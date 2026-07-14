@@ -167,7 +167,7 @@ class Dt_Journeys_Magic_User_App extends DT_Magic_Url_Base {
                 'nonce' => wp_create_nonce( 'wp_rest' ),
                 'parts' => $this->parts,
                 'translations' => [
-                    'add' => __( 'Add Magic', 'disciple-tools-journeys' ),
+                    'add' => __( 'Add Magic', 'dt-journeys' ),
                 ],
             ]) ?>][0]
 
@@ -320,12 +320,12 @@ class Dt_Journeys_Magic_User_App extends DT_Magic_Url_Base {
 
         $args = [];
         if ( !is_user_logged_in() ){
-            $global_name = apply_filters( 'dt_magic_link_global_name', __( 'Magic Link', 'disciple-tools-journeys' ) );
-            $args['comment_author'] = sprintf( __( '%s Submission', 'disciple-tools-journeys' ), $global_name );
+            $global_name = apply_filters( 'dt_magic_link_global_name', __( 'Magic Link', 'dt-journeys' ) );
+            $args['comment_author'] = sprintf( __( '%s Submission', 'dt-journeys' ), $global_name );
             wp_set_current_user( 0 );
             $current_user = wp_get_current_user();
             $current_user->add_cap( 'magic_link' );
-            $current_user->display_name = sprintf( __( '%s Submission', 'disciple-tools-journeys' ), $global_name );
+            $current_user->display_name = sprintf( __( '%s Submission', 'dt-journeys' ), $global_name );
         }
 
         if ( isset( $params['update']['comment'] ) && !empty( $params['update']['comment'] ) ){

@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: Disciple.Tools - Journeys
- * Plugin URI: https://github.com/cairocoder01/disciple-tools-journeys
+ * Plugin URI: https://github.com/cairocoder01/dt-journeys
  * Description: Disciple.Tools - Journeys is intended to help developers and integrator jumpstart their extension of the Disciple.Tools system.
- * Text Domain: disciple-tools-journeys
+ * Text Domain: dt-journeys
  * Domain Path: /languages
  * Version:  0.1.0
  * Author URI: https://github.com/DiscipleTools
- * GitHub Plugin URI: https://github.com/cairocoder01/disciple-tools-journeys
+ * GitHub Plugin URI: https://github.com/cairocoder01/dt-journeys
  * Requires at least: 4.7.0
  * (Requires 4.7+ because of the integration of the REST API at 4.7 and the security requirements of this milestone version.)
  * Tested up to: 5.6
@@ -57,14 +57,14 @@ function disciple_tools_journeys() {
         require_once get_template_directory() . '/dt-core/global-functions.php';
     }
 
-    return Disciple_Tools_Journeys::instance();
+    return Dt_Journeys::instance();
 }
 add_action( 'after_setup_theme', 'disciple_tools_journeys', 20 );
 
 //register the D.T Plugin
 add_filter( 'dt_plugins', function ( $plugins ){
     $plugin_data = get_file_data( __FILE__, [ 'Version' => 'Version', 'Plugin Name' => 'Plugin Name' ], false );
-    $plugins['disciple-tools-journeys'] = [
+    $plugins['dt-journeys'] = [
         'plugin_url' => trailingslashit( plugin_dir_url( __FILE__ ) ),
         'version' => $plugin_data['Version'] ?? null,
         'name' => $plugin_data['Plugin Name'] ?? null,
@@ -78,7 +78,7 @@ add_filter( 'dt_plugins', function ( $plugins ){
  * @since  0.1
  * @access public
  */
-class Disciple_Tools_Journeys {
+class Dt_Journeys {
 
     private static $_instance = null;
     public static function instance() {
@@ -94,7 +94,7 @@ class Disciple_Tools_Journeys {
          * @todo Decide if you want to use the REST API example
          * To remove: delete this following line and remove the folder named /rest-api
          */
-        if ( $is_rest && strpos( dt_get_url_path(), 'disciple-tools-journeys' ) !== false ) {
+        if ( $is_rest && strpos( dt_get_url_path(), 'dt-journeys' ) !== false ) {
             require_once( 'rest-api/rest-api.php' ); // adds starter rest api class
         }
 
@@ -114,7 +114,7 @@ class Disciple_Tools_Journeys {
          * @todo Decide if you want to add new charts to the metrics section
          * To remove: delete the line below and remove the folder named /charts
          */
-        if ( strpos( dt_get_url_path(), 'metrics' ) !== false || ( $is_rest && strpos( dt_get_url_path(), 'disciple-tools-journeys-metrics' ) !== false ) ){
+        if ( strpos( dt_get_url_path(), 'metrics' ) !== false || ( $is_rest && strpos( dt_get_url_path(), 'dt-journeys-metrics' ) !== false ) ){
             require_once( 'charts/charts-loader.php' );  // add custom charts to the metrics area
         }
 
@@ -203,7 +203,7 @@ class Disciple_Tools_Journeys {
      */
     public static function deactivation() {
         // add functions here that need to happen on deactivation
-        delete_option( 'dismissed-disciple-tools-journeys' );
+        delete_option( 'dismissed-dt-journeys' );
     }
 
     /**
@@ -214,7 +214,7 @@ class Disciple_Tools_Journeys {
      * @return void
      */
     public function i18n() {
-        $domain = 'disciple-tools-journeys';
+        $domain = 'dt-journeys';
         load_plugin_textdomain( $domain, false, trailingslashit( dirname( plugin_basename( __FILE__ ) ) ). 'languages' );
     }
 
@@ -226,7 +226,7 @@ class Disciple_Tools_Journeys {
      * @return string
      */
     public function __toString() {
-        return 'disciple-tools-journeys';
+        return 'dt-journeys';
     }
 
     /**
@@ -261,7 +261,7 @@ class Disciple_Tools_Journeys {
      * @access public
      */
     public function __call( $method = '', $args = array() ) {
-        _doing_it_wrong( 'Disciple_Tools_Journeys::' . esc_html( $method ), 'Method does not exist.', '0.1' );
+        _doing_it_wrong( 'Dt_Journeys::' . esc_html( $method ), 'Method does not exist.', '0.1' );
         unset( $method, $args );
         return null;
     }
@@ -269,8 +269,8 @@ class Disciple_Tools_Journeys {
 
 
 // Register activation hook.
-register_activation_hook( __FILE__, [ 'Disciple_Tools_Journeys', 'activation' ] );
-register_deactivation_hook( __FILE__, [ 'Disciple_Tools_Journeys', 'deactivation' ] );
+register_activation_hook( __FILE__, [ 'Dt_Journeys', 'activation' ] );
+register_deactivation_hook( __FILE__, [ 'Dt_Journeys', 'deactivation' ] );
 
 
 if ( ! function_exists( 'dt_journeys_hook_admin_notice' ) ) {
@@ -283,18 +283,18 @@ if ( ! function_exists( 'dt_journeys_hook_admin_notice' ) ) {
             $message .= ' ' . sprintf( esc_html( 'Current Disciple.Tools version: %1$s, required version: %2$s' ), esc_html( $current_version ), esc_html( $dt_journeys_required_dt_theme_version ) );
         }
         // Check if it's been dismissed...
-        if ( ! get_option( 'dismissed-disciple-tools-journeys', false ) ) { ?>
-            <div class="notice notice-error notice-disciple-tools-journeys is-dismissible" data-notice="disciple-tools-journeys">
+        if ( ! get_option( 'dismissed-dt-journeys', false ) ) { ?>
+            <div class="notice notice-error notice-dt-journeys is-dismissible" data-notice="dt-journeys">
                 <p><?php echo esc_html( $message );?></p>
             </div>
             <script>
                 jQuery(function($) {
-                    $( document ).on( 'click', '.notice-disciple-tools-journeys .notice-dismiss', function () {
+                    $( document ).on( 'click', '.notice-dt-journeys .notice-dismiss', function () {
                         $.ajax( ajaxurl, {
                             type: 'POST',
                             data: {
                                 action: 'dismissed_notice_handler',
-                                type: 'disciple-tools-journeys',
+                                type: 'dt-journeys',
                                 security: '<?php echo esc_html( wp_create_nonce( 'wp_rest_dismiss' ) ) ?>'
                             }
                         })
@@ -326,7 +326,7 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
  * This section runs the remote plugin updating service, so you can issue distributed updates to your plugin
  *
  * @note See the instructions for version updating to understand the steps involved.
- * @link https://github.com/cairocoder01/disciple-tools-journeys/wiki/Configuring-Remote-Updating-System
+ * @link https://github.com/cairocoder01/dt-journeys/wiki/Configuring-Remote-Updating-System
  *
  * @todo Enable this section with your own hosted file
  * @todo An example of this file can be found in (version-control.json)
@@ -351,9 +351,9 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
 //        }
 //        if ( class_exists( 'Puc_v4_Factory' ) ){
 //            Puc_v4_Factory::buildUpdateChecker(
-//                'https://raw.githubusercontent.com/cairocoder01/disciple-tools-journeys/master/version-control.json',
+//                'https://raw.githubusercontent.com/cairocoder01/dt-journeys/master/version-control.json',
 //                __FILE__,
-//                'disciple-tools-journeys'
+//                'dt-journeys'
 //            );
 //
 //        }
