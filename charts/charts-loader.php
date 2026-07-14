@@ -1,7 +1,7 @@
 <?php
 if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
 
-class Disciple_Tools_Plugin_Starter_Template_Charts
+class Dt_Journeys_Charts
 {
     private static $_instance = null;
     public static function instance(){
@@ -14,11 +14,11 @@ class Disciple_Tools_Plugin_Starter_Template_Charts
     public function __construct(){
 
         require_once( 'one-page-chart-template.php' );
-        new Disciple_Tools_Plugin_Starter_Template_Chart_Template();
+        new Dt_Journeys_Chart_Template();
 
         /**
          * @todo add other charts like the pattern above here
          */
     } // End __construct
 }
-Disciple_Tools_Plugin_Starter_Template_Charts::instance();
+Dt_Journeys_Charts::instance();

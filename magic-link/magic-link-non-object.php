@@ -11,7 +11,7 @@ if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
  * audience. I.E public maps or statistics on the DT system.
  * @see https://zume.vision/maps for a public map link example
  */
-class Disciple_Tools_Plugin_Starter_Template_Magic_Non_Object_App extends DT_Magic_Url_Base
+class Dt_Journeys_Magic_Non_Object_App extends DT_Magic_Url_Base
 {
     public $magic = false;
     public $parts = false;
@@ -99,7 +99,7 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Non_Object_App extends DT_Mag
                 'nonce' => wp_create_nonce( 'wp_rest' ),
                 'parts' => $this->parts,
                 'translations' => [
-                    'add' => __( 'Add Magic', 'disciple-tools-plugin-starter-template' ),
+                    'add' => __( 'Add Magic', 'dt-journeys' ),
                 ],
             ]) ?>][0]
 
@@ -189,4 +189,4 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Non_Object_App extends DT_Mag
         }
     }
 }
-Disciple_Tools_Plugin_Starter_Template_Magic_Non_Object_App::instance();
+Dt_Journeys_Magic_Non_Object_App::instance();

@@ -2,22 +2,22 @@
 if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
 
 /**
- * Class Disciple_Tools_Plugin_Starter_Template_Base
+ * Class Dt_Journeys_Base
  * Load the core post type hooks into the Disciple.Tools system
  */
-class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
+class Dt_Journeys_Base extends DT_Module_Base {
 
     /**
      * Define post type variables
      * @todo update these variables with your post_type, module key, and names.
      * @var string
      */
-    public $post_type = 'starter_post_type';
+    public $post_type = 'dt_journeys_post_type';
     public $module = 'starter_base';
     public $single_name = 'Starter';
     public $plural_name = 'Starters';
     public static function post_type(){
-        return 'starter_post_type';
+        return 'dt_journeys_post_type';
     }
 
     private static $_instance = null;
@@ -59,8 +59,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
     }
 
     public function after_setup_theme(){
-        $this->single_name = __( 'Starter', 'disciple-tools-plugin-starter-template' );
-        $this->plural_name = __( 'Starters', 'disciple-tools-plugin-starter-template' );
+        $this->single_name = __( 'Starter', 'dt-journeys' );
+        $this->plural_name = __( 'Starters', 'dt-journeys' );
 
         if ( class_exists( 'Disciple_Tools_Post_Type_Template' ) ) {
             new Disciple_Tools_Post_Type_Template( $this->post_type, $this->single_name, $this->plural_name );
@@ -75,8 +75,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
      */
     public function dt_get_post_type_settings( $settings, $post_type ){
         if ( $post_type === $this->post_type ){
-            $settings['label_singular'] = __( 'Starter', 'disciple-tools-plugin-starter-template' );
-            $settings['label_plural'] = __( 'Starters', 'disciple-tools-plugin-starter-template' );
+            $settings['label_singular'] = __( 'Starter', 'dt-journeys' );
+            $settings['label_plural'] = __( 'Starters', 'dt-journeys' );
         }
         return $settings;
     }
@@ -91,7 +91,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
         if ( !isset( $expected_roles['my_starter_role'] ) ){
             $expected_roles['my_starter_role'] = [
 
-                'label' => __( 'My Starter Role', 'disciple-tools-plugin-starter-template' ),
+                'label' => __( 'My Starter Role', 'dt-journeys' ),
                 'description' => 'Does something Cool',
                 'permissions' => [
                     'access_contacts' => true,
@@ -137,18 +137,18 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
              * @todo modify strings and add elements to default array
              */
             $fields['status'] = [
-                'name'        => __( 'Status', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'Set the current status.', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Status', 'dt-journeys' ),
+                'description' => __( 'Set the current status.', 'dt-journeys' ),
                 'type'        => 'key_select',
                 'default'     => [
                     'inactive' => [
-                        'label' => __( 'Inactive', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'No longer active.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Inactive', 'dt-journeys' ),
+                        'description' => __( 'No longer active.', 'dt-journeys' ),
                         'color' => '#F43636'
                     ],
                     'active'   => [
-                        'label' => __( 'Active', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Is active.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Active', 'dt-journeys' ),
+                        'description' => __( 'Is active.', 'dt-journeys' ),
                         'color' => '#4CAF50'
                     ],
                 ],
@@ -158,8 +158,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'show_in_table' => 10,
             ];
             $fields['assigned_to'] = [
-                'name'        => __( 'Assigned To', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'Select the main person who is responsible for reporting on this record.', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Assigned To', 'dt-journeys' ),
+                'description' => __( 'Select the main person who is responsible for reporting on this record.', 'dt-journeys' ),
                 'type'        => 'user_select',
                 'default'     => '',
                 'tile' => 'status',
@@ -173,7 +173,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
              * Common and recommended fields
              */
             $fields['start_date'] = [
-                'name'        => __( 'Start Date', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'Start Date', 'dt-journeys' ),
                 'description' => '',
                 'type'        => 'date',
                 'default'     => time(),
@@ -181,7 +181,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'icon' => get_template_directory_uri() . '/dt-assets/images/date-start.svg',
             ];
             $fields['end_date'] = [
-                'name'        => __( 'End Date', 'disciple-tools-plugin-starter-template' ),
+                'name'        => __( 'End Date', 'dt-journeys' ),
                 'description' => '',
                 'type'        => 'date',
                 'default'     => '',
@@ -189,21 +189,21 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'icon' => get_template_directory_uri() . '/dt-assets/images/date-end.svg',
             ];
             $fields['multi_select'] = [
-                'name' => __( 'Multi-Select', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'Multi Select Field', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Multi-Select', 'dt-journeys' ),
+                'description' => __( 'Multi Select Field', 'dt-journeys' ),
                 'type' => 'multi_select',
                 'default' => [
                     'item_1' => [
-                        'label' => __( 'Item 1', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Item 1.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Item 1', 'dt-journeys' ),
+                        'description' => __( 'Item 1.', 'dt-journeys' ),
                     ],
                     'item_2' => [
-                        'label' => __( 'Item 2', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Item 2.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Item 2', 'dt-journeys' ),
+                        'description' => __( 'Item 2.', 'dt-journeys' ),
                     ],
                     'item_3' => [
-                        'label' => __( 'Item 3', 'disciple-tools-plugin-starter-template' ),
-                        'description' => __( 'Item 3.', 'disciple-tools-plugin-starter-template' ),
+                        'label' => __( 'Item 3', 'dt-journeys' ),
+                        'description' => __( 'Item 3.', 'dt-journeys' ),
                     ],
                 ],
                 'tile' => 'details',
@@ -212,7 +212,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             ];
 
             $fields['contact_address'] = [
-                'name' => __( 'Address', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Address', 'dt-journeys' ),
                 'icon' => get_template_directory_uri() . '/dt-assets/images/house.svg',
                 'type' => 'communication_channel',
                 'tile' => 'details',
@@ -231,7 +231,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
              * generation and peer connection fields
              */
             $fields['parents'] = [
-                'name' => __( 'Parents', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Parents', 'dt-journeys' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => $this->post_type,
@@ -242,7 +242,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'create-icon' => get_template_directory_uri() . '/dt-assets/images/add-group.svg',
             ];
             $fields['peers'] = [
-                'name' => __( 'Peers', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Peers', 'dt-journeys' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => $this->post_type,
@@ -253,7 +253,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 'create-icon' => get_template_directory_uri() . '/dt-assets/images/add-group.svg',
             ];
             $fields['children'] = [
-                'name' => __( 'Children', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Children', 'dt-journeys' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => $this->post_type,
@@ -270,8 +270,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
              * Connections to other post types
              */
             $fields['peoplegroups'] = [
-                'name' => __( 'People Groups', 'disciple-tools-plugin-starter-template' ),
-                'description' => __( 'The people groups connected to this record.', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'People Groups', 'dt-journeys' ),
+                'description' => __( 'The people groups connected to this record.', 'dt-journeys' ),
                 'type' => 'connection',
                 'tile' => 'details',
                 'post_type' => 'peoplegroups',
@@ -281,7 +281,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             ];
 
             $fields['contacts'] = [
-                'name' => __( 'Contacts', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'Contacts', 'dt-journeys' ),
                 'description' => '',
                 'type' => 'connection',
                 'post_type' => 'contacts',
@@ -338,8 +338,8 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
      */
     public function dt_details_additional_tiles( $tiles, $post_type = '' ){
         if ( $post_type === $this->post_type ){
-            $tiles['connections'] = [ 'label' => __( 'Connections', 'disciple-tools-plugin-starter-template' ) ];
-            $tiles['other'] = [ 'label' => __( 'Other', 'disciple-tools-plugin-starter-template' ) ];
+            $tiles['connections'] = [ 'label' => __( 'Connections', 'dt-journeys' ) ];
+            $tiles['other'] = [ 'label' => __( 'Other', 'dt-journeys' ) ];
         }
         return $tiles;
     }
@@ -356,7 +356,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             $post = DT_Posts::get_post( $this->post_type, get_the_ID() );
             ?>
             <div class="section-subheader">
-                <?php esc_html_e( 'Custom Section Contact', 'disciple-tools-plugin-starter-template' ) ?>
+                <?php esc_html_e( 'Custom Section Contact', 'dt-journeys' ) ?>
             </div>
             <div>
                 <p>Add information or custom fields here</p>
@@ -483,7 +483,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             // add assigned to me tab
             $filters['tabs'][] = [
                 'key' => 'assigned_to_me',
-                'label' => __( 'Assigned to me', 'disciple-tools-plugin-starter-template' ),
+                'label' => __( 'Assigned to me', 'dt-journeys' ),
                 'count' => $total_my,
                 'order' => 20
             ];
@@ -491,7 +491,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
             $filters['filters'][] = [
                 'ID' => 'my_all',
                 'tab' => 'assigned_to_me',
-                'name' => __( 'All', 'disciple-tools-plugin-starter-template' ),
+                'name' => __( 'All', 'dt-journeys' ),
                 'query' => [
                     'assigned_to' => [ 'me' ],
                     'sort' => 'status'
@@ -527,7 +527,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 // add by Status Tab
                 $filters['tabs'][] = [
                     'key' => 'by_status',
-                    'label' => __( 'All By Status', 'disciple-tools-plugin-starter-template' ),
+                    'label' => __( 'All By Status', 'dt-journeys' ),
                     'count' => $total_all,
                     'order' => 30
                 ];
@@ -535,7 +535,7 @@ class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
                 $filters['filters'][] = [
                     'ID' => 'all_status',
                     'tab' => 'by_status',
-                    'name' => __( 'All', 'disciple-tools-plugin-starter-template' ),
+                    'name' => __( 'All', 'dt-journeys' ),
                     'query' => [
                         'sort' => '-post_date'
                     ],
