@@ -65,7 +65,7 @@ class Dt_Journeys_Chart_Template extends DT_Metrics_Chart_Base
                 ],
                 'translations' => [
                     'title' => $this->title,
-                    'Sample API Call' => __( 'Sample API Call', 'dt-journeys' )
+                    'Sample API Call' => __( 'Sample API Call', 'disciple-tools-journeys' )
                 ]
             ]
         );

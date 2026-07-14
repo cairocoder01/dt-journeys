@@ -19,12 +19,12 @@ add_filter( 'dt_post_type_modules', function( $modules ){
      * @todo Add more modules by adding a new array element. i.e. 'starter_base_two'.
      */
     $modules['starter_base'] = [
-        'name' => __( 'Starter', 'dt-journeys' ),
+        'name' => __( 'Starter', 'disciple-tools-journeys' ),
         'enabled' => true,
         'locked' => true,
         'prerequisites' => [ 'contacts_base' ],
         'post_type' => 'dt_journeys_post_type',
-        'description' => __( 'Default starter functionality', 'dt-journeys' )
+        'description' => __( 'Default starter functionality', 'disciple-tools-journeys' )
     ];
 
     return $modules;

@@ -37,7 +37,7 @@ class Dt_Journeys_Menu {
 
         add_action( 'admin_menu', array( $this, 'register_menu' ) );
 
-        $this->page_title = __( 'Journeys', 'dt-journeys' );
+        $this->page_title = __( 'Journeys', 'disciple-tools-journeys' );
     } // End __construct()
 
 
@@ -46,7 +46,7 @@ class Dt_Journeys_Menu {
      * @since 0.1
      */
     public function register_menu() {
-        $this->page_title = __( 'Journeys', 'dt-journeys' );
+        $this->page_title = __( 'Journeys', 'disciple-tools-journeys' );
 
         add_submenu_page( 'dt_extensions', $this->page_title, $this->page_title, 'manage_dt', $this->token, [ $this, 'content' ] );
     }
