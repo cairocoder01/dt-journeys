@@ -3,9 +3,9 @@ if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
 
 
 /**
- * Class Disciple_Tools_Plugin_Starter_Template_Magic_Link
+ * Class Dt_Journeys_Magic_Link
  */
-class Disciple_Tools_Plugin_Starter_Template_Magic_Link extends DT_Magic_Url_Base {
+class Dt_Journeys_Magic_Link extends DT_Magic_Url_Base {
 
     public $magic = false;
     public $parts = false;
@@ -13,7 +13,7 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Link extends DT_Magic_Url_Bas
     public $page_description = 'Post Type - Magic Links.';
     public $root = 'starter_magic_app'; // @todo define the root of the url {yoursite}/root/type/key/action
     public $type = 'starter_magic_type'; // @todo define the type
-    public $post_type = 'starter_post_type'; // @todo set the post type this magic link connects with.
+    public $post_type = 'dt_journeys_post_type'; // @todo set the post type this magic link connects with.
     private $meta_key = '';
     public $show_bulk_send = false;
     public $show_app_tile = true; // show this magic link in the Apps tile on the post record
@@ -102,7 +102,7 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Link extends DT_Magic_Url_Bas
                 'nonce' => wp_create_nonce( 'wp_rest' ),
                 'parts' => $this->parts,
                 'translations' => [
-                    'add' => __( 'Add Magic', 'disciple-tools-plugin-starter-template' ),
+                    'add' => __( 'Add Magic', 'dt-journeys' ),
                 ],
                 'rest_namespace' => $this->root . '/v1/' . $this->type,
             ]
@@ -128,7 +128,7 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Link extends DT_Magic_Url_Bas
     public function dt_details_additional_tiles( $tiles, $post_type = '' ) {
         if ( $post_type === $this->post_type ){
             $tiles['dt_starters_magic_url'] = [
-                'label' => __( 'Magic Url', 'disciple-tools-plugin-starter-template' ),
+                'label' => __( 'Magic Url', 'dt-journeys' ),
                 'description' => 'The Magic URL sets up a page accessible without authentication, only the link is needed. Useful for small applications liked to this record, like quick surveys or updates.'
             ];
         }
@@ -235,12 +235,12 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Link extends DT_Magic_Url_Bas
 
         $args = [];
         if ( !is_user_logged_in() ){
-            $global_name = apply_filters( 'dt_magic_link_global_name', __( 'Magic Link', 'disciple-tools-plugin-starter-template' ) );
-            $args['comment_author'] = sprintf( __( '%s Submission', 'disciple-tools-plugin-starter-template' ), $global_name );
+            $global_name = apply_filters( 'dt_magic_link_global_name', __( 'Magic Link', 'dt-journeys' ) );
+            $args['comment_author'] = sprintf( __( '%s Submission', 'dt-journeys' ), $global_name );
             wp_set_current_user( 0 );
             $current_user = wp_get_current_user();
             $current_user->add_cap( 'magic_link' );
-            $current_user->display_name = sprintf( __( '%s Submission', 'disciple-tools-plugin-starter-template' ), $global_name );
+            $current_user->display_name = sprintf( __( '%s Submission', 'dt-journeys' ), $global_name );
         }
 
         if ( isset( $params['update']['comment'] ) && !empty( $params['update']['comment'] ) ){
@@ -274,4 +274,4 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Link extends DT_Magic_Url_Bas
         return $data;
     }
 }
-Disciple_Tools_Plugin_Starter_Template_Magic_Link::instance();
+Dt_Journeys_Magic_Link::instance();

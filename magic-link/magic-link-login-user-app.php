@@ -3,9 +3,9 @@ if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
 
 
 /**
- * Class Disciple_Tools_Plugin_Starter_Template_Magic_User_App
+ * Class Dt_Journeys_Magic_User_App
  */
-class Disciple_Tools_Plugin_Starter_Template_Magic_Login_User_App extends DT_Magic_Url_Base {
+class Dt_Journeys_Magic_Login_User_App extends DT_Magic_Url_Base {
 
     public $page_title = 'Starter - Magic Links - Login User App';
     public $page_description = 'Login User App - Magic Links.';
@@ -173,7 +173,7 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Login_User_App extends DT_Mag
                 'nonce' => wp_create_nonce( 'wp_rest' ),
                 'parts' => $this->parts,
                 'translations' => [
-                    'add' => __( 'Add Magic', 'disciple-tools-plugin-starter-template' ),
+                    'add' => __( 'Add Magic', 'dt-journeys' ),
                 ],
             ]) ?>][0]
 
@@ -341,12 +341,12 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Login_User_App extends DT_Mag
 
         $args = [];
         if ( !is_user_logged_in() ){
-            $global_name = apply_filters( 'dt_magic_link_global_name', __( 'Magic Link', 'disciple-tools-plugin-starter-template' ) );
-            $args['comment_author'] = sprintf( __( '%s Submission', 'disciple-tools-plugin-starter-template' ), $global_name );
+            $global_name = apply_filters( 'dt_magic_link_global_name', __( 'Magic Link', 'dt-journeys' ) );
+            $args['comment_author'] = sprintf( __( '%s Submission', 'dt-journeys' ), $global_name );
             wp_set_current_user( 0 );
             $current_user = wp_get_current_user();
             $current_user->add_cap( 'magic_link' );
-            $current_user->display_name = sprintf( __( '%s Submission', 'disciple-tools-plugin-starter-template' ), $global_name );
+            $current_user->display_name = sprintf( __( '%s Submission', 'dt-journeys' ), $global_name );
         }
 
         if ( isset( $params['update']['comment'] ) && !empty( $params['update']['comment'] ) ){
@@ -380,4 +380,4 @@ class Disciple_Tools_Plugin_Starter_Template_Magic_Login_User_App extends DT_Mag
         return $data;
     }
 }
-Disciple_Tools_Plugin_Starter_Template_Magic_Login_User_App::instance();
+Dt_Journeys_Magic_Login_User_App::instance();
