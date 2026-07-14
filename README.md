@@ -48,11 +48,11 @@ Purpose purpose purpose purpose purpose purpose purpose purpose purpose purpose 
 ## Contribution
 
 Contributions welcome. You can report issues and bugs in the
-[Issues](https://github.com/DiscipleTools/dt-journeys/issues) section of the repo. You can present ideas
-in the [Discussions](https://github.com/DiscipleTools/dt-journeys/discussions) section of the repo. And
-code contributions are welcome using the [Pull Request](https://github.com/DiscipleTools/dt-journeys/pulls)
+[Issues](https://github.com/cairocoder01/dt-journeys/issues) section of the repo. You can present ideas
+in the [Discussions](https://github.com/cairocoder01/dt-journeys/discussions) section of the repo. And
+code contributions are welcome using the [Pull Request](https://github.com/cairocoder01/dt-journeys/pulls)
 system for git. For a more details on contribution see the
-[contribution guidelines](https://github.com/DiscipleTools/dt-journeys/blob/master/CONTRIBUTING.md).
+[contribution guidelines](https://github.com/cairocoder01/dt-journeys/blob/master/CONTRIBUTING.md).
 
 
 ## Screenshots

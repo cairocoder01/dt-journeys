@@ -261,7 +261,7 @@ class Dt_Journeys {
      * @access public
      */
     public function __call( $method = '', $args = array() ) {
-        _doing_it_wrong( 'Dt_Journeys::' . esc_html( $method ), 'Method does not exist.', '0.1' );
+        _doing_it_wrong( 'dt_journeys::' . esc_html( $method ), 'Method does not exist.', '0.1' );
         unset( $method, $args );
         return null;
     }
