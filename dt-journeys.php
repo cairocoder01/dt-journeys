@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: Disciple.Tools - Journeys
- * Plugin URI: https://github.com/DiscipleTools/dt-journeys
+ * Plugin URI: https://github.com/cairocoder01/dt-journeys
  * Description: Disciple.Tools - Journeys is intended to help developers and integrator jumpstart their extension of the Disciple.Tools system.
  * Text Domain: dt-journeys
  * Domain Path: /languages
  * Version:  0.1
  * Author URI: https://github.com/DiscipleTools
- * GitHub Plugin URI: https://github.com/DiscipleTools/dt-journeys
+ * GitHub Plugin URI: https://github.com/cairocoder01/dt-journeys
  * Requires at least: 4.7.0
  * (Requires 4.7+ because of the integration of the REST API at 4.7 and the security requirements of this milestone version.)
  * Tested up to: 5.6
@@ -330,7 +330,7 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
  * This section runs the remote plugin updating service, so you can issue distributed updates to your plugin
  *
  * @note See the instructions for version updating to understand the steps involved.
- * @link https://github.com/DiscipleTools/dt-journeys/wiki/Configuring-Remote-Updating-System
+ * @link https://github.com/cairocoder01/dt-journeys/wiki/Configuring-Remote-Updating-System
  *
  * @todo Enable this section with your own hosted file
  * @todo An example of this file can be found in (version-control.json)
@@ -355,7 +355,7 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
 //        }
 //        if ( class_exists( 'Puc_v4_Factory' ) ){
 //            Puc_v4_Factory::buildUpdateChecker(
-//                'https://raw.githubusercontent.com/DiscipleTools/dt-journeys/master/version-control.json',
+//                'https://raw.githubusercontent.com/cairocoder01/dt-journeys/master/version-control.json',
 //                __FILE__,
 //                'dt-journeys'
 //            );

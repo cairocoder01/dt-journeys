@@ -11,5 +11,5 @@ msgid "https://github.com/DiscipleTools"
 msgstr ""
 
 #. Plugin URI of the plugin
-msgid "https://github.com/DiscipleTools/dt-journeys"
+msgid "https://github.com/cairocoder01/dt-journeys"
 msgstr ""
