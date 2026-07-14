@@ -64,8 +64,8 @@ The plugin is still the untouched `disciple-tools-plugin-starter-template` (v0.1
 correctly-named baseline before adding features.
 
 **Tasks**
-1. Rename the main plugin file → `disciple-tools-journeys.php`; update header (Name, Text Domain
-   `disciple-tools-journeys`, version `0.1.0`, required DT theme version).
+1. Rename the main plugin file → `dt-journeys.php`; update header (Name, Text Domain
+   `dt-journeys`, version `0.1.0`, required DT theme version).
 2. Rename the main class `Disciple_Tools_Plugin_Starter_Template` → `Disciple_Tools_Journeys`
    and update all `Disciple_Tools_Plugin_Starter_Template_*` prefixes across every module.
 3. Remove the starter test content: the 25 demo fields and both demo tiles in `tile/`, the demo
@@ -73,8 +73,7 @@ correctly-named baseline before adding features.
 4. Update `version-control.json`, `README.md`, `composer.json`, text-domain in `languages/`.
 
 **Verify**
-- Plugin activates on the LocalWP `dtplayground` site with no PHP errors; `starter_post_type` no
-  longer registered.
+- Plugin activates on the local site with no PHP errors; `starter_post_type` no longer registered.
 - `./tests/test_phpcs.sh` and ESLint pass; existing PHPUnit bootstrap still runs.
 
 ---
@@ -108,7 +107,7 @@ correctly-named baseline before adding features.
    **sequential** journeys, "mark journey complete" sets remaining stages to `skipped`.
 3. Maintain the `dt_journeys_active` marker meta in sync on start/complete.
 4. On every status change, write a `dt_activity_log` entry and, when a note is supplied, an
-   `add_post_comment()` note.
+   `add_post_comment()` note. Set comment type to Journeys so they can be filtered.
 5. Enforce that a stage's `related_fields` edits go through `DT_Posts::update_post()` so normal
    field validation/permissions/logging apply.
 
@@ -125,10 +124,10 @@ and hydrated from REST (mirrors the theme's web-component + `ComponentService` a
 
 **Tasks**
 1. Register a `journeys` tile on `contacts` and `groups`.
-2. REST endpoints (namespace `disciple-tools-journeys/v1`): get a record's journeys+progress,
+2. REST endpoints (namespace `dt-journeys/v1`): get a record's journeys+progress,
    set stage status, start journey, complete journey, list available journeys to add (filtered by
    the record's applicable roles).
-3. Tile UI (LitElement, built through the theme/plugin Vite pipeline):
+3. Tile UI:
    - **Sequential** journey → timeline; **non-sequential** → list or icon/grid per `display_type`.
    - Per-stage: name, short description, links, completion date; action buttons **Complete / Skip /
      Stalled**; allow skipping steps (don't force sequential completion, but visually encourage it).
@@ -140,7 +139,7 @@ and hydrated from REST (mirrors the theme's web-component + `ComponentService` a
    resolved via existing contact↔group connections).
 
 **Verify**
-- dt-e2e on `dtplayground`: attach a journey to a contact, advance/skip/stall stages, edit a related
+- Test on local site: attach a journey to a contact, advance/skip/stall stages, edit a related
   field from the pop-out, complete the journey and confirm the start-another prompt; confirm a
   group's journeys surface on its member contact.
 
@@ -193,7 +192,7 @@ Cross-record dashboard, driven by the `dt_journeys_active` marker meta for perfo
 3. REST list endpoint that queries records via the marker meta, then hydrates progress; paginated.
 
 **Verify**
-- dt-e2e: dashboard lists a contact and a group each with an active journey; each filter narrows the
+- Test on site: dashboard lists a contact and a group each with an active journey; each filter narrows the
   set correctly; completed journeys are excluded; progress indicators reflect stage completion.
 
 ---
@@ -201,13 +200,13 @@ Cross-record dashboard, driven by the `dt_journeys_active` marker meta for perfo
 ## Phase 7 — Polish, integration & hardening
 
 **Tasks**
-1. i18n sweep (`disciple-tools-journeys` text domain), accessibility pass on tile/dashboard.
+1. i18n sweep (`dt-journeys` text domain), accessibility pass on tile/dashboard.
 2. Notifications: optional prompt/notification when a journey completes to start the next.
 3. Docs in `documentation/`; update `.specs` cross-links.
 4. Full suite green: PHPCS, ESLint/Prettier, PHPUnit (multisite), Vite build parity.
 
 **Verify**
-- `/dt-verify` (PHPCS + ESLint + PHPUnit) passes; manual smoke of the full flow end-to-end.
+- (PHPCS + ESLint + PHPUnit) passes; manual smoke of the full flow end-to-end.
 
 ---
 
