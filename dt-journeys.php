@@ -5,7 +5,7 @@
  * Description: Disciple.Tools - Journeys is intended to help developers and integrator jumpstart their extension of the Disciple.Tools system.
  * Text Domain: dt-journeys
  * Domain Path: /languages
- * Version:  0.1
+ * Version:  0.1.0
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/cairocoder01/dt-journeys
  * Requires at least: 4.7.0
@@ -19,11 +19,7 @@
  */
 
 /**
- * Refactoring (renaming) this plugin as your own:
- * 1. @todo Rename the `dt-journeys.php file.
- * 2. @todo Refactor all occurrences of the name Dt_Journeys, dt_journeys, dt-journeys, dt_journeys_post_type, and "Journeys"
- * 3. @todo Update the README.md and LICENSE
- * 4. @todo Update the default.pot file if you intend to make your plugin multilingual. Use a tool like POEdit
+ * Disciple.Tools - Journeys
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access public
  * @return object|bool
  */
-function dt_journeys() {
+function disciple_tools_journeys() {
     $dt_journeys_required_dt_theme_version = '1.19';
     $wp_theme = wp_get_theme();
     $version = $wp_theme->version;
@@ -63,7 +59,7 @@ function dt_journeys() {
 
     return Dt_Journeys::instance();
 }
-add_action( 'after_setup_theme', 'dt_journeys', 20 );
+add_action( 'after_setup_theme', 'disciple_tools_journeys', 20 );
 
 //register the D.T Plugin
 add_filter( 'dt_plugins', function ( $plugins ){
@@ -323,20 +319,6 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
 }
 
 /**
- * Plugin Releases and updates
- * @todo Uncomment and change the url if you want to support remote plugin updating with new versions of your plugin
- * To remove: delete the section of code below and delete the file called version-control.json in the plugin root
- *
- * This section runs the remote plugin updating service, so you can issue distributed updates to your plugin
- *
- * @note See the instructions for version updating to understand the steps involved.
- * @link https://github.com/cairocoder01/dt-journeys/wiki/Configuring-Remote-Updating-System
- *
- * @todo Enable this section with your own hosted file
- * @todo An example of this file can be found in (version-control.json)
- * @todo Github is a good option for delivering static json.
- */
-/**
  * Check for plugin updates even when the active theme is not Disciple.Tools
  *
  * Below is the publicly hosted .json file that carries the version information. This file can be hosted
@@ -345,21 +327,21 @@ if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ){
  * Also, see the instructions for version updating to understand the steps involved.
  * @see https://github.com/DiscipleTools/disciple-tools-version-control/wiki/How-to-Update-the-Starter-Plugin
  */
-//add_action( 'plugins_loaded', function (){
-//    if ( ( is_admin() || wp_doing_cron() ) && !( is_multisite() && class_exists( 'DT_Multisite' ) ) ){
-//        // Check for plugin updates
-//        if ( ! class_exists( 'Puc_v4_Factory' ) ) {
-//            if ( file_exists( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' ) ){
-//                require( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' );
-//            }
-//        }
-//        if ( class_exists( 'Puc_v4_Factory' ) ){
-//            Puc_v4_Factory::buildUpdateChecker(
-//                'https://raw.githubusercontent.com/cairocoder01/dt-journeys/master/version-control.json',
-//                __FILE__,
-//                'dt-journeys'
-//            );
-//
-//        }
-//    }
-//} );
+add_action( 'plugins_loaded', function (){
+    if ( ( is_admin() || wp_doing_cron() ) && !( is_multisite() && class_exists( 'DT_Multisite' ) ) ){
+        // Check for plugin updates
+        if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+            if ( file_exists( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' ) ){
+                require( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' );
+            }
+        }
+        if ( class_exists( 'Puc_v4_Factory' ) ){
+            Puc_v4_Factory::buildUpdateChecker(
+                'https://raw.githubusercontent.com/cairocoder01/dt-journeys/master/version-control.json',
+                __FILE__,
+                'dt-journeys'
+            );
+
+        }
+    }
+} );
