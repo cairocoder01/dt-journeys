@@ -10,29 +10,33 @@ if ( ! class_exists( 'DT_Module_Base' ) ) {
 }
 
 /**
- * Add any modules required or added for the post type
+ * Register the Journeys post type modules.
  */
 add_filter( 'dt_post_type_modules', function( $modules ){
 
-    /**
-     * @todo Update the starter in the array below 'starter_base'. Follow the pattern.
-     * @todo Add more modules by adding a new array element. i.e. 'starter_base_two'.
-     */
-    $modules['starter_base'] = [
-        'name' => __( 'Starter', 'dt-journeys' ),
+    $modules['journeys_base'] = [
+        'name' => __( 'Journeys', 'dt-journeys' ),
         'enabled' => true,
         'locked' => true,
         'prerequisites' => [ 'contacts_base' ],
-        'post_type' => 'dt_journeys_post_type',
-        'description' => __( 'Default starter functionality', 'dt-journeys' )
+        'post_type' => 'journeys',
+        'description' => __( 'Journey definitions (templates).', 'dt-journeys' )
+    ];
+
+    $modules['journey_stages_base'] = [
+        'name' => __( 'Journey Stages', 'dt-journeys' ),
+        'enabled' => true,
+        'locked' => true,
+        'prerequisites' => [ 'journeys_base' ],
+        'post_type' => 'journey_stages',
+        'description' => __( 'Stages that make up a journey.', 'dt-journeys' )
     ];
 
     return $modules;
 }, 20, 1 );
 
-require_once 'module-base.php';
-Dt_Journeys_Base::instance();
+require_once 'journeys-post-type.php';
+Disciple_Tools_Journeys_Post_Type::instance();
 
-/**
- * @todo require_once and load additional modules
- */
+require_once 'journey-stages-post-type.php';
+Disciple_Tools_Journey_Stages_Post_Type::instance();
