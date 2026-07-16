@@ -1,13 +1,13 @@
 <?php
 
 abstract class TestCase extends WP_UnitTestCase {
-    public function setUp() {
+    public function setUp(): void {
         global $wpdb;
         $wpdb->query( 'START TRANSACTION' );
         parent::setUp();
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         global $wpdb;
         $wpdb->query( 'ROLLBACK' );
         parent::tearDown();

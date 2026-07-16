@@ -4,6 +4,12 @@
  *
  * @package Disciple.Tools
  */
+
+// Tell the WP test suite where to find the Yoast PHPUnit Polyfills (required for PHPUnit 10+).
+if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) ) {
+	define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__ ) . '/vendor/yoast/phpunit-polyfills' );
+}
+
 $_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 $_core_dir = getenv( 'WP_CORE_DIR' ) ? getenv( 'WP_CORE_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress';
 $_theme_dir = getenv( 'WP_THEME_DIR' ) ? getenv( 'WP_THEME_DIR' ) : $_core_dir . '/wp-content/themes/disciple-tools-theme';

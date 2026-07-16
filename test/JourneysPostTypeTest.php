@@ -8,7 +8,7 @@
  */
 class JourneysPostTypeTest extends TestCase {
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         // Act as an administrator so connection/activity writes have a user context.
         $admin_id = $this->factory()->user->create( [ 'role' => 'administrator' ] );
@@ -66,7 +66,7 @@ class JourneysPostTypeTest extends TestCase {
         // Create the journey definition.
         $journey = DT_Posts::create_post( 'journeys', [
             'name'             => 'Test Journey',
-            'journey_category' => 'discipleship',
+            'journey_category' => [ 'values' => [ [ 'value' => 'discipleship' ] ] ],
             'display_type'     => 'timeline',
             'is_sequential'    => true,
         ], true, false );
