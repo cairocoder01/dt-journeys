@@ -7,7 +7,7 @@
 
 // Tell the WP test suite where to find the Yoast PHPUnit Polyfills (required for PHPUnit 10+).
 if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) ) {
-	define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__ ) . '/vendor/yoast/phpunit-polyfills' );
+    define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', dirname( __DIR__ ) . '/vendor/yoast/phpunit-polyfills' );
 }
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
