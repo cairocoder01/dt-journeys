@@ -104,6 +104,9 @@ class Dt_Journeys {
          */
         require_once( 'post-type/loader.php' ); // add starter post type extension to Disciple.Tools system
 
+        // Progress service: tracks a record's progress through a journey (post meta).
+        require_once( 'progress/loader.php' );
+
         /**
          * @todo Decide if you want to create a custom site-to-site link
          * To remove: delete the line below and remove the folder named /site-link
