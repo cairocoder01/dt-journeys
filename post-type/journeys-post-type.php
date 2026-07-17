@@ -38,6 +38,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
         add_filter( 'dt_capabilities', [ $this, 'dt_capabilities' ], 20, 1 );
 
         //setup tiles and fields
+        add_filter( 'dt_details_additional_tiles', [ $this, 'dt_details_additional_tiles' ], 10, 2 );
         add_filter( 'dt_custom_fields_settings', [ $this, 'dt_custom_fields_settings' ], 10, 2 );
         add_filter( 'dt_get_post_type_settings', [ $this, 'dt_get_post_type_settings' ], 20, 2 );
 
@@ -52,6 +53,18 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
         if ( class_exists( 'Disciple_Tools_Post_Type_Template' ) ) {
             new Disciple_Tools_Post_Type_Template( $this->post_type, $this->single_name, $this->plural_name );
         }
+    }
+    
+    /**
+     * Add the Resources tile, grouping attachments and links.
+     */
+    public function dt_details_additional_tiles( $tiles, $post_type = '' ){
+        if ( $post_type === $this->post_type ){
+            $tiles['stages'] = [
+                'label' => __( 'Stages', 'dt-journeys' ),
+            ];
+        }
+        return $tiles;
     }
 
     /**
@@ -137,6 +150,11 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
         // A journey template has no geographic location; drop the base location fields.
         unset( $fields['location_grid'], $fields['location_grid_meta'] );
 
+        if ( isset( $fields['name'] ) ){
+            $fields['name']['tile'] = 'status';
+            $fields['name']['font-icon'] = 'mdi mdi-star-four-points-outline';
+            $fields['name']['icon'] = null;
+        }
         // Grouping by ministry model (T4T, Zúme, DMM, …). Tags so categories can be
         // added dynamically as needed rather than from a fixed list.
         $fields['journey_category'] = [
@@ -144,9 +162,9 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'description' => __( 'Group journeys by ministry model (e.g. T4T, Zúme, DMM). Add categories as needed.', 'dt-journeys' ),
             'type'        => 'tags',
             'default'     => [],
-            'tile'          => 'details',
+            'tile'          => 'status',
             'in_create_form' => true,
-            'icon'          => get_template_directory_uri() . '/dt-assets/images/group-type.svg',
+            'font-icon'          => 'mdi mdi-shape-plus',
             'show_in_table' => 15,
         ];
 
@@ -157,7 +175,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'type'        => 'multi_select',
             'default'     => $this->get_role_options(),
             'tile'        => 'details',
-            'icon'        => get_template_directory_uri() . '/dt-assets/images/roles.svg',
+            'font-icon'   => 'mdi mdi-account-key',
         ];
 
         // Timeline vs. list/grid behaviour.
@@ -167,7 +185,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'type'        => 'boolean',
             'default'     => true,
             'tile'        => 'details',
-            'icon'        => get_template_directory_uri() . '/dt-assets/images/list.svg',
+            'font-icon'        => 'mdi mdi-order-numeric-ascending',
         ];
 
         $fields['display_type'] = [
@@ -181,7 +199,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             ],
             'default_color' => '#366184',
             'tile'          => 'details',
-            'icon'          => get_template_directory_uri() . '/dt-assets/images/list.svg',
+            'font-icon'     => 'mdi mdi-view-dashboard',
         ];
 
         // The ordered set of stages that belong to this journey.
@@ -192,8 +210,8 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'post_type'     => 'journey_stages',
             'p2p_direction' => 'from',
             'p2p_key'       => 'journeys_to_stages',
-            'tile'          => 'details',
-            'icon'          => get_template_directory_uri() . '/dt-assets/images/list.svg',
+            'tile'          => 'stages',
+            'font-icon'     => 'mdi mdi-timeline-check',
         ];
 
         // "When this ends, start that" — an optional pointer to the next journey.
@@ -205,7 +223,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'p2p_direction' => 'to',
             'p2p_key'       => 'journeys_to_journeys',
             'tile'          => 'details',
-            'icon'          => get_template_directory_uri() . '/dt-assets/images/group-child.svg',
+            'font-icon'     => 'mdi mdi-skip-next',
         ];
         $fields['previous_journeys'] = [
             'name'          => __( 'Previous Journeys', 'dt-journeys' ),
@@ -215,7 +233,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'p2p_direction' => 'from',
             'p2p_key'       => 'journeys_to_journeys',
             'tile'          => 'details',
-            'icon'          => get_template_directory_uri() . '/dt-assets/images/group-parent.svg',
+            'font-icon'     => 'mdi mdi-skip-previous',
         ];
 
         return $fields;

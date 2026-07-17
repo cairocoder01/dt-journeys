@@ -36,7 +36,8 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
         add_action( 'after_setup_theme', [ $this, 'after_setup_theme' ], 100 );
         add_filter( 'dt_set_roles_and_permissions', [ $this, 'dt_set_roles_and_permissions' ], 20, 1 );
 
-        //setup fields
+        //setup tiles and fields
+        add_filter( 'dt_details_additional_tiles', [ $this, 'dt_details_additional_tiles' ], 10, 2 );
         add_filter( 'dt_custom_fields_settings', [ $this, 'dt_custom_fields_settings' ], 10, 2 );
         add_filter( 'dt_get_post_type_settings', [ $this, 'dt_get_post_type_settings' ], 20, 2 );
 
@@ -52,6 +53,18 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
         if ( class_exists( 'Disciple_Tools_Post_Type_Template' ) ) {
             new Disciple_Tools_Post_Type_Template( $this->post_type, $this->single_name, $this->plural_name );
         }
+    }
+
+    /**
+     * Add the Resources tile, grouping attachments and links.
+     */
+    public function dt_details_additional_tiles( $tiles, $post_type = '' ){
+        if ( $post_type === $this->post_type ){
+            $tiles['resources'] = [
+                'label' => __( 'Resources', 'dt-journeys' ),
+            ];
+        }
+        return $tiles;
     }
 
     /**
@@ -112,13 +125,19 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
         // A stage has no geographic location; drop the base location fields.
         unset( $fields['location_grid'], $fields['location_grid_meta'] );
 
+        if ( isset( $fields['name'] ) ){
+            $fields['name']['tile'] = 'status';
+            $fields['name']['font-icon'] = 'mdi mdi-timeline-check';
+            $fields['name']['icon'] = null;
+        }
+
         $fields['description'] = [
             'name'        => __( 'Description', 'dt-journeys' ),
             'description' => __( 'A short description of this stage.', 'dt-journeys' ),
             'type'        => 'text',
             'default'     => '',
             'tile'        => 'details',
-            'icon'        => get_template_directory_uri() . '/dt-assets/images/text.svg',
+            'font-icon'   => 'mdi mdi-text',
         ];
 
         $fields['instructions'] = [
@@ -127,21 +146,33 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
             'type'        => 'textarea',
             'default'     => '',
             'tile'        => 'details',
-            'icon'        => get_template_directory_uri() . '/dt-assets/images/text.svg',
+            'font-icon'   => 'mdi mdi-clipboard-text-outline',
         ];
 
         // Repeating link/label: PDFs, images, or other resource material by URL.
         $fields['attachments'] = [
             'name'        => __( 'Attachments', 'dt-journeys' ),
             'description' => __( 'Links to PDFs, images, or other resource material.', 'dt-journeys' ),
+            'type'        => 'file_upload',
+            'default'     => [
+                'resource' => [
+                    'label' => __( 'Resource', 'dt-journeys' ),
+                ],
+            ],
+            'tile'        => 'resources',
+            'font-icon'   => 'mdi mdi-attachment',
+        ];
+        $fields['links'] = [
+            'name'        => __( 'Links', 'dt-journeys' ),
+            'description' => __( 'Links to online resource material', 'dt-journeys' ),
             'type'        => 'link',
             'default'     => [
                 'resource' => [
                     'label' => __( 'Resource', 'dt-journeys' ),
                 ],
             ],
-            'tile'        => 'details',
-            'icon'        => get_template_directory_uri() . '/dt-assets/images/link.svg',
+            'tile'        => 'resources',
+            'font-icon'   => 'mdi mdi-open-in-new',
         ];
 
         // DT field keys (on contacts/groups) relevant to edit at this stage.
@@ -162,7 +193,7 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
             'type'        => 'text',
             'default'     => '',
             'tile'        => 'details',
-            'icon'        => get_template_directory_uri() . '/dt-assets/images/text.svg',
+            'font-icon'   => 'mdi mdi-marker-check',
         ];
 
         $fields['stage_order'] = [
@@ -171,7 +202,7 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
             'type'        => 'number',
             'default'     => 0,
             'tile'        => 'details',
-            'icon'        => get_template_directory_uri() . '/dt-assets/images/list.svg',
+            'font-icon'   => 'mdi mdi-sort-numeric-ascending',
         ];
 
         // Reverse of journeys.stages — the journey this stage belongs to.
@@ -182,8 +213,8 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
             'post_type'     => 'journeys',
             'p2p_direction' => 'to',
             'p2p_key'       => 'journeys_to_stages',
-            'tile'          => 'details',
-            'icon'          => get_template_directory_uri() . '/dt-assets/images/group-parent.svg',
+            'tile'          => 'status',
+            'font-icon'     => 'mdi mdi-star-four-points-outline',
         ];
 
         return $fields;
