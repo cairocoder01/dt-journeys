@@ -54,7 +54,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             new Disciple_Tools_Post_Type_Template( $this->post_type, $this->single_name, $this->plural_name );
         }
     }
-    
+
     /**
      * Add the Resources tile, grouping attachments and links.
      */
