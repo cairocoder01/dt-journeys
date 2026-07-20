@@ -1,0 +1,174 @@
+.dt-journeys-tile {
+    .msg {
+        color: var(--gray-1, #919191);
+        font-style: italic;
+        padding: 8px 0;
+        font-size: 0.9em;
+    }
+
+    .journey {
+        border: 1px solid var(--border-color, #cecece);
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+
+        &--readonly {
+            background: var(--surface-2, #f5f5f5);
+        }
+
+        &--timeline .stages {
+            border-left: 2px solid var(--border-color, #cecece);
+            padding-left: 10px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+
+            .name {
+                font-size: 1em;
+            }
+
+            .status {
+                font-size: 0.8em;
+                color: var(--gray-0, #666);
+
+                &--completed {
+                    color: var(--success-color, #4caf50);
+                }
+            }
+        }
+
+        .stages {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stage {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            background: var(--surface-2, #f5f5f5);
+
+            &--complete {
+                background: color-mix(in srgb, var(--success-color, #4caf50) 15%, white);
+            }
+
+            &--skipped {
+                opacity: 0.6;
+            }
+
+            .main {
+                display: flex;
+                flex-direction: column;
+                cursor: pointer;
+
+                .name {
+                    font-weight: 600;
+                    color: var(--primary-color, #3f729b);
+
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+
+                .desc {
+                    font-size: 0.8em;
+                    color: var(--gray-1, #919191);
+                }
+            }
+
+            .status {
+                font-size: 0.78em;
+                color: var(--gray-0, #666);
+                white-space: nowrap;
+            }
+
+            .actions {
+                display: flex;
+                gap: 4px;
+            }
+        }
+
+        .complete-btn {
+            margin-top: 4px;
+        }
+    }
+
+    .group-rollup {
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed var(--border-color, #cecece);
+
+        h4 {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gray-1, #919191);
+            margin: 0 0 8px;
+        }
+
+        .group-name {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+    }
+}
+
+#dt-journeys-add-btn {
+    margin-top: 4px;
+}
+
+.dt-journeys-modal-content {
+    .available-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--surface-2, #f5f5f5);
+        }
+    }
+
+    .instructions,
+    .attachments,
+    .related-fields,
+    .note {
+        margin-bottom: 16px;
+
+        h4 {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gray-1, #919191);
+            margin: 0 0 8px;
+        }
+    }
+
+    .note {
+        label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--gray-0, #666);
+            margin-bottom: 4px;
+        }
+
+        .note-input {
+            width: 100%;
+            min-height: 60px;
+            box-sizing: border-box;
+        }
+    }
+}

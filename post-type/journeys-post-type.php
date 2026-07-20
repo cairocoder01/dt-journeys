@@ -81,25 +81,48 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
     /**
      * Grant access to the journeys post type.
      *
-     * Anyone who can access contacts can access and manage journey definitions.
-     * Admin roles (manage_dt) additionally receive view/update/delete of any journey.
+     * Journey definitions are shared ministry-model templates, not personal
+     * records: anyone who can access contacts can VIEW every journey (needed
+     * to browse/attach one to a record) but NOT create/edit/delete them.
+     * Full CRUD is gated behind `manage_journeys` -- granted to admin roles
+     * (manage_dt) by default, and delegatable to any other role either via
+     * the `journeys_admin` support role registered below, or by an admin
+     * toggling the capability directly on the D.T roles/permissions screen.
      *
      * @link https://github.com/DiscipleTools/Documentation/blob/master/Theme-Core/roles-permissions.md
      */
     public function dt_set_roles_and_permissions( $expected_roles ){
 
-        // if a user can access contacts they can also access & manage journeys
+        // Delegatable support role: layers full Journeys management onto any
+        // user's existing base role (dispatcher, multiplier, ...) without
+        // granting site-wide admin rights.
+        $expected_roles['journeys_admin'] = [
+            'label'       => __( 'Journeys Admin', 'dt-journeys' ),
+            'description' => __( 'Full access to build and manage journey definitions and their stages.', 'dt-journeys' ),
+            'permissions' => [
+                'access_disciple_tools' => true,
+                'manage_journeys'       => true,
+            ],
+            'type'        => [ 'support' ],
+            'order'       => 50,
+        ];
+
+        // Anyone who can access contacts can view/list journeys (to browse and
+        // attach one to a record), read-only.
         foreach ( $expected_roles as $role => $role_value ){
             if ( !empty( $expected_roles[$role]['permissions']['access_contacts'] ) ){
                 $expected_roles[$role]['permissions']['access_' . $this->post_type ] = true;
-                $expected_roles[$role]['permissions']['create_' . $this->post_type] = true;
-                $expected_roles[$role]['permissions']['update_' . $this->post_type] = true;
+                $expected_roles[$role]['permissions']['view_any_' . $this->post_type ] = true;
             }
         }
 
-        // admin roles get full access to every journey
+        // manage_journeys (admin roles by default, or delegated via the
+        // journeys_admin support role / a manual capability toggle) gets full CRUD.
         foreach ( $expected_roles as $role => $role_value ){
             if ( !empty( $expected_roles[$role]['permissions']['manage_dt'] ) ){
+                $expected_roles[$role]['permissions']['manage_journeys'] = true;
+            }
+            if ( !empty( $expected_roles[$role]['permissions']['manage_journeys'] ) ){
                 $expected_roles[$role]['permissions']['access_' . $this->post_type ] = true;
                 $expected_roles[$role]['permissions']['create_' . $this->post_type] = true;
                 $expected_roles[$role]['permissions']['update_' . $this->post_type] = true;
@@ -111,14 +134,6 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
 
         if ( isset( $expected_roles['administrator'] ) ){
             $expected_roles['administrator']['permissions']['delete_any_' . $this->post_type ] = true;
-        }
-
-        // manage_journeys gates the Journeys admin UI (definition builder). Grant
-        // it to admin roles by default; it can be delegated to non-admin roles.
-        foreach ( $expected_roles as $role => $role_value ){
-            if ( !empty( $expected_roles[$role]['permissions']['manage_dt'] ) ){
-                $expected_roles[$role]['permissions']['manage_journeys'] = true;
-            }
         }
 
         return $expected_roles;

@@ -57,9 +57,43 @@ class JourneysPostTypeTest extends TestCase {
         $this->assertArrayNotHasKey( 'location_grid_meta', $fields );
     }
 
+    public function test_related_fields_option_registry_round_trips_a_selected_value() {
+        // DT_Posts silently drops any multi_select value not present in the
+        // field's 'default' option registry on read -- an empty registry
+        // would make every selection vanish. Assert it's populated and that a
+        // real contact field key survives create -> get.
+        $fields = DT_Posts::get_post_field_settings( 'journey_stages', false );
+        $this->assertNotEmpty( $fields['related_fields']['default'], 'related_fields must have a non-empty option registry' );
+        $this->assertArrayHasKey( 'overall_status', $fields['related_fields']['default'] );
+
+        $stage = DT_Posts::create_post( 'journey_stages', [
+            'name'           => 'Stage with related field',
+            'related_fields' => [ 'values' => [ [ 'value' => 'overall_status' ] ] ],
+        ], true, false );
+        $this->assertNotWPError( $stage );
+
+        $fetched = DT_Posts::get_post( 'journey_stages', $stage['ID'], false, false );
+        $this->assertContains( 'overall_status', $fetched['related_fields'] );
+    }
+
     public function test_manage_journeys_capability_registered() {
         $capabilities = apply_filters( 'dt_capabilities', [] );
         $this->assertArrayHasKey( 'manage_journeys', $capabilities );
+    }
+
+    public function test_non_admin_can_view_journey_created_by_another_user() {
+        // Journeys are shared ministry-model templates: a regular user must be
+        // able to view one they didn't personally create (e.g. to attach it to
+        // their own contact), even though editing/deleting stays restricted.
+        $journey = DT_Posts::create_post( 'journeys', [ 'name' => 'Shared Journey' ], true, false );
+        $this->assertNotWPError( $journey );
+
+        $multiplier_id = $this->factory()->user->create( [ 'role' => 'multiplier' ] );
+        wp_set_current_user( $multiplier_id );
+
+        $fetched = DT_Posts::get_post( 'journeys', $journey['ID'] );
+        $this->assertNotWPError( $fetched );
+        $this->assertSame( $journey['ID'], $fetched['ID'] );
     }
 
     public function test_create_journey_with_ordered_stages() {
