@@ -216,6 +216,42 @@ class JourneysRestApiTest extends TestCase {
         }
     }
 
+    public function test_remove_journey_via_rest() {
+        list( $journey_id ) = $this->create_journey( true );
+        DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
+
+        $response = $this->dispatch( 'DELETE', "/dt-journeys/v1/remove/contacts/{$this->contact_id}", [
+            'journey_id' => $journey_id,
+        ] );
+        $this->assertSame( 200, $response->get_status() );
+        $this->assertTrue( $response->get_data()['removed'] );
+
+        $progress = DT_Journeys_Progress::get_progress( 'contacts', $this->contact_id, $journey_id );
+        $this->assertNull( $progress );
+    }
+
+    public function test_get_stage_fields_strips_required_to_avoid_validation_flash() {
+        // This pop-out is a quick-edit convenience, not the record's main edit
+        // form -- a field required there shouldn't block/flash a validation
+        // error here, even though the real required-ness is left untouched
+        // everywhere else (enforced server-side on the main form's save).
+        add_filter( 'dt_custom_fields_settings', function ( $fields, $post_type ) {
+            if ( $post_type === 'contacts' && isset( $fields['overall_status'] ) ) {
+                $fields['overall_status']['required'] = true;
+            }
+            return $fields;
+        }, 20, 2 );
+        wp_cache_delete( 'contacts_field_settings' );
+
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/stage-fields/contacts/{$this->contact_id}", [
+            'field_keys' => [ 'overall_status' ],
+        ] );
+        $this->assertSame( 200, $response->get_status() );
+
+        $html = $response->get_data()['fields']['overall_status'];
+        $this->assertStringNotContainsString( 'required', $html );
+    }
+
     public function test_get_stage_fields_returns_rendered_field_html() {
         $response = $this->dispatch( 'GET', "/dt-journeys/v1/stage-fields/contacts/{$this->contact_id}", [
             'field_keys' => [ 'overall_status' ],

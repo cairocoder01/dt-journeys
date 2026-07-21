@@ -160,9 +160,9 @@
         wrap.appendChild(header);
 
         if (!expanded) {
-            var summary = renderJourneySummary(journey);
-            if (summary) {
-                wrap.appendChild(summary);
+            var progressBar = renderJourneyProgressBar(journey);
+            if (progressBar) {
+                wrap.appendChild(progressBar);
             }
             return wrap;
         }
@@ -174,53 +174,78 @@
         });
         wrap.appendChild(stagesWrap);
 
-        if (!readonly && journey.status !== 'completed') {
-            var completeBtn = document.createElement('button');
-            completeBtn.type = 'button';
-            completeBtn.className = 'button small complete-btn';
-            completeBtn.textContent = t('mark_complete', 'Mark Journey Complete');
-            completeBtn.addEventListener('click', function (e) {
+        if (!readonly) {
+            var footerActions = document.createElement('div');
+            footerActions.className = 'journey-actions';
+
+            if (journey.status !== 'completed') {
+                var completeBtn = document.createElement('button');
+                completeBtn.type = 'button';
+                completeBtn.className = 'button small complete-btn';
+                completeBtn.textContent = t('mark_complete', 'Mark Journey Complete');
+                completeBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    onMarkJourneyComplete(journey);
+                });
+                footerActions.appendChild(completeBtn);
+            }
+
+            // Removes the whole instance (not just marks it done) -- for
+            // undoing a mistaken/test "Start", regardless of its status.
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'button small hollow alert remove-btn';
+            removeBtn.textContent = t('remove_journey', 'Remove Journey');
+            removeBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                onMarkJourneyComplete(journey);
+                onRemoveJourney(journey);
             });
-            wrap.appendChild(completeBtn);
+            footerActions.appendChild(removeBtn);
+
+            wrap.appendChild(footerActions);
         }
 
         return wrap;
     }
 
-    // Collapsed-state summary: the next actionable stage for a sequential
-    // journey, or a simple complete-count for a non-sequential one (there's
-    // no single "next" stage to point at when stages can be done in any
-    // order).
-    function renderJourneySummary(journey) {
+    // Collapsed-state summary: a single percent-complete bar works for both
+    // sequential and non-sequential journeys alike (no need for a "next
+    // stage" vs. "X of Y" split). A forced/cascaded completion can leave
+    // sequential stages "skipped" rather than "complete", so a finished
+    // journey is always shown full regardless of how it got there.
+    function renderJourneyProgressBar(journey) {
         var stages = journey.stages || [];
         if (!stages.length) {
             return null;
         }
 
-        var text;
-        if (journey.is_sequential) {
-            var next = stages.filter(function (stage) {
-                return stage.status !== 'complete' && stage.status !== 'skipped';
-            })[0];
-            if (!next) {
-                return null;
-            }
-            text = t('next_stage', 'Next: %s').replace('%s', next.name);
+        var percent;
+        if (journey.status === 'completed') {
+            percent = 100;
         } else {
             var doneCount = stages.filter(function (stage) {
                 return stage.status === 'complete';
             }).length;
-            text = t('stages_complete', '%1$d of %2$d complete')
-                .replace('%1$d', doneCount)
-                .replace('%2$d', stages.length);
+            percent = Math.round((doneCount / stages.length) * 100);
         }
 
-        var p = document.createElement('p');
-        p.className = 'summary';
-        p.textContent = text;
-        return p;
+        var wrap = document.createElement('div');
+        wrap.className = 'progress-bar' + (percent === 100 ? ' progress-bar--complete' : '');
+
+        var track = document.createElement('div');
+        track.className = 'progress-bar__track';
+        var fill = document.createElement('div');
+        fill.className = 'progress-bar__fill';
+        fill.style.width = percent + '%';
+        track.appendChild(fill);
+        wrap.appendChild(track);
+
+        var label = document.createElement('span');
+        label.className = 'progress-bar__label';
+        label.textContent = percent + '%';
+        wrap.appendChild(label);
+
+        return wrap;
     }
 
     function renderStage(journey, stage, readonly) {
@@ -268,14 +293,18 @@
             var actions = document.createElement('span');
             actions.className = 'actions';
 
+            // Completing a stage opens the pop-out (preset to Complete) rather
+            // than saving instantly, since that's typically when a note or a
+            // related field also needs to be filled in. Skip/Stalled don't
+            // carry that same expectation, so they stay a single click.
             var completeLabel = stage.success_action_label || t('complete', 'Complete');
-            actions.appendChild(makeStageBtn(completeLabel, function () {
-                setStageStatus(journey.ID, stage.ID, 'complete');
+            actions.appendChild(makeStageBtn(completeLabel, 'complete', function () {
+                openStageModal(journey, stage, 'complete');
             }));
-            actions.appendChild(makeStageBtn(t('skip', 'Skip'), function () {
+            actions.appendChild(makeStageBtn(t('skip', 'Skip'), 'skip', function () {
                 setStageStatus(journey.ID, stage.ID, 'skipped');
             }));
-            actions.appendChild(makeStageBtn(t('stalled', 'Stalled'), function () {
+            actions.appendChild(makeStageBtn(t('stalled', 'Stalled'), 'stalled', function () {
                 setStageStatus(journey.ID, stage.ID, 'incomplete');
             }));
 
@@ -287,10 +316,10 @@
         return row;
     }
 
-    function makeStageBtn(label, onClick) {
+    function makeStageBtn(label, modifier, onClick) {
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'button tiny';
+        btn.className = 'button tiny stage-btn stage-btn--' + modifier;
         btn.textContent = label;
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -351,6 +380,26 @@
             .catch(function (err) {
                 window.alert(err.message);
                 return null;
+            });
+    }
+
+    function onRemoveJourney(journey) {
+        if (!window.confirm(t('confirm_remove', 'Remove this journey and its progress from this record? This cannot be undone.'))) {
+            return;
+        }
+        removeJourney(journey.ID);
+    }
+
+    function removeJourney(journeyId) {
+        return apiFetch('remove/' + recordPath, {
+            method: 'DELETE',
+            body: JSON.stringify({ journey_id: journeyId }),
+        })
+            .then(function () {
+                return loadRecord();
+            })
+            .catch(function (err) {
+                window.alert(err.message);
             });
     }
 
@@ -538,31 +587,50 @@
         }
     }
 
-    function renderStageAttachments(stage) {
-        var items = (stage.links || []).concat(stage.attachments || []).filter(function (link) {
-            return link && link.value;
-        });
+    // A link's raw value can optionally use markdown link syntax
+    // (`[Label](https://...)`) to give it a friendlier name than the bare
+    // URL; anything else is shown as-is with the URL as its own label.
+    function parseMarkdownLink(str) {
+        var match = /^\[([^\]]+)\]\((\S+)\)$/.exec((str || '').trim());
+        return match ? { label: match[1], href: match[2] } : { label: str, href: str };
+    }
+
+    function renderLinkSection(className, heading, items) {
         if (!items.length) {
             return null;
         }
-
         var wrap = document.createElement('div');
-        wrap.className = 'attachments';
-        wrap.innerHTML = '<h4>' + esc(t('attachments', 'Attachments')) + '</h4>';
+        wrap.className = className;
+        wrap.innerHTML = '<h4>' + esc(heading) + '</h4>';
 
         var ul = document.createElement('ul');
-        items.forEach(function (link) {
+        items.forEach(function (item) {
             var li = document.createElement('li');
             var a = document.createElement('a');
-            a.href = link.value;
+            a.href = item.href;
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
-            a.textContent = link.type || link.value;
+            a.textContent = item.label;
             li.appendChild(a);
             ul.appendChild(li);
         });
         wrap.appendChild(ul);
         return wrap;
+    }
+
+    function renderStageLinks(stage) {
+        var items = (stage.links || [])
+            .map(function (link) { return link && link.value; })
+            .filter(Boolean)
+            .map(parseMarkdownLink);
+        return renderLinkSection('links', t('links', 'Links'), items);
+    }
+
+    function renderStageAttachments(stage) {
+        var items = (stage.attachments || [])
+            .filter(function (file) { return file && file.url; })
+            .map(function (file) { return { label: file.name || file.url, href: file.url }; });
+        return renderLinkSection('attachments', t('attachments', 'Attachments'), items);
     }
 
     function renderRelatedFields(journey, stage, body, fieldRefs) {
@@ -620,7 +688,7 @@
         }));
     }
 
-    function openStageModal(journey, stage) {
+    function openStageModal(journey, stage, presetStatus) {
         if (!stageModal) {
             return;
         }
@@ -635,6 +703,11 @@
             instr.innerHTML = '<h4>' + esc(t('instructions', 'Instructions')) + '</h4><div>' +
                 esc(stage.instructions).replace(/\n/g, '<br>') + '</div>';
             body.appendChild(instr);
+        }
+
+        var links = renderStageLinks(stage);
+        if (links) {
+            body.appendChild(links);
         }
 
         var attachments = renderStageAttachments(stage);
@@ -655,7 +728,7 @@
             var opt = document.createElement('option');
             opt.value = key;
             opt.textContent = statusLabel(key);
-            if (key === stage.status) {
+            if (key === (presetStatus || stage.status)) {
                 opt.selected = true;
             }
             statusSelect.appendChild(opt);

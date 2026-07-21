@@ -11,13 +11,15 @@
     }
 
     .journey {
-        border: 1px solid var(--border-color, #cecece);
-        border-radius: 6px;
-        padding: 10px 12px;
-        margin-bottom: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border-color, #cecece);
 
-        &--readonly {
-            background: var(--surface-2, #f5f5f5);
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &.journey--readonly {
+            opacity: 0.8;
         }
 
         .header {
@@ -51,25 +53,56 @@
                 color: var(--gray-0, #666);
                 flex: none;
 
-                &--completed {
+                &.status--completed {
                     color: var(--success-color, #4caf50);
                 }
             }
         }
 
-        .summary {
-            margin: 0;
-            font-size: 0.85em;
-            color: var(--gray-0, #666);
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+
+            .progress-bar__track {
+                flex: 1;
+                height: 6px;
+                border-radius: 999px;
+                background: var(--surface-2, #f5f5f5);
+                overflow: hidden;
+            }
+
+            .progress-bar__fill {
+                height: 100%;
+                background: var(--primary-color, #3f729b);
+                border-radius: 999px;
+                transition: width 0.2s ease;
+            }
+
+            .progress-bar__label {
+                flex: none;
+                min-width: 2.4em;
+                font-size: 0.78em;
+                color: var(--gray-0, #666);
+                text-align: right;
+            }
+
+            &.progress-bar--complete .progress-bar__fill {
+                background: var(--success-color, #4caf50);
+            }
         }
 
         .stages {
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            padding-top: 4px;
         }
 
-        .complete-btn {
+        .journey-actions {
+            display: flex;
+            gap: 0.5rem;
             margin-top: 0.5rem;
         }
     }
@@ -155,13 +188,33 @@
             .actions {
                 display: flex;
                 gap: 0.35rem;
+
+                .stage-btn--complete {
+                    background: var(--success-color, #4caf50);
+                    border-color: var(--success-color, #4caf50);
+                    color: #fff;
+                }
+
+                .stage-btn--skip {
+                    background: var(--gray-2, #b8b8b8);
+                    border-color: var(--gray-2, #b8b8b8);
+                    color: #fff;
+                }
+
+                .stage-btn--stalled {
+                    background: var(--alert-color, #cc4b37);
+                    border-color: var(--alert-color, #cc4b37);
+                    color: #fff;
+                }
             }
         }
 
-        /* `&--modifier` string-concatenation only works when the nesting
-           parent is a single simple selector -- ".journey .stage" is a
-           complex (multi-compound) selector, so these need to be spelled
-           out in full rather than nested with `&`. */
+        /* There's no build step for this file -- it's native browser CSS
+           nesting, not Sass -- so Sass-style `&--modifier`/`&__element`
+           bare-identifier concatenation isn't supported at all (it silently
+           fails to match, dropping the rule); only `&.explicit-class`,
+           `&:pseudo-class`, and plain nested selectors work. These stage
+           modifier rules need the full class name spelled out. */
         .journey .stage--complete .rail .marker {
             background: var(--success-color, #4caf50);
             border-color: var(--success-color, #4caf50);
@@ -247,6 +300,7 @@
     }
 
     .instructions,
+    .links,
     .attachments,
     .related-fields,
     .status-control,

@@ -61,6 +61,12 @@ class Dt_Journeys_Endpoints {
             'callback'            => [ $this, 'complete_journey' ],
             'permission_callback' => [ $this, 'can_update' ],
         ] );
+
+        register_rest_route( $namespace, "/remove/$record", [
+            'methods'             => WP_REST_Server::DELETABLE,
+            'callback'            => [ $this, 'remove_journey' ],
+            'permission_callback' => [ $this, 'can_update' ],
+        ] );
     }
 
     public function can_view( WP_REST_Request $request ) {
@@ -182,8 +188,16 @@ class Dt_Journeys_Endpoints {
             if ( !isset( $field_settings[ $field_key ] ) ) {
                 continue;
             }
+            // This pop-out is a quick-edit convenience, not the record's main
+            // edit form -- a field required there shouldn't block or flash a
+            // validation error here. `required` is read fresh from whatever
+            // settings are passed in, so overriding it on this shallow copy
+            // doesn't touch the field's real required-ness anywhere else.
+            $display_settings = $field_settings;
+            $display_settings[ $field_key ]['required'] = false;
+
             ob_start();
-            render_field_for_display( $field_key, $field_settings, $post, true );
+            render_field_for_display( $field_key, $display_settings, $post, true );
             $html[ $field_key ] = ob_get_clean();
         }
 
@@ -262,6 +276,29 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
+     * DELETE /remove/{post_type}/{post_id} { journey_id }
+     * Removes a journey instance -- its whole progress entry -- from the
+     * record, e.g. to undo starting the wrong one. Distinct from `complete`.
+     */
+    public function remove_journey( WP_REST_Request $request ) {
+        $journey_id = (int) $request->get_param( 'journey_id' );
+        if ( !$journey_id ) {
+            return new WP_Error( 'journeys_progress', 'journey_id is required', [ 'status' => 400 ] );
+        }
+
+        $result = DT_Journeys_Progress::remove_journey(
+            $request->get_param( 'post_type' ),
+            (int) $request->get_param( 'post_id' ),
+            $journey_id
+        );
+        if ( is_wp_error( $result ) ) {
+            return $result;
+        }
+
+        return [ 'removed' => true ];
+    }
+
+    /**
      * Merge a stored progress entry with its journey/stage definitions into
      * the shape the tile UI renders.
      */
@@ -292,7 +329,7 @@ class Dt_Journeys_Endpoints {
                 'description'          => $stage['description'] ?? '',
                 'instructions'         => $stage['instructions'] ?? '',
                 'links'                => $stage['links'] ?? [],
-                'attachments'          => $stage['attachments'] ?? [],
+                'attachments'          => $this->format_stage_attachments( $stage['attachments'] ?? [] ),
                 'related_fields'       => $stage['related_fields'] ?? [],
                 'success_action_label' => $stage['success_action_label'] ?? '',
                 'status'               => $stage_progress['status'],
@@ -312,6 +349,25 @@ class Dt_Journeys_Endpoints {
             'completed_date' => $progress_entry['completed_date'] ?? null,
             'stages'         => $stages,
         ];
+    }
+
+    /**
+     * Resolve each `file_upload` entry's storage key to a downloadable URL,
+     * for the stage pop-out's read-only attachments list (the field's own
+     * `<dt-file-upload>` widget is an upload/manage UI, not a fit here).
+     */
+    private function format_stage_attachments( array $files ) {
+        $formatted = [];
+        foreach ( $files as $file ) {
+            if ( !is_array( $file ) || empty( $file['key'] ) ) {
+                continue;
+            }
+            $formatted[] = [
+                'name' => $file['name'] ?? basename( $file['key'] ),
+                'url'  => DT_Storage_API::is_enabled() ? DT_Storage_API::get_file_url( $file['key'] ) : '',
+            ];
+        }
+        return $formatted;
     }
 
     /**

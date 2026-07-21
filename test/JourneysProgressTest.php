@@ -95,6 +95,28 @@ class JourneysProgressTest extends TestCase {
         $this->assertSame( (string) $stage_ids[0], get_comment_meta( $comments[0]->comment_ID, 'journeys_stage_id', true ) );
     }
 
+    public function test_set_stage_status_activity_names_the_stage() {
+        list( $journey_id, $stage_ids ) = $this->create_journey( true );
+        DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
+        DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete' );
+
+        global $wpdb;
+        $activity = $wpdb->get_row( $wpdb->prepare(
+            "SELECT * FROM $wpdb->dt_activity_log WHERE object_id = %d AND action = %s ORDER BY histid DESC LIMIT 1",
+            $this->contact_id,
+            'journeys_stage_status'
+        ) );
+        $this->assertNotNull( $activity );
+        // Without a readable object_name, the generic activity feed formatter
+        // has no idea what a `dt_journeys_progress.*` meta_key means and just
+        // prints the raw key -- object_name (and the dt_format_activity_message
+        // filter below) is what turns that into a real sentence.
+        $this->assertSame( 'Stage 1', $activity->object_name );
+
+        $message = DT_Journeys_Progress::format_activity_message( 'dt_journeys_progress:', $activity );
+        $this->assertSame( 'Stage Completed: Stage 1', $message );
+    }
+
     public function test_invalid_stage_status_returns_error() {
         list( $journey_id, $stage_ids ) = $this->create_journey( true );
         $result = DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'bogus' );
@@ -151,6 +173,43 @@ class JourneysProgressTest extends TestCase {
     public function test_complete_journey_without_start_returns_error() {
         list( $journey_id ) = $this->create_journey( true );
         $result = DT_Journeys_Progress::complete_journey( 'contacts', $this->contact_id, $journey_id );
+        $this->assertWPError( $result );
+    }
+
+    public function test_remove_journey_deletes_the_whole_progress_entry() {
+        list( $journey_id, $stage_ids ) = $this->create_journey( true );
+        DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
+        DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete' );
+
+        $result = DT_Journeys_Progress::remove_journey( 'contacts', $this->contact_id, $journey_id );
+        $this->assertNotWPError( $result );
+        $this->assertTrue( $result );
+
+        $progress = DT_Journeys_Progress::get_progress( 'contacts', $this->contact_id, $journey_id );
+        $this->assertNull( $progress, 'the journey should have no progress entry left at all, not just a reset one' );
+
+        // no longer marked active, either
+        $marker = get_post_meta( $this->contact_id, DT_Journeys_Progress::ACTIVE_MARKER_KEY );
+        $this->assertNotContains( (string) $journey_id, array_map( 'strval', $marker ) );
+
+        $this->assertSame( 1, $this->count_activity( $this->contact_id, 'journeys_removed' ) );
+    }
+
+    public function test_remove_journey_works_on_a_completed_journey_too() {
+        list( $journey_id ) = $this->create_journey( true, 1 );
+        DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
+        DT_Journeys_Progress::complete_journey( 'contacts', $this->contact_id, $journey_id, true );
+
+        $result = DT_Journeys_Progress::remove_journey( 'contacts', $this->contact_id, $journey_id );
+        $this->assertNotWPError( $result );
+
+        $progress = DT_Journeys_Progress::get_progress( 'contacts', $this->contact_id, $journey_id );
+        $this->assertNull( $progress );
+    }
+
+    public function test_remove_journey_without_start_returns_error() {
+        list( $journey_id ) = $this->create_journey( true );
+        $result = DT_Journeys_Progress::remove_journey( 'contacts', $this->contact_id, $journey_id );
         $this->assertWPError( $result );
     }
 

@@ -173,6 +173,34 @@ class DT_Journeys_Progress {
     }
 
     /**
+     * Remove a journey instance from a record entirely -- its whole progress
+     * entry (started/active or completed) is deleted, not just marked
+     * inactive. Distinct from `complete_journey()`: this is for undoing a
+     * mistaken or test "Start", not finishing one.
+     *
+     * @return true|WP_Error
+     */
+    public static function remove_journey( string $post_type, int $post_id, int $journey_id ) {
+        $progress = self::get_progress( $post_type, $post_id );
+        $key = (string) $journey_id;
+
+        if ( empty( $progress[ $key ] ) ) {
+            return new WP_Error( 'journeys_progress', 'Journey has not been started for this record', [ 'status' => 400 ] );
+        }
+
+        $journey = DT_Posts::get_post( 'journeys', $journey_id );
+        $journey_name = is_wp_error( $journey ) ? '' : ( $journey['name'] ?? $journey['title'] ?? '' );
+        $old_status = $progress[ $key ]['status'] ?? '';
+
+        unset( $progress[ $key ] );
+        update_post_meta( $post_id, self::META_KEY, $progress );
+        self::sync_active_marker( $post_id, $journey_id, false );
+        self::log_activity( $post_type, $post_id, 'journeys_removed', $journey_id, $journey_name, 'removed', $old_status );
+
+        return true;
+    }
+
+    /**
      * Set a single stage's status on a record's journey progress.
      *
      * Starts the journey automatically if it hasn't been started yet. Once
@@ -207,12 +235,13 @@ class DT_Journeys_Progress {
             'note'   => $note,
         ];
 
+        $stage_post = DT_Posts::get_post( 'journey_stages', $stage_id );
+        $stage_name = is_wp_error( $stage_post ) ? '' : ( $stage_post['name'] ?? $stage_post['title'] ?? '' );
+
         update_post_meta( $post_id, self::META_KEY, $progress );
-        self::log_activity( $post_type, $post_id, 'journeys_stage_status', $journey_id, '', $status, $old_status, $stage_id );
+        self::log_activity( $post_type, $post_id, 'journeys_stage_status', $journey_id, $stage_name, $status, $old_status, $stage_id );
 
         if ( '' !== $note ) {
-            $stage_post = DT_Posts::get_post( 'journey_stages', $stage_id );
-            $stage_name = is_wp_error( $stage_post ) ? '' : ( $stage_post['name'] ?? $stage_post['title'] ?? '' );
             $comment_html = '' !== $stage_name ? $stage_name . ': ' . $note : $note;
 
             DT_Posts::add_post_comment( $post_type, $post_id, $comment_html, self::COMMENT_TYPE, [
@@ -285,4 +314,70 @@ class DT_Journeys_Progress {
             'field_type'     => 'journeys',
         ] );
     }
+
+    /**
+     * The generic activity-feed formatter has no idea what a
+     * `dt_journeys_progress.*` meta_key means, so without this it renders
+     * these entries as a bare "dt_journeys_progress:" line. `object_name` is
+     * the journey's name (start/complete/remove actions) or the stage's name
+     * (stage status changes) -- see the `log_activity()` calls above. Action
+     * leads (e.g. "Stage Completed: X"), not the name, so a quick scan of the
+     * feed shows what happened before which record it happened to.
+     */
+    public static function format_activity_message( $message, $activity ) {
+        if ( ( $activity->field_type ?? '' ) !== 'journeys' ) {
+            return $message;
+        }
+
+        $stage_status_labels = [
+            'not_started' => __( 'Reset to Not Started', 'dt-journeys' ),
+            'started'     => __( 'Started', 'dt-journeys' ),
+            'paused'      => __( 'Paused', 'dt-journeys' ),
+            'incomplete'  => __( 'Stalled', 'dt-journeys' ),
+            'complete'    => __( 'Completed', 'dt-journeys' ),
+            'skipped'     => __( 'Skipped', 'dt-journeys' ),
+        ];
+        $name = $activity->object_name ?? '';
+
+        switch ( $activity->action ) {
+            case 'journeys_started':
+                return '' !== $name
+                    ? sprintf( __( 'Journey Started: %s', 'dt-journeys' ), $name )
+                    : __( 'Journey Started', 'dt-journeys' );
+
+            case 'journeys_completed':
+                return '' !== $name
+                    ? sprintf( __( 'Journey Completed: %s', 'dt-journeys' ), $name )
+                    : __( 'Journey Completed', 'dt-journeys' );
+
+            case 'journeys_removed':
+                return '' !== $name
+                    ? sprintf( __( 'Journey Removed: %s', 'dt-journeys' ), $name )
+                    : __( 'Journey Removed', 'dt-journeys' );
+
+            case 'journeys_stage_status':
+                $status_label = $stage_status_labels[ $activity->meta_value ] ?? $activity->meta_value;
+                return '' !== $name
+                    /* translators: 1: status label, 2: stage name, e.g. "Stage Completed: Reading Plan" */
+                    ? sprintf( __( 'Stage %1$s: %2$s', 'dt-journeys' ), $status_label, $name )
+                    : sprintf( __( 'Stage %s', 'dt-journeys' ), $status_label );
+        }
+
+        return $message;
+    }
 }
+
+add_filter( 'dt_format_activity_message', [ 'DT_Journeys_Progress', 'format_activity_message' ], 10, 2 );
+
+/**
+ * DT's generic post-meta-change logger (`Disciple_Tools_Hook_Posts`) fires on
+ * every `update_post_meta()` call and, not knowing what these two keys mean,
+ * dumps their raw (serialized, for META_KEY) value into the activity feed as
+ * a second, noisy entry alongside the readable one `log_activity()` above
+ * already records for the same change.
+ */
+add_filter( 'dt_ignore_fields_logging', function ( $ignore_fields ) {
+    $ignore_fields[] = DT_Journeys_Progress::META_KEY;
+    $ignore_fields[] = DT_Journeys_Progress::ACTIVE_MARKER_KEY;
+    return $ignore_fields;
+} );
