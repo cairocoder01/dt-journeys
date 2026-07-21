@@ -65,4 +65,16 @@ system for git. For a more details on contribution see the
 
 ## Screenshots
 
-_Coming soon._
+**The Journeys tile on a contact record** — one journey expanded to its full timeline, two others
+collapsed to a percent-complete summary:
+
+![Journeys tile](documentation/screenshots/tile-overview.png)
+
+**A stage's pop-out** — instructions, links (with custom display names), status, a related record
+field, and a note, all in one place:
+
+![Stage pop-out](documentation/screenshots/stage-popout.png)
+
+**Adding a journey**, filtered by category:
+
+![Add a Journey modal](documentation/screenshots/add-journey.png)
