@@ -65,11 +65,16 @@ Opened by clicking a stage's name or its Complete button. Shows, in order:
      field renders without the `required` flag so no validation error can block or flash during this
      quick edit. The field's real required-ness is untouched everywhere else.
    - Field values are **not** auto-saved on change; nothing commits until the pop-out's own **Save**
-     button is clicked, matching the note field's behavior for a consistent single save action.
-6. **Note** (optional) — free text. If provided, it's saved as a comment on the record, **prefixed
-   with the stage's name** (e.g. `"Reading Plan: Finished the first chapter"`) so its origin is never
-   lost once it's just one comment among many; the journey/stage IDs are also stored as comment meta
-   for anything that wants to query it later.
+     button is clicked, matching the note field's behavior for a consistent single save action. Only
+     fields the user actually edited are re-submitted on Save — an untouched field isn't resent just
+     because Save was clicked (e.g. to record a note or revisit the status).
+6. **Note** (optional) — free text, pre-filled with whatever was saved last time the stage was
+   completed. If provided *and changed* from what's already stored, it's saved as a new comment on
+   the record, **prefixed with the stage's name** (e.g. `"Reading Plan: Finished the first
+   chapter"`) so its origin is never lost once it's just one comment among many; the journey/stage
+   IDs are also stored as comment meta for anything that wants to query it later. Re-saving without
+   editing the note (e.g. reopening a completed stage just to check its status) does **not** create
+   a duplicate comment — only an actual change to the note text writes a new one.
 
 Clicking **Save** commits the selected status, the note (if any), and any related-field edits
 together, then closes the pop-out.
@@ -98,6 +103,10 @@ activity/comments feed with a clean, readable, **action-first** sentence:
 - `Journey Removed: <name>`
 - `Stage <Status>: <name>` — e.g. `Stage Completed: Reading Plan`, `Stage Skipped: ...`,
   `Stage Stalled: ...`
+
+A stage-status entry is only logged when the status actually changes — re-saving the pop-out
+without changing the status (e.g. reopening a completed stage just to add a note) does not log a
+second "marked Complete" entry, and doesn't bump the stage's recorded date either.
 
 Without this, DT's generic activity formatter has no idea what the plugin's own meta blob means and
 would otherwise print a raw `dt_journeys_progress: a:1:{...}` line; the plugin also suppresses DT's

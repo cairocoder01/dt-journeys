@@ -675,7 +675,14 @@
     // like it would during live auto-save.
     function flushFieldChanges(fieldRefs) {
         var componentService = window.componentService;
-        var fieldKeys = Object.keys(fieldRefs || {});
+        var fieldKeys = Object.keys(fieldRefs || {}).filter(function (key) {
+            // handleChangeEvent() has no such guard itself -- it always POSTs
+            // an update -- so skip fields the user didn't touch, or every
+            // Save would redundantly resubmit every related field's existing
+            // value (and risk a spurious activity-log entry for field types
+            // whose serialization isn't perfectly stable on resubmission).
+            return fieldRefs[key].el.value !== fieldRefs[key].original;
+        });
         if (!fieldKeys.length || !componentService) {
             return Promise.resolve();
         }

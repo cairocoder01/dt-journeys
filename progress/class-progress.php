@@ -227,11 +227,17 @@ class DT_Journeys_Progress {
         }
 
         $stage_key = (string) $stage_id;
-        $old_status = $progress[ $key ]['stages'][ $stage_key ]['status'] ?? 'not_started';
+        $existing_stage = $progress[ $key ]['stages'][ $stage_key ] ?? [];
+        $old_status = $existing_stage['status'] ?? 'not_started';
+        $old_note = $existing_stage['note'] ?? '';
+        $status_changed = $status !== $old_status;
 
         $progress[ $key ]['stages'][ $stage_key ] = [
+            // Re-saving the pop-out without actually changing the status
+            // (e.g. just to add a note) shouldn't bump the "status changed"
+            // date to today.
             'status' => $status,
-            'date'   => current_time( 'Y-m-d' ),
+            'date'   => $status_changed ? current_time( 'Y-m-d' ) : ( $existing_stage['date'] ?? current_time( 'Y-m-d' ) ),
             'note'   => $note,
         ];
 
@@ -239,9 +245,21 @@ class DT_Journeys_Progress {
         $stage_name = is_wp_error( $stage_post ) ? '' : ( $stage_post['name'] ?? $stage_post['title'] ?? '' );
 
         update_post_meta( $post_id, self::META_KEY, $progress );
-        self::log_activity( $post_type, $post_id, 'journeys_stage_status', $journey_id, $stage_name, $status, $old_status, $stage_id );
 
-        if ( '' !== $note ) {
+        // Same reasoning as the note dedup below -- the pop-out always
+        // re-submits whatever status is currently selected, so only log an
+        // activity entry when the status actually changed, or every re-save
+        // would claim the stage was "completed" (or whatever) again.
+        if ( $status_changed ) {
+            self::log_activity( $post_type, $post_id, 'journeys_stage_status', $journey_id, $stage_name, $status, $old_status, $stage_id );
+        }
+
+        // The pop-out always re-submits whatever note is currently in the
+        // textarea, including one carried over unchanged from a previous
+        // save (e.g. reopening an already-completed stage) -- only add a new
+        // comment when the note text actually changed, or every re-save
+        // would duplicate the same comment.
+        if ( '' !== $note && $note !== $old_note ) {
             $comment_html = '' !== $stage_name ? $stage_name . ': ' . $note : $note;
 
             DT_Posts::add_post_comment( $post_type, $post_id, $comment_html, self::COMMENT_TYPE, [

@@ -95,6 +95,55 @@ class JourneysProgressTest extends TestCase {
         $this->assertSame( (string) $stage_ids[0], get_comment_meta( $comments[0]->comment_ID, 'journeys_stage_id', true ) );
     }
 
+    public function test_resaving_the_same_note_does_not_duplicate_the_comment() {
+        list( $journey_id, $stage_ids ) = $this->create_journey( true );
+        DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
+
+        DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete', 'Same note' );
+        // Reopening the stage pop-out re-submits whatever note is already
+        // there (e.g. just to revisit the status), which shouldn't write a
+        // second copy of an unchanged comment.
+        DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete', 'Same note' );
+
+        $comments = get_comments( [ 'post_id' => $this->contact_id, 'type' => DT_Journeys_Progress::COMMENT_TYPE ] );
+        $this->assertCount( 1, $comments, 'an unchanged note should not be re-added as a new comment' );
+
+        // But an actually-edited note still gets its own comment.
+        DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete', 'A different note' );
+        $comments = get_comments( [ 'post_id' => $this->contact_id, 'type' => DT_Journeys_Progress::COMMENT_TYPE ] );
+        $this->assertCount( 2, $comments, 'a genuinely changed note should still be recorded' );
+    }
+
+    public function test_resaving_the_same_status_does_not_duplicate_the_activity_log() {
+        list( $journey_id, $stage_ids ) = $this->create_journey( true );
+        DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
+
+        DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete' );
+        $this->assertSame( 1, $this->count_activity( $this->contact_id, 'journeys_stage_status' ) );
+
+        // Backdate the stored date, as if the stage had actually been
+        // completed a while ago, to prove a same-status re-save preserves it
+        // rather than bumping it to today (current_time() alone can't tell
+        // the two code paths apart within a single test run).
+        $raw = get_post_meta( $this->contact_id, DT_Journeys_Progress::META_KEY, true );
+        $raw[ (string) $journey_id ]['stages'][ (string) $stage_ids[0] ]['date'] = '2020-01-01';
+        update_post_meta( $this->contact_id, DT_Journeys_Progress::META_KEY, $raw );
+
+        // Reopening the stage pop-out re-submits whatever status is already
+        // selected -- e.g. just to check on it, or to add/edit a note --
+        // which shouldn't log a second "marked Complete" activity entry or
+        // bump the stage's recorded date to today.
+        $progress = DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete', 'Just a note this time' );
+        $this->assertSame( 1, $this->count_activity( $this->contact_id, 'journeys_stage_status' ), 'an unchanged status should not log a second activity entry' );
+        $this->assertSame( '2020-01-01', $progress['stages'][ (string) $stage_ids[0] ]['date'], 'an unchanged status should not bump the date to today' );
+
+        // An actual status change still logs its own activity entry and
+        // updates the date.
+        $progress = DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'incomplete' );
+        $this->assertSame( 2, $this->count_activity( $this->contact_id, 'journeys_stage_status' ), 'a genuine status change should still be logged' );
+        $this->assertNotSame( '2020-01-01', $progress['stages'][ (string) $stage_ids[0] ]['date'], 'a genuine status change should update the date' );
+    }
+
     public function test_set_stage_status_activity_names_the_stage() {
         list( $journey_id, $stage_ids ) = $this->create_journey( true );
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
