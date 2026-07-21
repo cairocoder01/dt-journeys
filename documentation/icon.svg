@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a86ad"/>
+      <stop offset="100%" stop-color="#31597a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App-icon background -->
+  <rect x="0" y="0" width="128" height="128" rx="24" fill="url(#bg)"/>
+
+  <!-- Journey path connecting three waypoints: not-started -> active -> complete -->
+  <path d="M 26 90 C 44 90, 44 62, 62 62 S 84 34, 102 34"
+        fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"
+        stroke-dasharray="1 11" opacity="0.9"/>
+
+  <!-- Stage 1: not started -->
+  <circle cx="26" cy="90" r="9" fill="#31597a" stroke="#ffffff" stroke-width="4"/>
+
+  <!-- Stage 2: active -->
+  <circle cx="62" cy="62" r="10" fill="#ffffff"/>
+
+  <!-- Stage 3: complete -->
+  <circle cx="102" cy="34" r="11" fill="#4caf50" stroke="#ffffff" stroke-width="3"/>
+  <path d="M 97 34 L 100.5 37.5 L 108 29" fill="none" stroke="#ffffff" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

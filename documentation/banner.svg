@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" width="1544" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3f729b"/>
+      <stop offset="100%" stop-color="#274a63"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1544" height="500" fill="url(#bg)"/>
+
+  <!-- Decorative journey path across the right two-thirds of the banner -->
+  <path d="M 560 400 C 660 400, 660 320, 760 320 S 880 240, 980 240 S 1100 160, 1220 160 S 1340 110, 1440 110"
+        fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"
+        stroke-dasharray="1 16" opacity="0.55"/>
+
+  <!-- Waypoints along the path: not started -> in progress -> stalled -> skipped -> complete -->
+  <circle cx="560" cy="400" r="14" fill="#274a63" stroke="#ffffff" stroke-width="5" opacity="0.95"/>
+  <circle cx="760" cy="320" r="15" fill="#ffffff" opacity="0.95"/>
+  <circle cx="980" cy="240" r="15" fill="#cc4b37" stroke="#ffffff" stroke-width="4" opacity="0.9"/>
+  <circle cx="1220" cy="160" r="15" fill="#9fb1bd" stroke="#ffffff" stroke-width="4" opacity="0.9"/>
+  <circle cx="1440" cy="110" r="18" fill="#4caf50" stroke="#ffffff" stroke-width="4"/>
+  <path d="M 1432 110 L 1437 115 L 1449 101" fill="none" stroke="#ffffff" stroke-width="4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Wordmark -->
+  <text x="90" y="190" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="30"
+        letter-spacing="3" fill="#cfe0ec">DISCIPLE.TOOLS</text>
+  <text x="90" y="292" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="92"
+        font-weight="700" fill="#ffffff">Journeys</text>
+  <text x="90" y="362" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="27"
+        fill="#cfe0ec">Guide every contact and group through their next step</text>
+</svg>
