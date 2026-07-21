@@ -105,20 +105,17 @@ class Dt_Journeys_Endpoints {
 
     /**
      * GET /available/{post_type}/{post_id}
-     * Journeys not currently active on this record, filtered by journey_roles
-     * against the current user's roles (Dispatcher/admin see every journey).
+     * Journeys with no progress yet on this record (active OR completed --
+     * once finished, the record's existing entry is how you go back to it,
+     * not a fresh restart), filtered by journey_roles against the current
+     * user's roles (Dispatcher/admin see every journey).
      */
     public function get_available( WP_REST_Request $request ) {
         $post_type = $request->get_param( 'post_type' );
         $post_id = (int) $request->get_param( 'post_id' );
 
         $progress = DT_Journeys_Progress::get_progress( $post_type, $post_id );
-        $active_ids = [];
-        foreach ( $progress as $journey_id => $entry ) {
-            if ( ( $entry['status'] ?? '' ) === 'active' ) {
-                $active_ids[] = (int) $journey_id;
-            }
-        }
+        $existing_ids = array_map( 'intval', array_keys( $progress ) );
 
         $sees_all = current_user_can( 'manage_dt' );
         $user_roles = wp_get_current_user()->roles ?? [];
@@ -132,7 +129,7 @@ class Dt_Journeys_Endpoints {
         ] );
 
         foreach ( $journey_ids as $journey_id ) {
-            if ( in_array( (int) $journey_id, $active_ids, true ) ) {
+            if ( in_array( (int) $journey_id, $existing_ids, true ) ) {
                 continue;
             }
 

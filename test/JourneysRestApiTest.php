@@ -133,6 +133,20 @@ class JourneysRestApiTest extends TestCase {
         $this->assertContains( $inactive_id, $ids );
     }
 
+    public function test_get_available_excludes_completed_journey() {
+        list( $completed_id ) = $this->create_journey( true, 1 );
+        list( $inactive_id ) = $this->create_journey( true );
+        DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $completed_id );
+        DT_Journeys_Progress::complete_journey( 'contacts', $this->contact_id, $completed_id, true );
+
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/available/contacts/{$this->contact_id}" );
+        $this->assertSame( 200, $response->get_status() );
+
+        $ids = array_column( $response->get_data()['journeys'], 'ID' );
+        $this->assertNotContains( $completed_id, $ids, 'a completed journey should not be offered again -- users go back to the existing entry instead' );
+        $this->assertContains( $inactive_id, $ids );
+    }
+
     public function test_get_available_filters_by_journey_roles_for_non_admin() {
         list( $matching_id ) = $this->create_journey( true, 2, [
             'journey_roles' => [ 'values' => [ [ 'value' => 'multiplier' ] ] ],

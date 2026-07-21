@@ -25,6 +25,22 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+            cursor: pointer;
+            user-select: none;
+
+            .title-group {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 0;
+            }
+
+            .toggle {
+                color: var(--gray-1, #919191);
+                font-size: 0.75em;
+                width: 0.7em;
+                flex: none;
+            }
 
             .name {
                 font-size: 1em;
@@ -33,11 +49,18 @@
             .status {
                 font-size: 0.8em;
                 color: var(--gray-0, #666);
+                flex: none;
 
                 &--completed {
                     color: var(--success-color, #4caf50);
                 }
             }
+        }
+
+        .summary {
+            margin: 0;
+            font-size: 0.85em;
+            color: var(--gray-0, #666);
         }
 
         .stages {
@@ -186,6 +209,29 @@
 }
 
 .dt-journeys-modal-content {
+    .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+
+        .tag-filter {
+            border: 1px solid var(--border-color, #cecece);
+            background: var(--surface-1, #fefefe);
+            border-radius: 999px;
+            padding: 3px 10px;
+            font-size: 0.78em;
+            cursor: pointer;
+            color: var(--gray-0, #666);
+
+            &.active {
+                background: var(--primary-color, #3f729b);
+                border-color: var(--primary-color, #3f729b);
+                color: #fff;
+            }
+        }
+    }
+
     .available-list {
         list-style: none;
         margin: 0;
@@ -203,6 +249,7 @@
     .instructions,
     .attachments,
     .related-fields,
+    .status-control,
     .note {
         margin-bottom: 16px;
 
@@ -221,6 +268,7 @@
         gap: 1rem;
     }
 
+    .status-control,
     .note {
         label {
             display: block;
@@ -228,11 +276,15 @@
             color: var(--gray-0, #666);
             margin-bottom: 4px;
         }
+    }
 
-        .note-input {
-            width: 100%;
-            min-height: 60px;
-            box-sizing: border-box;
-        }
+    .status-control .status-select {
+        width: 100%;
+    }
+
+    .note .note-input {
+        width: 100%;
+        min-height: 60px;
+        box-sizing: border-box;
     }
 }

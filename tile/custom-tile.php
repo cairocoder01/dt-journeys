@@ -88,6 +88,10 @@ class Dt_Journeys_Tile {
                 'instructions'     => __( 'Instructions', 'dt-journeys' ),
                 'attachments'      => __( 'Attachments', 'dt-journeys' ),
                 'related_fields'   => __( 'Related Fields', 'dt-journeys' ),
+                'status_label'     => __( 'Status', 'dt-journeys' ),
+                'next_stage'       => __( 'Next: %s', 'dt-journeys' ),
+                'stages_complete'  => __( '%1$d of %2$d complete', 'dt-journeys' ),
+                'all_categories'   => __( 'All', 'dt-journeys' ),
             ],
         ] );
     }
@@ -116,6 +120,7 @@ class Dt_Journeys_Tile {
             -->
             <dt-modal id="dt-journeys-add-modal" hidebutton>
                 <div slot="content" class="dt-journeys-modal-content">
+                    <div class="category-filters"></div>
                     <ul class="available-list"></ul>
                 </div>
             </dt-modal>

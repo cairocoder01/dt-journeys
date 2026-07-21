@@ -49,7 +49,22 @@
 
     // ── Rendering ──────────────────────────────────────────────────────────
 
+    // Journeys are collapsed by default (only the summary line shows) since a
+    // record can accumulate several of them and each one's full stage list is
+    // tall. Expansion state is kept here, keyed by journey ID, so it survives
+    // the re-renders that follow every data reload/toggle.
+    var expandedJourneys = {};
+    var lastData = null;
+
+    function toggleJourney(journeyId) {
+        expandedJourneys[journeyId] = !expandedJourneys[journeyId];
+        if (lastData) {
+            render(lastData);
+        }
+    }
+
     function render(data) {
+        lastData = data;
         container.innerHTML = '';
 
         if (data.group_journeys && data.group_journeys.length) {
@@ -94,6 +109,8 @@
         return wrap;
     }
 
+    var STAGE_STATUS_KEYS = ['not_started', 'started', 'paused', 'incomplete', 'complete', 'skipped'];
+
     function statusLabel(status) {
         var map = {
             not_started: t('not_started', 'Not Started'),
@@ -108,17 +125,31 @@
 
     function renderJourney(journey, readonly) {
         var displayMode = journey.is_sequential ? 'timeline' : journey.display_type || 'list';
+        var expanded = !!expandedJourneys[journey.ID];
 
         var wrap = document.createElement('div');
         wrap.className = 'journey journey--' + displayMode + (readonly ? ' journey--readonly' : '');
 
         var header = document.createElement('div');
         header.className = 'header';
+        header.addEventListener('click', function () {
+            toggleJourney(journey.ID);
+        });
+
+        var titleGroup = document.createElement('div');
+        titleGroup.className = 'title-group';
+
+        var toggle = document.createElement('span');
+        toggle.className = 'toggle';
+        toggle.setAttribute('aria-hidden', 'true');
+        toggle.textContent = expanded ? '▾' : '▸';
+        titleGroup.appendChild(toggle);
 
         var title = document.createElement('strong');
         title.className = 'name';
         title.textContent = journey.name;
-        header.appendChild(title);
+        titleGroup.appendChild(title);
+        header.appendChild(titleGroup);
 
         var statusEl = document.createElement('span');
         statusEl.className = 'status' + (journey.status === 'completed' ? ' status--completed' : '');
@@ -127,6 +158,14 @@
             : t('started_on', 'Started') + ' ' + (journey.started || '');
         header.appendChild(statusEl);
         wrap.appendChild(header);
+
+        if (!expanded) {
+            var summary = renderJourneySummary(journey);
+            if (summary) {
+                wrap.appendChild(summary);
+            }
+            return wrap;
+        }
 
         var stagesWrap = document.createElement('div');
         stagesWrap.className = 'stages';
@@ -140,13 +179,48 @@
             completeBtn.type = 'button';
             completeBtn.className = 'button small complete-btn';
             completeBtn.textContent = t('mark_complete', 'Mark Journey Complete');
-            completeBtn.addEventListener('click', function () {
+            completeBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
                 onMarkJourneyComplete(journey);
             });
             wrap.appendChild(completeBtn);
         }
 
         return wrap;
+    }
+
+    // Collapsed-state summary: the next actionable stage for a sequential
+    // journey, or a simple complete-count for a non-sequential one (there's
+    // no single "next" stage to point at when stages can be done in any
+    // order).
+    function renderJourneySummary(journey) {
+        var stages = journey.stages || [];
+        if (!stages.length) {
+            return null;
+        }
+
+        var text;
+        if (journey.is_sequential) {
+            var next = stages.filter(function (stage) {
+                return stage.status !== 'complete' && stage.status !== 'skipped';
+            })[0];
+            if (!next) {
+                return null;
+            }
+            text = t('next_stage', 'Next: %s').replace('%s', next.name);
+        } else {
+            var doneCount = stages.filter(function (stage) {
+                return stage.status === 'complete';
+            }).length;
+            text = t('stages_complete', '%1$d of %2$d complete')
+                .replace('%1$d', doneCount)
+                .replace('%2$d', stages.length);
+        }
+
+        var p = document.createElement('p');
+        p.className = 'summary';
+        p.textContent = text;
+        return p;
     }
 
     function renderStage(journey, stage, readonly) {
@@ -334,39 +408,102 @@
 
     var addModal = document.getElementById('dt-journeys-add-modal');
     var addModalList = addModal ? addModal.querySelector('.available-list') : null;
+    var addModalFilters = addModal ? addModal.querySelector('.category-filters') : null;
+    var activeCategory = null;
 
     if (addModal) {
         addModal.title = t('add_journey', 'Add a Journey');
     }
 
+    function categoryValue(cat) {
+        return (cat && cat.value) || cat;
+    }
+
+    function renderCategoryFilters(journeys) {
+        if (!addModalFilters) {
+            return;
+        }
+        addModalFilters.innerHTML = '';
+
+        var categories = [];
+        journeys.forEach(function (journey) {
+            (journey.category || []).forEach(function (cat) {
+                var val = categoryValue(cat);
+                if (val && categories.indexOf(val) === -1) {
+                    categories.push(val);
+                }
+            });
+        });
+        if (!categories.length) {
+            return;
+        }
+        categories.sort();
+
+        function makeTag(value, label) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'tag-filter' + (activeCategory === value ? ' active' : '');
+            btn.textContent = label;
+            btn.addEventListener('click', function () {
+                activeCategory = value;
+                renderCategoryFilters(journeys);
+                renderAvailableList(journeys);
+            });
+            return btn;
+        }
+
+        addModalFilters.appendChild(makeTag(null, t('all_categories', 'All')));
+        categories.forEach(function (cat) {
+            addModalFilters.appendChild(makeTag(cat, cat));
+        });
+    }
+
+    function renderAvailableList(journeys) {
+        var filtered = activeCategory
+            ? journeys.filter(function (journey) {
+                return (journey.category || []).some(function (cat) {
+                    return categoryValue(cat) === activeCategory;
+                });
+            })
+            : journeys;
+
+        addModalList.innerHTML = '';
+        if (!filtered.length) {
+            addModalList.innerHTML = '<li>' + esc(t('no_available', 'No journeys available to add.')) + '</li>';
+            return;
+        }
+        filtered.forEach(function (journey) {
+            var li = document.createElement('li');
+
+            var label = document.createElement('span');
+            label.textContent = journey.name;
+            li.appendChild(label);
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'button tiny';
+            btn.textContent = t('start', 'Start');
+            btn.addEventListener('click', function () {
+                startJourney(journey.ID).then(closeAddModal);
+            });
+            li.appendChild(btn);
+
+            addModalList.appendChild(li);
+        });
+    }
+
     function openAddJourneyModal() {
+        activeCategory = null;
+        if (addModalFilters) {
+            addModalFilters.innerHTML = '';
+        }
         addModalList.innerHTML = '<li>' + esc(t('loading', 'Loading…')) + '</li>';
         addModal.dispatchEvent(new CustomEvent('open'));
 
         apiFetch('available/' + recordPath).then(function (data) {
-            addModalList.innerHTML = '';
-            if (!data.journeys || !data.journeys.length) {
-                addModalList.innerHTML = '<li>' + esc(t('no_available', 'No journeys available to add.')) + '</li>';
-                return;
-            }
-            data.journeys.forEach(function (journey) {
-                var li = document.createElement('li');
-
-                var label = document.createElement('span');
-                label.textContent = journey.name;
-                li.appendChild(label);
-
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'button tiny';
-                btn.textContent = t('start', 'Start');
-                btn.addEventListener('click', function () {
-                    startJourney(journey.ID).then(closeAddModal);
-                });
-                li.appendChild(btn);
-
-                addModalList.appendChild(li);
-            });
+            var journeys = data.journeys || [];
+            renderCategoryFilters(journeys);
+            renderAvailableList(journeys);
         });
     }
 
@@ -505,6 +642,28 @@
             body.appendChild(attachments);
         }
 
+        // Lets a status set earlier be revisited/corrected here, rather than
+        // only being settable once via the tile's quick-action buttons (which
+        // disappear once a stage is no longer not_started).
+        var statusWrap = document.createElement('div');
+        statusWrap.className = 'status-control';
+        var statusLabelEl = document.createElement('label');
+        statusLabelEl.textContent = t('status_label', 'Status');
+        var statusSelect = document.createElement('select');
+        statusSelect.className = 'status-select';
+        STAGE_STATUS_KEYS.forEach(function (key) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = statusLabel(key);
+            if (key === stage.status) {
+                opt.selected = true;
+            }
+            statusSelect.appendChild(opt);
+        });
+        statusWrap.appendChild(statusLabelEl);
+        statusWrap.appendChild(statusSelect);
+        body.appendChild(statusWrap);
+
         var fieldRefs = {};
         renderRelatedFields(journey, stage, body, fieldRefs);
 
@@ -521,7 +680,7 @@
 
         currentStageSave = function () {
             return flushFieldChanges(fieldRefs).then(function () {
-                return setStageStatus(journey.ID, stage.ID, stage.status, noteInput.value);
+                return setStageStatus(journey.ID, stage.ID, statusSelect.value, noteInput.value);
             });
         };
 
