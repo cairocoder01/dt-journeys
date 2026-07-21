@@ -104,6 +104,30 @@ class Dt_Journeys_Tile {
             <button id="dt-journeys-add-btn" type="button" class="button">
                 <?php esc_html_e( 'Add a Journey', 'dt-journeys' ); ?>
             </button>
+
+            <!--
+            Both modals below are the theme's real <dt-modal> component,
+            rendered here (rather than built up via document.createElement in
+            JS) since their shells are entirely static -- only the stage
+            modal's title and the content each wraps are set dynamically.
+            `hidebutton`/`submitbutton` are dt-modal's own boolean props;
+            Lit's default attribute mapping is the lowercased property name
+            (no hyphen), not `hide-button`.
+            -->
+            <dt-modal id="dt-journeys-add-modal" hidebutton>
+                <div slot="content" class="dt-journeys-modal-content">
+                    <ul class="available-list"></ul>
+                </div>
+            </dt-modal>
+
+            <dt-modal id="dt-journeys-stage-modal" hidebutton submitbutton>
+                <div slot="content" class="dt-journeys-modal-content">
+                    <div class="body"></div>
+                </div>
+                <button type="button" slot="submit-button" id="dt-journeys-stage-save" class="button small">
+                    <?php esc_html_e( 'Save', 'dt-journeys' ); ?>
+                </button>
+            </dt-modal>
         </div>
         <?php
     }

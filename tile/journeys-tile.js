@@ -153,6 +153,16 @@
         var row = document.createElement('div');
         row.className = 'stage stage--' + stage.status;
 
+        var rail = document.createElement('div');
+        rail.className = 'rail';
+        var marker = document.createElement('span');
+        marker.className = 'marker';
+        rail.appendChild(marker);
+        row.appendChild(rail);
+
+        var content = document.createElement('div');
+        content.className = 'content';
+
         var main = document.createElement('div');
         main.className = 'main';
 
@@ -170,14 +180,17 @@
             desc.textContent = stage.description;
             main.appendChild(desc);
         }
-        row.appendChild(main);
+        content.appendChild(main);
 
         var statusEl = document.createElement('span');
         statusEl.className = 'status';
         statusEl.textContent = statusLabel(stage.status) + (stage.date ? ' – ' + stage.date : '');
-        row.appendChild(statusEl);
+        content.appendChild(statusEl);
 
-        if (!readonly) {
+        // Once a stage's status has been set, the action buttons give way to
+        // just the status/date above -- only a not-yet-addressed stage shows
+        // Complete/Skip/Stalled.
+        if (!readonly && stage.status === 'not_started') {
             var actions = document.createElement('span');
             actions.className = 'actions';
 
@@ -192,8 +205,10 @@
                 setStageStatus(journey.ID, stage.ID, 'incomplete');
             }));
 
-            row.appendChild(actions);
+            content.appendChild(actions);
         }
+
+        row.appendChild(content);
 
         return row;
     }
@@ -310,66 +325,47 @@
 
     // ── "Add a Journey" modal ──────────────────────────────────────────────
     //
-    // Both modals use the theme's real <dt-modal> web component (already
-    // loaded globally) rather than a hand-rolled overlay, so backdrop,
-    // centering, header/title, and the close (×) button, Escape-to-close,
-    // and click-outside-to-close all come from the same component every
-    // other modal on the site uses.
+    // Both modals are the theme's real <dt-modal> web component, rendered
+    // as static markup by the PHP tile (see custom-tile.php) rather than
+    // built up here -- their shells never change, only the content each
+    // wraps and (for the stage modal) the title. That also means they're
+    // already in the DOM and fully rendered well before any open action can
+    // happen, so there's no need to wait on Lit's async first render here.
 
-    var addModal;
-    var addModalList;
+    var addModal = document.getElementById('dt-journeys-add-modal');
+    var addModalList = addModal ? addModal.querySelector('.available-list') : null;
 
-    function ensureAddModal() {
-        if (addModal) {
-            return addModal.updateComplete;
-        }
-        addModal = document.createElement('dt-modal');
-        addModal.hideButton = true;
+    if (addModal) {
         addModal.title = t('add_journey', 'Add a Journey');
-
-        var content = document.createElement('div');
-        content.className = 'dt-journeys-modal-content';
-        content.setAttribute('slot', 'content');
-        addModalList = document.createElement('ul');
-        addModalList.className = 'available-list';
-        content.appendChild(addModalList);
-        addModal.appendChild(content);
-
-        document.body.appendChild(addModal);
-        // Lit renders asynchronously -- the shadow DOM's <dialog> the 'open'
-        // event opens doesn't exist until the element's first update completes.
-        return addModal.updateComplete;
     }
 
     function openAddJourneyModal() {
-        ensureAddModal().then(function () {
-            addModalList.innerHTML = '<li>' + esc(t('loading', 'Loading…')) + '</li>';
-            addModal.dispatchEvent(new CustomEvent('open'));
+        addModalList.innerHTML = '<li>' + esc(t('loading', 'Loading…')) + '</li>';
+        addModal.dispatchEvent(new CustomEvent('open'));
 
-            apiFetch('available/' + recordPath).then(function (data) {
-                addModalList.innerHTML = '';
-                if (!data.journeys || !data.journeys.length) {
-                    addModalList.innerHTML = '<li>' + esc(t('no_available', 'No journeys available to add.')) + '</li>';
-                    return;
-                }
-                data.journeys.forEach(function (journey) {
-                    var li = document.createElement('li');
+        apiFetch('available/' + recordPath).then(function (data) {
+            addModalList.innerHTML = '';
+            if (!data.journeys || !data.journeys.length) {
+                addModalList.innerHTML = '<li>' + esc(t('no_available', 'No journeys available to add.')) + '</li>';
+                return;
+            }
+            data.journeys.forEach(function (journey) {
+                var li = document.createElement('li');
 
-                    var label = document.createElement('span');
-                    label.textContent = journey.name;
-                    li.appendChild(label);
+                var label = document.createElement('span');
+                label.textContent = journey.name;
+                li.appendChild(label);
 
-                    var btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'button tiny';
-                    btn.textContent = t('start', 'Start');
-                    btn.addEventListener('click', function () {
-                        startJourney(journey.ID).then(closeAddModal);
-                    });
-                    li.appendChild(btn);
-
-                    addModalList.appendChild(li);
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'button tiny';
+                btn.textContent = t('start', 'Start');
+                btn.addEventListener('click', function () {
+                    startJourney(journey.ID).then(closeAddModal);
                 });
+                li.appendChild(btn);
+
+                addModalList.appendChild(li);
             });
         });
     }
@@ -380,49 +376,23 @@
         }
     }
 
-    if (addBtn) {
+    if (addBtn && addModal) {
         addBtn.addEventListener('click', openAddJourneyModal);
     }
 
     // ── Stage pop-out modal ────────────────────────────────────────────────
 
-    var stageModal;
-    var stageModalBody;
-    var stageModalSaveBtn;
+    var stageModal = document.getElementById('dt-journeys-stage-modal');
+    var stageModalBody = stageModal ? stageModal.querySelector('.body') : null;
+    var stageModalSaveBtn = document.getElementById('dt-journeys-stage-save');
     var currentStageSave;
 
-    function ensureStageModal() {
-        if (stageModal) {
-            return stageModal.updateComplete;
-        }
-        stageModal = document.createElement('dt-modal');
-        stageModal.hideButton = true;
-        stageModal.submitButton = true;
-
-        var content = document.createElement('div');
-        content.className = 'dt-journeys-modal-content';
-        content.setAttribute('slot', 'content');
-        stageModalBody = document.createElement('div');
-        stageModalBody.className = 'body';
-        content.appendChild(stageModalBody);
-        stageModal.appendChild(content);
-
-        stageModalSaveBtn = document.createElement('button');
-        stageModalSaveBtn.type = 'button';
-        stageModalSaveBtn.className = 'button small';
-        stageModalSaveBtn.setAttribute('slot', 'submit-button');
-        stageModalSaveBtn.textContent = t('save_note', 'Save');
+    if (stageModalSaveBtn) {
         stageModalSaveBtn.addEventListener('click', function () {
             if (currentStageSave) {
                 currentStageSave().then(closeStageModal);
             }
         });
-        stageModal.appendChild(stageModalSaveBtn);
-
-        document.body.appendChild(stageModal);
-        // Lit renders asynchronously -- the shadow DOM's <dialog> the 'open'
-        // event opens doesn't exist until the element's first update completes.
-        return stageModal.updateComplete;
     }
 
     function closeStageModal() {
@@ -458,7 +428,7 @@
         return wrap;
     }
 
-    function renderRelatedFields(journey, stage, body) {
+    function renderRelatedFields(journey, stage, body, fieldRefs) {
         var relatedFields = stage.related_fields || [];
         if (!relatedFields.length) {
             return;
@@ -480,52 +450,82 @@
                 el.className = 'field';
                 el.innerHTML = data.fields[key];
                 fieldsBody.appendChild(el);
+
+                // These fields normally auto-save on change, but the note
+                // field can't (it needs an explicit Save action), so for
+                // consistency these are committed on Save too -- see
+                // flushFieldChanges(), which reads the current value straight
+                // off the element rather than tracking edits as they happen.
+                var fieldEl = el.querySelector('[id="' + key + '"]');
+                if (fieldEl) {
+                    fieldRefs[key] = { el: fieldEl, original: fieldEl.value };
+                }
             });
-            if (window.componentService && typeof window.componentService.enableAutoSave === 'function') {
-                window.componentService.enableAutoSave();
-            }
         });
     }
 
+    // Commit each related field's current value (compared against the value
+    // it had when the modal opened) through the theme's own change handler --
+    // the same one auto-save uses -- so every field type serializes exactly
+    // like it would during live auto-save.
+    function flushFieldChanges(fieldRefs) {
+        var componentService = window.componentService;
+        var fieldKeys = Object.keys(fieldRefs || {});
+        if (!fieldKeys.length || !componentService) {
+            return Promise.resolve();
+        }
+        return Promise.all(fieldKeys.map(function (key) {
+            var ref = fieldRefs[key];
+            return componentService.handleChangeEvent({
+                target: ref.el,
+                detail: { field: key, newValue: ref.el.value, oldValue: ref.original },
+            });
+        }));
+    }
+
     function openStageModal(journey, stage) {
-        ensureStageModal().then(function () {
-            stageModal.title = stage.name;
+        if (!stageModal) {
+            return;
+        }
+        stageModal.title = stage.name;
 
-            var body = stageModalBody;
-            body.innerHTML = '';
+        var body = stageModalBody;
+        body.innerHTML = '';
 
-            if (stage.instructions) {
-                var instr = document.createElement('div');
-                instr.className = 'instructions';
-                instr.innerHTML = '<h4>' + esc(t('instructions', 'Instructions')) + '</h4><div>' +
-                    esc(stage.instructions).replace(/\n/g, '<br>') + '</div>';
-                body.appendChild(instr);
-            }
+        if (stage.instructions) {
+            var instr = document.createElement('div');
+            instr.className = 'instructions';
+            instr.innerHTML = '<h4>' + esc(t('instructions', 'Instructions')) + '</h4><div>' +
+                esc(stage.instructions).replace(/\n/g, '<br>') + '</div>';
+            body.appendChild(instr);
+        }
 
-            var attachments = renderStageAttachments(stage);
-            if (attachments) {
-                body.appendChild(attachments);
-            }
+        var attachments = renderStageAttachments(stage);
+        if (attachments) {
+            body.appendChild(attachments);
+        }
 
-            renderRelatedFields(journey, stage, body);
+        var fieldRefs = {};
+        renderRelatedFields(journey, stage, body, fieldRefs);
 
-            var noteWrap = document.createElement('div');
-            noteWrap.className = 'note';
-            var noteLabel = document.createElement('label');
-            noteLabel.textContent = t('note_placeholder', 'Add a note (optional)…');
-            var noteInput = document.createElement('textarea');
-            noteInput.className = 'note-input';
-            noteInput.value = stage.note || '';
-            noteWrap.appendChild(noteLabel);
-            noteWrap.appendChild(noteInput);
-            body.appendChild(noteWrap);
+        var noteWrap = document.createElement('div');
+        noteWrap.className = 'note';
+        var noteLabel = document.createElement('label');
+        noteLabel.textContent = t('note_placeholder', 'Add a note (optional)…');
+        var noteInput = document.createElement('textarea');
+        noteInput.className = 'note-input';
+        noteInput.value = stage.note || '';
+        noteWrap.appendChild(noteLabel);
+        noteWrap.appendChild(noteInput);
+        body.appendChild(noteWrap);
 
-            currentStageSave = function () {
+        currentStageSave = function () {
+            return flushFieldChanges(fieldRefs).then(function () {
                 return setStageStatus(journey.ID, stage.ID, stage.status, noteInput.value);
-            };
+            });
+        };
 
-            stageModal.dispatchEvent(new CustomEvent('open'));
-        });
+        stageModal.dispatchEvent(new CustomEvent('open'));
     }
 
     // ── Init ───────────────────────────────────────────────────────────────

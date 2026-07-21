@@ -88,7 +88,11 @@ class JourneysProgressTest extends TestCase {
 
         $comments = get_comments( [ 'post_id' => $this->contact_id, 'type' => DT_Journeys_Progress::COMMENT_TYPE ] );
         $this->assertCount( 1, $comments );
-        $this->assertSame( 'Finished the first stage', $comments[0]->comment_content );
+        // The comment text is prefixed with the stage name, and the journey/stage
+        // IDs are also stored as comment meta, so the note's origin is never lost.
+        $this->assertSame( 'Stage 1: Finished the first stage', $comments[0]->comment_content );
+        $this->assertSame( (string) $journey_id, get_comment_meta( $comments[0]->comment_ID, 'journeys_journey_id', true ) );
+        $this->assertSame( (string) $stage_ids[0], get_comment_meta( $comments[0]->comment_ID, 'journeys_stage_id', true ) );
     }
 
     public function test_invalid_stage_status_returns_error() {

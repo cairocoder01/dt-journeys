@@ -211,7 +211,16 @@ class DT_Journeys_Progress {
         self::log_activity( $post_type, $post_id, 'journeys_stage_status', $journey_id, '', $status, $old_status, $stage_id );
 
         if ( '' !== $note ) {
-            DT_Posts::add_post_comment( $post_type, $post_id, $note, self::COMMENT_TYPE );
+            $stage_post = DT_Posts::get_post( 'journey_stages', $stage_id );
+            $stage_name = is_wp_error( $stage_post ) ? '' : ( $stage_post['name'] ?? $stage_post['title'] ?? '' );
+            $comment_html = '' !== $stage_name ? $stage_name . ': ' . $note : $note;
+
+            DT_Posts::add_post_comment( $post_type, $post_id, $comment_html, self::COMMENT_TYPE, [
+                'comment_meta' => [
+                    'journeys_journey_id' => $journey_id,
+                    'journeys_stage_id'   => $stage_id,
+                ],
+            ] );
         }
 
         if ( self::all_stages_complete( $journey_id, $progress[ $key ]['stages'] ) && 'completed' !== $progress[ $key ]['status'] ) {

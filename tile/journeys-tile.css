@@ -1,4 +1,8 @@
 .dt-journeys-tile {
+    /* Lets the stage layout below respond to the tile's own column width
+       (almost always narrow, sidebar or not) rather than the viewport. */
+    container: dt-journeys / inline-size;
+
     .msg {
         color: var(--gray-1, #919191);
         font-style: italic;
@@ -14,11 +18,6 @@
 
         &--readonly {
             background: var(--surface-2, #f5f5f5);
-        }
-
-        &--timeline .stages {
-            border-left: 2px solid var(--border-color, #cecece);
-            padding-left: 10px;
         }
 
         .header {
@@ -44,25 +43,65 @@
         .stages {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 1rem;
         }
 
-        .stage {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-            padding: 6px 8px;
-            border-radius: 4px;
-            background: var(--surface-2, #f5f5f5);
+        .complete-btn {
+            margin-top: 0.5rem;
+        }
+    }
 
-            &--complete {
-                background: color-mix(in srgb, var(--success-color, #4caf50) 15%, white);
+    .group-rollup {
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed var(--border-color, #cecece);
+
+        h4 {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gray-1, #919191);
+            margin: 0 0 8px;
+        }
+
+        .group-name {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+    }
+
+    /* Small/mobile stage layout -- the tile's column is almost always this
+       narrow today. A wider variant can be added later as another
+       @container rule alongside this one. */
+    @container dt-journeys (max-width: 480px) {
+        .journey .stage {
+            display: grid;
+            grid-template-columns: 1.25rem 1fr;
+            column-gap: 0.65rem;
+
+            .rail {
+                position: relative;
+                display: flex;
+                justify-content: center;
+
+                .marker {
+                    width: 0.85rem;
+                    height: 0.85rem;
+                    margin-top: 0.2rem;
+                    border-radius: 50%;
+                    border: 2px solid var(--border-color, #cecece);
+                    background: var(--surface-1, #fefefe);
+                    z-index: 1;
+                }
             }
 
-            &--skipped {
-                opacity: 0.6;
+            .content {
+                display: flex;
+                flex-direction: column;
+                gap: 0.35rem;
+                min-width: 0;
+                padding-bottom: 0.25rem;
             }
 
             .main {
@@ -88,37 +127,56 @@
             .status {
                 font-size: 0.78em;
                 color: var(--gray-0, #666);
-                white-space: nowrap;
             }
 
             .actions {
                 display: flex;
-                gap: 4px;
+                gap: 0.35rem;
             }
         }
 
-        .complete-btn {
-            margin-top: 4px;
-        }
-    }
-
-    .group-rollup {
-        margin-bottom: 14px;
-        padding-bottom: 10px;
-        border-bottom: 1px dashed var(--border-color, #cecece);
-
-        h4 {
-            font-size: 0.8em;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--gray-1, #919191);
-            margin: 0 0 8px;
+        /* `&--modifier` string-concatenation only works when the nesting
+           parent is a single simple selector -- ".journey .stage" is a
+           complex (multi-compound) selector, so these need to be spelled
+           out in full rather than nested with `&`. */
+        .journey .stage--complete .rail .marker {
+            background: var(--success-color, #4caf50);
+            border-color: var(--success-color, #4caf50);
         }
 
-        .group-name {
-            font-weight: 600;
-            font-size: 0.9em;
-            margin-bottom: 4px;
+        .journey .stage--skipped .rail .marker {
+            background: var(--gray-2, #b8b8b8);
+            border-color: var(--gray-2, #b8b8b8);
+        }
+
+        .journey .stage--incomplete .rail .marker {
+            background: var(--caution-color, #f2c962);
+            border-color: var(--caution-color, #f2c962);
+        }
+
+        .journey .stage--started .rail .marker,
+        .journey .stage--paused .rail .marker {
+            background: var(--primary-color, #3f729b);
+            border-color: var(--primary-color, #3f729b);
+        }
+
+        /* Sequential journeys connect each stage's marker with a vertical
+           line running down to the next one. */
+        .journey--timeline .stage {
+            .rail::before {
+                content: '';
+                position: absolute;
+                top: 0.9rem;
+                bottom: -1rem;
+                left: 50%;
+                width: 2px;
+                background: var(--border-color, #cecece);
+                transform: translateX(-50%);
+            }
+
+            &:last-child .rail::before {
+                display: none;
+            }
         }
     }
 }
@@ -155,6 +213,12 @@
             color: var(--gray-1, #919191);
             margin: 0 0 8px;
         }
+    }
+
+    .related-fields .fields-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .note {
