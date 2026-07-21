@@ -81,7 +81,7 @@ class JourneysRestApiTest extends TestCase {
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
         DT_Journeys_Progress::set_stage_status( 'contacts', $this->contact_id, $journey_id, $stage_ids[0], 'complete' );
 
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/record/contacts/{$this->contact_id}" );
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}" );
         $this->assertSame( 200, $response->get_status() );
 
         $data = $response->get_data();
@@ -111,7 +111,7 @@ class JourneysRestApiTest extends TestCase {
         list( $journey_id ) = $this->create_journey( true );
         DT_Journeys_Progress::start_journey( 'groups', $group['ID'], $journey_id );
 
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/record/contacts/{$this->contact_id}" );
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}" );
         $this->assertSame( 200, $response->get_status() );
 
         $data = $response->get_data();
@@ -125,7 +125,7 @@ class JourneysRestApiTest extends TestCase {
         list( $inactive_id ) = $this->create_journey( true );
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $active_id );
 
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/available/contacts/{$this->contact_id}" );
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
         $this->assertSame( 200, $response->get_status() );
 
         $ids = array_column( $response->get_data()['journeys'], 'ID' );
@@ -139,7 +139,7 @@ class JourneysRestApiTest extends TestCase {
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $completed_id );
         DT_Journeys_Progress::complete_journey( 'contacts', $this->contact_id, $completed_id, true );
 
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/available/contacts/{$this->contact_id}" );
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
         $this->assertSame( 200, $response->get_status() );
 
         $ids = array_column( $response->get_data()['journeys'], 'ID' );
@@ -161,7 +161,7 @@ class JourneysRestApiTest extends TestCase {
         DT_Posts::update_post( 'contacts', $this->contact_id, [ 'assigned_to' => $user_id ], true, false );
         wp_set_current_user( $user_id );
 
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/available/contacts/{$this->contact_id}" );
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
         $this->assertSame( 200, $response->get_status() );
 
         $ids = array_column( $response->get_data()['journeys'], 'ID' );
@@ -172,7 +172,7 @@ class JourneysRestApiTest extends TestCase {
     public function test_start_journey_via_rest() {
         list( $journey_id ) = $this->create_journey( true );
 
-        $response = $this->dispatch( 'POST', "/dt-journeys/v1/start/contacts/{$this->contact_id}", [
+        $response = $this->dispatch( 'POST', "/dt-journeys/v1/contacts/{$this->contact_id}/start", [
             'journey_id' => $journey_id,
         ] );
         $this->assertSame( 200, $response->get_status() );
@@ -186,7 +186,7 @@ class JourneysRestApiTest extends TestCase {
         list( $journey_id, $stage_ids ) = $this->create_journey( true );
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
 
-        $response = $this->dispatch( 'POST', "/dt-journeys/v1/stage-status/contacts/{$this->contact_id}", [
+        $response = $this->dispatch( 'POST', "/dt-journeys/v1/contacts/{$this->contact_id}/stage-status", [
             'journey_id' => $journey_id,
             'stage_id'   => $stage_ids[0],
             'status'     => 'complete',
@@ -203,7 +203,7 @@ class JourneysRestApiTest extends TestCase {
         list( $journey_id, $stage_ids ) = $this->create_journey( true, 3 );
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
 
-        $response = $this->dispatch( 'POST', "/dt-journeys/v1/complete/contacts/{$this->contact_id}", [
+        $response = $this->dispatch( 'POST', "/dt-journeys/v1/contacts/{$this->contact_id}/complete", [
             'journey_id' => $journey_id,
             'force'      => true,
         ] );
@@ -220,7 +220,7 @@ class JourneysRestApiTest extends TestCase {
         list( $journey_id ) = $this->create_journey( true );
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
 
-        $response = $this->dispatch( 'DELETE', "/dt-journeys/v1/remove/contacts/{$this->contact_id}", [
+        $response = $this->dispatch( 'DELETE', "/dt-journeys/v1/contacts/{$this->contact_id}/remove", [
             'journey_id' => $journey_id,
         ] );
         $this->assertSame( 200, $response->get_status() );
@@ -243,7 +243,7 @@ class JourneysRestApiTest extends TestCase {
         }, 20, 2 );
         wp_cache_delete( 'contacts_field_settings' );
 
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/stage-fields/contacts/{$this->contact_id}", [
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/stage-fields", [
             'field_keys' => [ 'overall_status' ],
         ] );
         $this->assertSame( 200, $response->get_status() );
@@ -253,7 +253,7 @@ class JourneysRestApiTest extends TestCase {
     }
 
     public function test_get_stage_fields_returns_rendered_field_html() {
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/stage-fields/contacts/{$this->contact_id}", [
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/stage-fields", [
             'field_keys' => [ 'overall_status' ],
         ] );
         $this->assertSame( 200, $response->get_status() );
@@ -267,7 +267,7 @@ class JourneysRestApiTest extends TestCase {
         $user_id = $this->factory()->user->create( [ 'role' => 'subscriber' ] );
         wp_set_current_user( $user_id );
 
-        $response = $this->dispatch( 'GET', "/dt-journeys/v1/record/contacts/{$this->contact_id}" );
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}" );
         $this->assertSame( 403, $response->get_status() );
     }
 }

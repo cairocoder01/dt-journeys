@@ -24,45 +24,47 @@ class Dt_Journeys_Endpoints {
 
     public function add_api_routes() {
         $namespace = 'dt-journeys/v1';
+        // Resource first, action last -- matches the shape of the theme's own
+        // dt-posts/v2/{post_type}/{id}/{sub-resource} endpoints.
         $record = '(?P<post_type>contacts|groups)/(?P<post_id>\d+)';
 
-        register_rest_route( $namespace, "/record/$record", [
+        register_rest_route( $namespace, "/$record", [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [ $this, 'get_record' ],
             'permission_callback' => [ $this, 'can_view' ],
         ] );
 
-        register_rest_route( $namespace, "/available/$record", [
+        register_rest_route( $namespace, "/$record/available", [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [ $this, 'get_available' ],
             'permission_callback' => [ $this, 'can_view' ],
         ] );
 
-        register_rest_route( $namespace, "/stage-fields/$record", [
+        register_rest_route( $namespace, "/$record/stage-fields", [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [ $this, 'get_stage_fields' ],
             'permission_callback' => [ $this, 'can_update' ],
         ] );
 
-        register_rest_route( $namespace, "/start/$record", [
+        register_rest_route( $namespace, "/$record/start", [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [ $this, 'start_journey' ],
             'permission_callback' => [ $this, 'can_update' ],
         ] );
 
-        register_rest_route( $namespace, "/stage-status/$record", [
+        register_rest_route( $namespace, "/$record/stage-status", [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [ $this, 'set_stage_status' ],
             'permission_callback' => [ $this, 'can_update' ],
         ] );
 
-        register_rest_route( $namespace, "/complete/$record", [
+        register_rest_route( $namespace, "/$record/complete", [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [ $this, 'complete_journey' ],
             'permission_callback' => [ $this, 'can_update' ],
         ] );
 
-        register_rest_route( $namespace, "/remove/$record", [
+        register_rest_route( $namespace, "/$record/remove", [
             'methods'             => WP_REST_Server::DELETABLE,
             'callback'            => [ $this, 'remove_journey' ],
             'permission_callback' => [ $this, 'can_update' ],
@@ -78,7 +80,7 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
-     * GET /record/{post_type}/{post_id}
+     * GET /{post_type}/{post_id}
      * A record's attached journeys + progress. For contacts, also a
      * read-only roll-up of journeys active on the contact's groups.
      */
@@ -110,7 +112,7 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
-     * GET /available/{post_type}/{post_id}
+     * GET /{post_type}/{post_id}/available
      * Journeys with no progress yet on this record (active OR completed --
      * once finished, the record's existing entry is how you go back to it,
      * not a fresh restart), filtered by journey_roles against the current
@@ -166,7 +168,7 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
-     * GET /stage-fields/{post_type}/{post_id}?field_keys[]=...
+     * GET /{post_type}/{post_id}/stage-fields?field_keys[]=...
      * Pre-rendered field HTML (via the theme's own render_field_for_display())
      * for the requested field keys, for the stage pop-out's inline editor.
      */
@@ -205,7 +207,7 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
-     * POST /start/{post_type}/{post_id} { journey_id }
+     * POST /{post_type}/{post_id}/start { journey_id }
      */
     public function start_journey( WP_REST_Request $request ) {
         $journey_id = (int) $request->get_param( 'journey_id' );
@@ -226,7 +228,7 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
-     * POST /stage-status/{post_type}/{post_id} { journey_id, stage_id, status, note }
+     * POST /{post_type}/{post_id}/stage-status { journey_id, stage_id, status, note }
      */
     public function set_stage_status( WP_REST_Request $request ) {
         $journey_id = (int) $request->get_param( 'journey_id' );
@@ -254,7 +256,7 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
-     * POST /complete/{post_type}/{post_id} { journey_id, force }
+     * POST /{post_type}/{post_id}/complete { journey_id, force }
      */
     public function complete_journey( WP_REST_Request $request ) {
         $journey_id = (int) $request->get_param( 'journey_id' );
@@ -276,7 +278,7 @@ class Dt_Journeys_Endpoints {
     }
 
     /**
-     * DELETE /remove/{post_type}/{post_id} { journey_id }
+     * DELETE /{post_type}/{post_id}/remove { journey_id }
      * Removes a journey instance -- its whole progress entry -- from the
      * record, e.g. to undo starting the wrong one. Distinct from `complete`.
      */

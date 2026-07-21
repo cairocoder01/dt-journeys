@@ -332,7 +332,7 @@
 
     function loadRecord() {
         setMsg(t('loading', 'Loading journeys…'));
-        return apiFetch('record/' + recordPath)
+        return apiFetch(recordPath)
             .then(function (data) {
                 render(data);
                 return data;
@@ -347,7 +347,7 @@
         if (note) {
             body.note = note;
         }
-        return apiFetch('stage-status/' + recordPath, { method: 'POST', body: JSON.stringify(body) })
+        return apiFetch(recordPath + '/stage-status', { method: 'POST', body: JSON.stringify(body) })
             .then(function () {
                 return loadRecord();
             })
@@ -370,7 +370,7 @@
     }
 
     function completeJourney(journeyId, force) {
-        return apiFetch('complete/' + recordPath, {
+        return apiFetch(recordPath + '/complete', {
             method: 'POST',
             body: JSON.stringify({ journey_id: journeyId, force: !!force }),
         })
@@ -391,7 +391,7 @@
     }
 
     function removeJourney(journeyId) {
-        return apiFetch('remove/' + recordPath, {
+        return apiFetch(recordPath + '/remove', {
             method: 'DELETE',
             body: JSON.stringify({ journey_id: journeyId }),
         })
@@ -419,7 +419,7 @@
             return;
         }
 
-        apiFetch('available/' + recordPath).then(function (avail) {
+        apiFetch(recordPath + '/available').then(function (avail) {
             var next = (avail.journeys || []).filter(function (j) {
                 return j.ID === nextId;
             })[0];
@@ -434,7 +434,7 @@
     }
 
     function startJourney(journeyId) {
-        return apiFetch('start/' + recordPath, {
+        return apiFetch(recordPath + '/start', {
             method: 'POST',
             body: JSON.stringify({ journey_id: journeyId }),
         })
@@ -549,7 +549,7 @@
         addModalList.innerHTML = '<li>' + esc(t('loading', 'Loading…')) + '</li>';
         addModal.dispatchEvent(new CustomEvent('open'));
 
-        apiFetch('available/' + recordPath).then(function (data) {
+        apiFetch(recordPath + '/available').then(function (data) {
             var journeys = data.journeys || [];
             renderCategoryFilters(journeys);
             renderAvailableList(journeys);
@@ -646,7 +646,7 @@
         body.appendChild(wrap);
 
         var fieldsBody = wrap.querySelector('.fields-body');
-        apiFetch('stage-fields/' + recordPath + '?' + relatedFields.map(function (k) {
+        apiFetch(recordPath + '/stage-fields?' + relatedFields.map(function (k) {
             return 'field_keys[]=' + encodeURIComponent(k);
         }).join('&')).then(function (data) {
             fieldsBody.innerHTML = '';
