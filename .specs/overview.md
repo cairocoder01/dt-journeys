@@ -70,3 +70,7 @@ By designing Journeys specific to your method of ministry, multipliers can easil
 ## See Further
 - [Tech Details](./tech-details.md)
 - [Example Journeys](./example-journeys.md)
+- [Implementation Plan](./implementation-plan.md)
+- [Tile Features (as-built reference)](./tile-features.md) — the Phase 3 record-tile feature set as
+  actually shipped, including several decisions made during implementation that go beyond what's
+  specified above
