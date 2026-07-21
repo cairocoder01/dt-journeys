@@ -11,7 +11,8 @@
         "test": "vendor/bin/phpunit --testdox",
         "test:db-start": "bash -c 'STATE=$(docker inspect -f {{.State.Running}} dt-verify-db 2>/dev/null); if [ \"$STATE\" = true ]; then echo \"dt-verify-db already running\"; elif [ \"$STATE\" = false ]; then docker start dt-verify-db; else docker run -d --name dt-verify-db -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wordpress_test -p 33306:3306 mariadb:11; fi'",
         "test:db-stop": "docker rm -f dt-verify-db",
-        "test:install": "bash -c './test/install-wp-tests.sh wordpress_test root root 127.0.0.1:33306 latest true'"
+        "test:install": "bash -c './test/install-wp-tests.sh wordpress_test root root 127.0.0.1:33306 latest true'",
+        "test:clean": "bash -c 'T=${TMPDIR-/tmp}; T=$(echo $T | sed -e \"s/\\/$//\"); rm -rf \"$T/wordpress\" \"$T/wordpress-tests-lib\"; echo \"Removed $T/wordpress and $T/wordpress-tests-lib\"'"
     },
     "config": {
         "allow-plugins": {

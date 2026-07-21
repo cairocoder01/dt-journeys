@@ -81,21 +81,25 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
     /**
      * Grant access to the journey_stages post type.
      *
-     * Access mirrors the journeys post type: anyone who can manage journeys can
-     * manage their stages.
+     * Access mirrors the journeys post type: anyone who can access contacts
+     * can view stages (they're fetched as part of a journey on the record
+     * tile), but full CRUD is gated behind `manage_journeys` -- the same
+     * capability that gates the parent journeys post type.
      */
     public function dt_set_roles_and_permissions( $expected_roles ){
 
         foreach ( $expected_roles as $role => $role_value ){
             if ( !empty( $expected_roles[$role]['permissions']['access_contacts'] ) ){
                 $expected_roles[$role]['permissions']['access_' . $this->post_type ] = true;
-                $expected_roles[$role]['permissions']['create_' . $this->post_type] = true;
-                $expected_roles[$role]['permissions']['update_' . $this->post_type] = true;
+                $expected_roles[$role]['permissions']['view_any_' . $this->post_type ] = true;
             }
         }
 
         foreach ( $expected_roles as $role => $role_value ){
             if ( !empty( $expected_roles[$role]['permissions']['manage_dt'] ) ){
+                $expected_roles[$role]['permissions']['manage_journeys'] = true;
+            }
+            if ( !empty( $expected_roles[$role]['permissions']['manage_journeys'] ) ){
                 $expected_roles[$role]['permissions']['access_' . $this->post_type ] = true;
                 $expected_roles[$role]['permissions']['create_' . $this->post_type] = true;
                 $expected_roles[$role]['permissions']['update_' . $this->post_type] = true;
@@ -177,12 +181,15 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
 
         // DT field keys (on contacts/groups) relevant to edit at this stage.
         // The picker is provided by the Journeys admin UI; values are stored as
-        // arbitrary field-key strings.
+        // arbitrary field-key strings. The option registry must list every
+        // selectable key -- DT_Posts silently drops any multi_select value not
+        // present in 'default' on read, so an empty registry here would make
+        // stored selections vanish.
         $fields['related_fields'] = [
             'name'        => __( 'Related Fields', 'dt-journeys' ),
             'description' => __( 'Record fields that are relevant to complete at this stage.', 'dt-journeys' ),
             'type'        => 'multi_select',
-            'default'     => [],
+            'default'     => $this->get_related_field_options(),
             'tile'        => 'details',
             'icon'        => get_template_directory_uri() . '/dt-assets/images/list.svg',
         ];
@@ -218,6 +225,53 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
         ];
 
         return $fields;
+    }
+
+    /**
+     * Build the multi_select options for `related_fields` from every field on
+     * contacts and groups that `render_field_for_display()` knows how to
+     * render inline (its own allow-list of field types), excluding
+     * hidden/private fields.
+     *
+     * @return array
+     */
+    private function get_related_field_options(){
+        $renderable_types = apply_filters( 'dt_render_field_for_display_allowed_types', [
+            'boolean',
+            'key_select',
+            'multi_select',
+            'date',
+            'datetime',
+            'text',
+            'textarea',
+            'number',
+            'link',
+            'connection',
+            'location',
+            'location_meta',
+            'communication_channel',
+            'tags',
+            'user_select',
+            'file_upload',
+        ] );
+
+        $options = [];
+        foreach ( [ 'contacts', 'groups' ] as $post_type ){
+            $fields = DT_Posts::get_post_field_settings( $post_type );
+            foreach ( $fields as $field_key => $field ){
+                if ( empty( $field['type'] ) || !in_array( $field['type'], $renderable_types, true ) ){
+                    continue;
+                }
+                if ( !empty( $field['hidden'] ) || !empty( $field['private'] ) ){
+                    continue;
+                }
+                // contacts/groups can share a field key; keep the first label seen.
+                if ( !isset( $options[$field_key] ) ){
+                    $options[$field_key] = [ 'label' => ( $field['name'] ?? $field_key ) . ' (' . $post_type . ')' ];
+                }
+            }
+        }
+        return $options;
     }
 
     /**
