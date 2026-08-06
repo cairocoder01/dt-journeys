@@ -23,7 +23,7 @@ jobs:
       - name: Build project
         run: |
           mkdir dt-journeys
-          cp -r dt-journeys.php admin charts languages magic-link post-type rest-api site-link tile workflows spinner.svg version-control.json LICENSE SECURITY.md dt-journeys/
+          cp -r dt-journeys.php admin charts languages post-type progress rest-api site-link tile workflows spinner.svg version-control.json LICENSE SECURITY.md dt-journeys/
           zip -r dt-journeys.zip dt-journeys
       - name: Create Release
         uses: softprops/action-gh-release@v3
