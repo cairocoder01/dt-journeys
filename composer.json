@@ -1,7 +1,7 @@
 {
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "1.*",
-        "wp-coding-standards/wpcs": "3.1.*",
+        "wp-coding-standards/wpcs": "^3.3",
         "phpunit/phpunit": "^9.6",
         "yoast/phpunit-polyfills": "^4.0"
     },
@@ -17,11 +17,6 @@
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
-        },
-        "audit": {
-            "ignore": [
-                "PKSA-mh9b-91zm-m1gy"
-            ]
         }
     }
 }
