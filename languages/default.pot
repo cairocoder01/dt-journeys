@@ -1,298 +1,366 @@
-# Copyright (C) 2022 
+# Copyright (C) 2026 
 # This file is distributed under the same license as the Disciple.Tools - Journeys plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Disciple.Tools - Journeys 0.1\n"
+"Project-Id-Version: Disciple.Tools - Journeys 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/dt-journeys\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-10-27T10:12:56+00:00\n"
+"POT-Creation-Date: 2026-08-06T13:09:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.7.1\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dt-journeys\n"
 
 #: charts/one-page-chart-template.php:68
 msgid "Sample API Call"
 msgstr ""
 
-#: magic-link/magic-link-map.php:99
-#: magic-link/magic-link-non-object.php:117
-#: magic-link/magic-link-user-app.php:167
-#: magic-link/post-type-magic-link/magic-link-post-type.php:102
-msgid "Add Magic"
+#: post-type/journey-stages-post-type.php:50
+#: post-type/journey-stages-post-type.php:75
+msgid "Journey Stage"
 msgstr ""
 
-#: magic-link/post-type-magic-link/magic-link-post-type.php:128
-msgid "Magic Url"
-msgstr ""
-
-#: post-type/loader.php:22
-#: post-type/module-base.php:63
-#: post-type/module-base.php:79
-msgid "Starter"
-msgstr ""
-
+#: post-type/journey-stages-post-type.php:51
+#: post-type/journey-stages-post-type.php:76
 #: post-type/loader.php:27
-msgid "Default starter functionality"
+msgid "Journey Stages"
 msgstr ""
 
-#: post-type/module-base.php:64
-#: post-type/module-base.php:80
-msgid "Starters"
+#: post-type/journey-stages-post-type.php:64
+msgid "Resources"
 msgstr ""
 
-#: post-type/module-base.php:95
-msgid "Multiplier"
+#: post-type/journey-stages-post-type.php:139
+msgid "Description"
 msgstr ""
 
-#: post-type/module-base.php:137
-msgid "Status"
+#: post-type/journey-stages-post-type.php:140
+msgid "A short description of this stage."
 msgstr ""
 
-#: post-type/module-base.php:138
-msgid "Set the current status."
+#: post-type/journey-stages-post-type.php:148
+#: tile/custom-tile.php:90
+msgid "Instructions"
 msgstr ""
 
-#: post-type/module-base.php:142
-msgid "Inactive"
+#: post-type/journey-stages-post-type.php:149
+msgid "Long-form instructions or course material for this stage. Supports rich text."
 msgstr ""
 
-#: post-type/module-base.php:143
-msgid "No longer active."
+#: post-type/journey-stages-post-type.php:158
+#: tile/custom-tile.php:92
+msgid "Attachments"
 msgstr ""
 
-#: post-type/module-base.php:147
-msgid "Active"
+#: post-type/journey-stages-post-type.php:159
+msgid "Links to PDFs, images, or other resource material."
 msgstr ""
 
-#: post-type/module-base.php:148
-msgid "Is active."
+#: post-type/journey-stages-post-type.php:163
+#: post-type/journey-stages-post-type.php:175
+msgid "Resource"
 msgstr ""
 
-#: post-type/module-base.php:158
-msgid "Assigned To"
+#: post-type/journey-stages-post-type.php:170
+#: tile/custom-tile.php:91
+msgid "Links"
 msgstr ""
 
-#: post-type/module-base.php:159
-msgid "Select the main person who is responsible for reporting on this record."
+#: post-type/journey-stages-post-type.php:171
+msgid "Links to online resource material"
 msgstr ""
 
-#: post-type/module-base.php:173
-msgid "Start Date"
+#: post-type/journey-stages-post-type.php:189
+#: tile/custom-tile.php:93
+msgid "Related Fields"
 msgstr ""
 
-#: post-type/module-base.php:181
-msgid "End Date"
+#: post-type/journey-stages-post-type.php:190
+msgid "Record fields that are relevant to complete at this stage."
 msgstr ""
 
-#: post-type/module-base.php:189
-msgid "Multi-Select"
+#: post-type/journey-stages-post-type.php:198
+msgid "Success Action Label"
 msgstr ""
 
-#: post-type/module-base.php:190
-msgid "Multi Select Field"
+#: post-type/journey-stages-post-type.php:199
+msgid "Optionally rename the \"Complete\" action for this stage."
 msgstr ""
 
-#: post-type/module-base.php:194
-msgid "Item 1"
+#: post-type/journey-stages-post-type.php:207
+msgid "Order"
 msgstr ""
 
-#: post-type/module-base.php:195
-msgid "Item 1."
+#: post-type/journey-stages-post-type.php:208
+msgid "The order of this stage within its journey."
 msgstr ""
 
-#: post-type/module-base.php:198
-msgid "Item 2"
+#: post-type/journey-stages-post-type.php:217
+#: post-type/journeys-post-type.php:50
+#: post-type/journeys-post-type.php:75
+msgid "Journey"
 msgstr ""
 
-#: post-type/module-base.php:199
-msgid "Item 2."
+#: post-type/journey-stages-post-type.php:218
+msgid "The journey this stage belongs to."
 msgstr ""
 
-#: post-type/module-base.php:202
-msgid "Item 3"
-msgstr ""
-
-#: post-type/module-base.php:203
-msgid "Item 3."
-msgstr ""
-
-#: post-type/module-base.php:217
-#: post-type/module-base.php:226
-msgid "Locations"
-msgstr ""
-
-#: post-type/module-base.php:218
-msgid "The general location where this contact is located."
-msgstr ""
-
-#: post-type/module-base.php:227
-msgid "The general location where this record is located."
-msgstr ""
-
-#: post-type/module-base.php:235
-msgid "Address"
-msgstr ""
-
-#: post-type/module-base.php:258
-msgid "Parents"
-msgstr ""
-
-#: post-type/module-base.php:269
-msgid "Peers"
-msgstr ""
-
-#: post-type/module-base.php:280
-msgid "Children"
-msgstr ""
-
-#: post-type/module-base.php:297
-msgid "People Groups"
-msgstr ""
-
-#: post-type/module-base.php:298
-msgid "The people groups connected to this record."
-msgstr ""
-
-#: post-type/module-base.php:308
-msgid "Contacts"
-msgstr ""
-
-#: post-type/module-base.php:365
-msgid "Connections"
-msgstr ""
-
-#: post-type/module-base.php:366
-msgid "Other"
-msgstr ""
-
-#: post-type/module-base.php:383
-msgid "Custom Section Contact"
-msgstr ""
-
-#: post-type/module-base.php:539
-msgid "Assigned to me"
-msgstr ""
-
-#: post-type/module-base.php:547
-#: post-type/module-base.php:604
-#: post-type/module-base.php:612
-msgid "All"
-msgstr ""
-
-#: tile/custom-tile.php:32
+#: post-type/journeys-post-type.php:51
+#: post-type/journeys-post-type.php:76
+#: post-type/journeys-post-type.php:148
+#: post-type/loader.php:18
+#: progress/loader.php:19
+#: tile/custom-tile.php:33
 msgid "Journeys"
 msgstr ""
 
-#: tile/custom-tile.php:33
-msgid "A Beautiful Tile"
+#: post-type/journeys-post-type.php:64
+#: post-type/journeys-post-type.php:222
+msgid "Stages"
 msgstr ""
 
-#: tile/custom-tile.php:63
-#: tile/custom-tile.php:132
-#: tile/custom-tile.php:138
-msgid "Text"
+#: post-type/journeys-post-type.php:100
+msgid "Journeys Admin"
 msgstr ""
 
-#: tile/custom-tile.php:64
-msgctxt "Optional Documentation"
-msgid "Text"
+#: post-type/journeys-post-type.php:101
+msgid "Full access to build and manage journey definitions and their stages."
 msgstr ""
 
+#: post-type/journeys-post-type.php:149
+msgid "Manage Journeys"
+msgstr ""
+
+#: post-type/journeys-post-type.php:150
+msgid "Build and edit journey definitions and their stages."
+msgstr ""
+
+#: post-type/journeys-post-type.php:176
+msgid "Category"
+msgstr ""
+
+#: post-type/journeys-post-type.php:177
+msgid "Group journeys by ministry model (e.g. T4T, Zúme, DMM). Add categories as needed."
+msgstr ""
+
+#: post-type/journeys-post-type.php:188
+msgid "Applies to Roles"
+msgstr ""
+
+#: post-type/journeys-post-type.php:189
+msgid "Which roles this journey applies to. Dispatcher/admin always have access."
+msgstr ""
+
+#: post-type/journeys-post-type.php:198
+msgid "Sequential"
+msgstr ""
+
+#: post-type/journeys-post-type.php:199
+msgid "Sequential journeys display as a timeline; non-sequential as a list or grid."
+msgstr ""
+
+#: post-type/journeys-post-type.php:207
+msgid "Display Type"
+msgstr ""
+
+#: post-type/journeys-post-type.php:208
+msgid "How to display this journey on a record."
+msgstr ""
+
+#: post-type/journeys-post-type.php:211
+msgid "Timeline"
+msgstr ""
+
+#: post-type/journeys-post-type.php:212
+msgid "List"
+msgstr ""
+
+#: post-type/journeys-post-type.php:213
+msgid "Grid"
+msgstr ""
+
+#: post-type/journeys-post-type.php:223
+msgid "The stages that make up this journey."
+msgstr ""
+
+#: post-type/journeys-post-type.php:234
+msgid "Next Journey"
+msgstr ""
+
+#: post-type/journeys-post-type.php:235
+msgid "When this journey ends, suggest starting this journey next."
+msgstr ""
+
+#: post-type/journeys-post-type.php:244
+msgid "Previous Journeys"
+msgstr ""
+
+#: post-type/journeys-post-type.php:245
+msgid "Journeys that lead into this journey."
+msgstr ""
+
+#: post-type/loader.php:23
+msgid "Journey definitions (templates)."
+msgstr ""
+
+#: post-type/loader.php:32
+msgid "Stages that make up a journey."
+msgstr ""
+
+#: progress/class-progress.php:351
+msgid "Reset to Not Started"
+msgstr ""
+
+#: progress/class-progress.php:352
 #: tile/custom-tile.php:74
-msgid "Multiselect"
+#: tile/custom-tile.php:80
+msgid "Started"
+msgstr ""
+
+#: progress/class-progress.php:353
+#: tile/custom-tile.php:75
+msgid "Paused"
+msgstr ""
+
+#: progress/class-progress.php:354
+#: tile/custom-tile.php:78
+msgid "Stalled"
+msgstr ""
+
+#: progress/class-progress.php:355
+#: tile/custom-tile.php:81
+msgid "Completed"
+msgstr ""
+
+#: progress/class-progress.php:356
+msgid "Skipped"
+msgstr ""
+
+#: progress/class-progress.php:363
+#, php-format
+msgid "Journey Started: %s"
+msgstr ""
+
+#: progress/class-progress.php:364
+msgid "Journey Started"
+msgstr ""
+
+#: progress/class-progress.php:368
+#, php-format
+msgid "Journey Completed: %s"
+msgstr ""
+
+#: progress/class-progress.php:369
+msgid "Journey Completed"
+msgstr ""
+
+#: progress/class-progress.php:373
+#, php-format
+msgid "Journey Removed: %s"
+msgstr ""
+
+#: progress/class-progress.php:374
+msgid "Journey Removed"
+msgstr ""
+
+#. translators: 1: status label, 2: stage name, e.g. "Stage Completed: Reading Plan"
+#: progress/class-progress.php:380
+#, php-format
+msgid "Stage %1$s: %2$s"
+msgstr ""
+
+#: progress/class-progress.php:381
+#, php-format
+msgid "Stage %s"
+msgstr ""
+
+#: tile/custom-tile.php:34
+msgid "Track this record's progress through discipleship journeys."
+msgstr ""
+
+#: tile/custom-tile.php:67
+#: tile/custom-tile.php:107
+msgid "Loading journeys…"
+msgstr ""
+
+#: tile/custom-tile.php:68
+msgid "Could not load journeys."
+msgstr ""
+
+#: tile/custom-tile.php:69
+msgid "No journeys started yet."
+msgstr ""
+
+#: tile/custom-tile.php:70
+#: tile/custom-tile.php:110
+msgid "Add a Journey"
+msgstr ""
+
+#: tile/custom-tile.php:71
+msgid "No journeys available to add."
+msgstr ""
+
+#: tile/custom-tile.php:72
+msgid "Start"
+msgstr ""
+
+#: tile/custom-tile.php:73
+msgid "Not Started"
 msgstr ""
 
 #: tile/custom-tile.php:76
-msgid "One"
+msgid "Complete"
 msgstr ""
 
 #: tile/custom-tile.php:77
-msgid "Two"
-msgstr ""
-
-#: tile/custom-tile.php:78
-msgid "Three"
+msgid "Skip"
 msgstr ""
 
 #: tile/custom-tile.php:79
-msgid "Four"
+msgid "Mark Journey Complete"
+msgstr ""
+
+#: tile/custom-tile.php:82
+msgid "Add a note (optional)…"
+msgstr ""
+
+#: tile/custom-tile.php:83
+#: tile/custom-tile.php:134
+msgid "Save"
+msgstr ""
+
+#: tile/custom-tile.php:84
+msgid "Close"
+msgstr ""
+
+#: tile/custom-tile.php:85
+msgid "Mark this journey complete? Any remaining steps will be skipped."
+msgstr ""
+
+#: tile/custom-tile.php:86
+msgid "Remove Journey"
+msgstr ""
+
+#: tile/custom-tile.php:87
+msgid "Remove this journey and its progress from this record? This cannot be undone."
+msgstr ""
+
+#: tile/custom-tile.php:88
+#, php-format
+msgid "Start the next journey: %s?"
+msgstr ""
+
+#: tile/custom-tile.php:89
+msgid "Journeys Active in Groups"
+msgstr ""
+
+#: tile/custom-tile.php:94
+msgid "Status"
 msgstr ""
 
 #: tile/custom-tile.php:95
-msgctxt "Key Select Label"
-msgid "First"
-msgstr ""
-
-#: tile/custom-tile.php:96
-msgctxt "Training Status field description"
-msgid "First Key Description"
-msgstr ""
-
-#: tile/custom-tile.php:100
-msgctxt "Key Select Label"
-msgid "Second"
-msgstr ""
-
-#: tile/custom-tile.php:101
-msgctxt "Training Status field description"
-msgid "Second Key Description"
-msgstr ""
-
-#: tile/custom-tile.php:105
-msgctxt "Key Select Label"
-msgid "Third"
-msgstr ""
-
-#: tile/custom-tile.php:106
-msgctxt "Training Status field description"
-msgid "Third Key Description"
-msgstr ""
-
-#: tile/custom-tile.php:117
-msgid "Number field"
-msgstr ""
-
-#: tile/custom-tile.php:124
-msgid "Number field private"
-msgstr ""
-
-#: tile/custom-tile.php:145
-msgid "Communication Channel"
-msgstr ""
-
-#: tile/custom-tile.php:152
-msgid "User Select"
-msgstr ""
-
-#: tile/custom-tile.php:157
-msgid "Array"
-msgstr ""
-
-#: tile/custom-tile.php:167
-#: tile/custom-tile.php:174
-msgid " Date Field"
-msgstr ""
-
-#: tile/custom-tile.php:182
-#: tile/custom-tile.php:187
-msgid "Boolean"
-msgstr ""
-
-#: tile/settings-tile.php:43
-#: tile/settings-tile.php:61
-msgid "Custom Settings Section"
-msgstr ""
-
-#: tile/settings-tile.php:77
-msgctxt "Optional Documentation"
-msgid "Custom Settings Section"
-msgstr ""
-
-#: tile/settings-tile.php:78
-msgctxt "Optional Documentation"
-msgid "Add your own help information into this modal."
+msgid "All"
 msgstr ""
