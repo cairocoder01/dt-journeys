@@ -17,6 +17,11 @@
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "audit": {
+            "ignore": [
+                "PKSA-mh9b-91zm-m1gy"
+            ]
         }
     }
 }
