@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Disciple.Tools - Journeys plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Disciple.Tools - Journeys 0.1.0\n"
+"Project-Id-Version: Disciple.Tools - Journeys 0.1.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/dt-journeys\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-06T13:09:53+00:00\n"
+"POT-Creation-Date: 2026-08-17T13:45:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: dt-journeys\n"
@@ -34,6 +34,7 @@ msgid "Resources"
 msgstr ""
 
 #: post-type/journey-stages-post-type.php:139
+#: post-type/journeys-post-type.php:188
 msgid "Description"
 msgstr ""
 
@@ -91,6 +92,7 @@ msgid "Optionally rename the \"Complete\" action for this stage."
 msgstr ""
 
 #: post-type/journey-stages-post-type.php:207
+#: post-type/journeys-post-type.php:212
 msgid "Order"
 msgstr ""
 
@@ -99,8 +101,8 @@ msgid "The order of this stage within its journey."
 msgstr ""
 
 #: post-type/journey-stages-post-type.php:217
-#: post-type/journeys-post-type.php:50
-#: post-type/journeys-post-type.php:75
+#: post-type/journeys-post-type.php:53
+#: post-type/journeys-post-type.php:78
 msgid "Journey"
 msgstr ""
 
@@ -108,98 +110,114 @@ msgstr ""
 msgid "The journey this stage belongs to."
 msgstr ""
 
-#: post-type/journeys-post-type.php:51
-#: post-type/journeys-post-type.php:76
-#: post-type/journeys-post-type.php:148
+#: post-type/journeys-post-type.php:54
+#: post-type/journeys-post-type.php:79
+#: post-type/journeys-post-type.php:151
 #: post-type/loader.php:18
 #: progress/loader.php:19
 #: tile/custom-tile.php:33
 msgid "Journeys"
 msgstr ""
 
-#: post-type/journeys-post-type.php:64
-#: post-type/journeys-post-type.php:222
+#: post-type/journeys-post-type.php:67
+#: post-type/journeys-post-type.php:246
 msgid "Stages"
 msgstr ""
 
-#: post-type/journeys-post-type.php:100
+#: post-type/journeys-post-type.php:103
 msgid "Journeys Admin"
 msgstr ""
 
-#: post-type/journeys-post-type.php:101
+#: post-type/journeys-post-type.php:104
 msgid "Full access to build and manage journey definitions and their stages."
 msgstr ""
 
-#: post-type/journeys-post-type.php:149
+#: post-type/journeys-post-type.php:152
 msgid "Manage Journeys"
 msgstr ""
 
-#: post-type/journeys-post-type.php:150
+#: post-type/journeys-post-type.php:153
 msgid "Build and edit journey definitions and their stages."
 msgstr ""
 
-#: post-type/journeys-post-type.php:176
-msgid "Category"
+#: post-type/journeys-post-type.php:179
+msgid "Subtitle"
 msgstr ""
 
-#: post-type/journeys-post-type.php:177
-msgid "Group journeys by ministry model (e.g. T4T, Zúme, DMM). Add categories as needed."
-msgstr ""
-
-#: post-type/journeys-post-type.php:188
-msgid "Applies to Roles"
+#: post-type/journeys-post-type.php:180
+msgid "A short tagline shown under the journey name when selecting a journey to start."
 msgstr ""
 
 #: post-type/journeys-post-type.php:189
-msgid "Which roles this journey applies to. Dispatcher/admin always have access."
-msgstr ""
-
-#: post-type/journeys-post-type.php:198
-msgid "Sequential"
+msgid "A longer description of this journey."
 msgstr ""
 
 #: post-type/journeys-post-type.php:199
-msgid "Sequential journeys display as a timeline; non-sequential as a list or grid."
+msgid "Category"
 msgstr ""
 
-#: post-type/journeys-post-type.php:207
-msgid "Display Type"
-msgstr ""
-
-#: post-type/journeys-post-type.php:208
-msgid "How to display this journey on a record."
-msgstr ""
-
-#: post-type/journeys-post-type.php:211
-msgid "Timeline"
-msgstr ""
-
-#: post-type/journeys-post-type.php:212
-msgid "List"
+#: post-type/journeys-post-type.php:200
+msgid "Group journeys by ministry model (e.g. T4T, Zúme, DMM). Add categories as needed."
 msgstr ""
 
 #: post-type/journeys-post-type.php:213
-msgid "Grid"
+msgid "Controls the display order of this journey in selection lists and lookups. Lower numbers come first."
+msgstr ""
+
+#: post-type/journeys-post-type.php:222
+msgid "Sequential"
 msgstr ""
 
 #: post-type/journeys-post-type.php:223
-msgid "The stages that make up this journey."
+msgid "Sequential journeys display as a timeline; non-sequential as a list or grid."
 msgstr ""
 
-#: post-type/journeys-post-type.php:234
-msgid "Next Journey"
+#: post-type/journeys-post-type.php:231
+msgid "Display Type"
+msgstr ""
+
+#: post-type/journeys-post-type.php:232
+msgid "How to display this journey on a record."
 msgstr ""
 
 #: post-type/journeys-post-type.php:235
+msgid "Timeline"
+msgstr ""
+
+#: post-type/journeys-post-type.php:236
+msgid "List"
+msgstr ""
+
+#: post-type/journeys-post-type.php:237
+msgid "Grid"
+msgstr ""
+
+#: post-type/journeys-post-type.php:247
+msgid "The stages that make up this journey."
+msgstr ""
+
+#: post-type/journeys-post-type.php:258
+msgid "Next Journey"
+msgstr ""
+
+#: post-type/journeys-post-type.php:259
 msgid "When this journey ends, suggest starting this journey next."
 msgstr ""
 
-#: post-type/journeys-post-type.php:244
+#: post-type/journeys-post-type.php:268
 msgid "Previous Journeys"
 msgstr ""
 
-#: post-type/journeys-post-type.php:245
+#: post-type/journeys-post-type.php:269
 msgid "Journeys that lead into this journey."
+msgstr ""
+
+#: post-type/journeys-post-type.php:282
+msgid "Applies to Roles"
+msgstr ""
+
+#: post-type/journeys-post-type.php:283
+msgid "Which roles this journey applies to. Dispatcher/admin always have access."
 msgstr ""
 
 #: post-type/loader.php:23

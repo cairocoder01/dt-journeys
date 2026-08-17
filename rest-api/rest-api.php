@@ -157,14 +157,53 @@ class Dt_Journeys_Endpoints {
             $available[] = [
                 'ID'            => $journey['ID'],
                 'name'          => $journey['name'] ?? $journey['title'] ?? '',
+                'subtitle'      => $journey['subtitle'] ?? '',
                 'category'      => $journey['journey_category'] ?? [],
                 'is_sequential' => !empty( $journey['is_sequential'] ),
                 'display_type'  => $journey['display_type']['key'] ?? 'timeline',
                 'stage_count'   => count( $journey['stages'] ?? [] ),
+                'order'         => (int) ( $journey['journey_order'] ?? 0 ),
+                'category_group' => $this->category_group_key( $journey['journey_category'] ?? [] ),
             ];
         }
 
+        // Journeys are grouped by their exact set of categories (so separate
+        // "sets" of journeys can each reuse the same order numbers without
+        // colliding), categorized sets before the uncategorized one, each
+        // alphabetical by its category combination, then by order/name within.
+        usort( $available, function ( $a, $b ) {
+            $a_uncategorized = $a['category_group'] === '';
+            $b_uncategorized = $b['category_group'] === '';
+            if ( $a_uncategorized !== $b_uncategorized ) {
+                return $a_uncategorized <=> $b_uncategorized;
+            }
+            return strcasecmp( $a['category_group'], $b['category_group'] )
+                ?: ( $a['order'] <=> $b['order'] )
+                ?: strcasecmp( $a['name'], $b['name'] );
+        } );
+
+        $available = array_map( function ( $journey ) {
+            unset( $journey['category_group'] );
+            return $journey;
+        }, $available );
+
         return [ 'journeys' => $available ];
+    }
+
+    /**
+     * A stable grouping key for a journey's set of categories -- its category
+     * values, sorted and joined, so journeys sharing the exact same category
+     * combination are grouped (and ordered by journey_order) together.
+     */
+    private function category_group_key( array $categories ) {
+        $values = array_map( function ( $cat ) {
+            return is_array( $cat ) ? (string) ( $cat['value'] ?? '' ) : (string) $cat;
+        }, $categories );
+        $values = array_filter( $values, function ( $value ) {
+            return $value !== '';
+        } );
+        sort( $values, SORT_STRING | SORT_FLAG_CASE );
+        return implode( '|', $values );
     }
 
     /**

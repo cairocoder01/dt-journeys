@@ -44,6 +44,9 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
 
         // sort connected stages by their stage_order field
         add_filter( 'dt_after_get_post_fields_filter', [ $this, 'dt_after_get_post_fields_filter' ], 10, 2 );
+
+        // sort journeys by journey_order in connection field typeahead lookups
+        add_filter( 'dt_get_viewable_compact_search_query', [ $this, 'dt_get_viewable_compact_search_query' ], 10, 2 );
     }
 
     public function after_setup_theme(){
@@ -170,6 +173,26 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             $fields['name']['font-icon'] = 'mdi mdi-star-four-points-outline';
             $fields['name']['icon'] = null;
         }
+
+        // Short tagline shown alongside the name in journey selection lists.
+        $fields['subtitle'] = [
+            'name'        => __( 'Subtitle', 'dt-journeys' ),
+            'description' => __( 'A short tagline shown under the journey name when selecting a journey to start.', 'dt-journeys' ),
+            'type'        => 'text',
+            'default'     => '',
+            'tile'        => 'status',
+            'font-icon'   => 'mdi mdi-format-title',
+        ];
+
+        $fields['description'] = [
+            'name'        => __( 'Description', 'dt-journeys' ),
+            'description' => __( 'A longer description of this journey.', 'dt-journeys' ),
+            'type'        => 'textarea',
+            'default'     => '',
+            'tile'        => 'details',
+            'font-icon'   => 'mdi mdi-text',
+        ];
+
         // Grouping by ministry model (T4T, Zúme, DMM, …). Tags so categories can be
         // added dynamically as needed rather than from a fixed list.
         $fields['journey_category'] = [
@@ -183,14 +206,15 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'show_in_table' => 15,
         ];
 
-        // Which DT roles this journey applies to. Options are the current DT roles.
-        $fields['journey_roles'] = [
-            'name'        => __( 'Applies to Roles', 'dt-journeys' ),
-            'description' => __( 'Which roles this journey applies to. Dispatcher/admin always have access.', 'dt-journeys' ),
-            'type'        => 'multi_select',
-            'default'     => $this->get_role_options(),
+        // Manual display order -- used to sort the journey selection modal and
+        // any connection field/typeahead lookup targeting journeys.
+        $fields['journey_order'] = [
+            'name'        => __( 'Order', 'dt-journeys' ),
+            'description' => __( 'Controls the display order of this journey in selection lists and lookups. Lower numbers come first.', 'dt-journeys' ),
+            'type'        => 'number',
+            'default'     => 0,
             'tile'        => 'details',
-            'font-icon'   => 'mdi mdi-account-key',
+            'font-icon'   => 'mdi mdi-sort-numeric-ascending',
             'options'     => $this->get_role_options(),
         ];
 
@@ -261,6 +285,18 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'font-icon'     => 'mdi mdi-skip-previous',
         ];
 
+        // Which DT roles this journey applies to. Options are the current DT roles.
+        // Kept last among 'details' tile fields -- an access-control setting,
+        // not a defining property of the journey.
+        $fields['journey_roles'] = [
+            'name'        => __( 'Applies to Roles', 'dt-journeys' ),
+            'description' => __( 'Which roles this journey applies to. Dispatcher/admin always have access.', 'dt-journeys' ),
+            'type'        => 'multi_select',
+            'default'     => $this->get_role_options(),
+            'tile'        => 'details',
+            'font-icon'   => 'mdi mdi-account-key',
+        ];
+
         return $fields;
     }
 
@@ -327,5 +363,16 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
         } );
 
         return $fields;
+    }
+
+    /**
+     * Sort connection-field typeahead lookups against journeys by journey_order
+     * instead of the default last_modified sort.
+     */
+    public function dt_get_viewable_compact_search_query( $query, $post_type ){
+        if ( $post_type === $this->post_type ){
+            $query['sort'] = 'journey_order';
+        }
+        return $query;
     }
 }

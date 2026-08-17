@@ -458,7 +458,7 @@
     var addModal = document.getElementById('dt-journeys-add-modal');
     var addModalList = addModal ? addModal.querySelector('.available-list') : null;
     var addModalFilters = addModal ? addModal.querySelector('.category-filters') : null;
-    var activeCategory = null;
+    var activeCategories = [];
 
     if (addModal) {
         addModal.title = t('add_journey', 'Add a Journey');
@@ -488,30 +488,42 @@
         }
         categories.sort();
 
-        function makeTag(value, label) {
+        function makeTag(value, label, isActive) {
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'tag-filter' + (activeCategory === value ? ' active' : '');
+            btn.className = 'tag-filter' + (isActive ? ' active' : '');
             btn.textContent = label;
             btn.addEventListener('click', function () {
-                activeCategory = value;
+                if (value === null) {
+                    activeCategories = [];
+                } else {
+                    var index = activeCategories.indexOf(value);
+                    if (index === -1) {
+                        activeCategories.push(value);
+                    } else {
+                        activeCategories.splice(index, 1);
+                    }
+                }
                 renderCategoryFilters(journeys);
                 renderAvailableList(journeys);
             });
             return btn;
         }
 
-        addModalFilters.appendChild(makeTag(null, t('all_categories', 'All')));
+        addModalFilters.appendChild(makeTag(null, t('all_categories', 'All'), !activeCategories.length));
         categories.forEach(function (cat) {
-            addModalFilters.appendChild(makeTag(cat, cat));
+            addModalFilters.appendChild(makeTag(cat, cat, activeCategories.indexOf(cat) !== -1));
         });
     }
 
     function renderAvailableList(journeys) {
-        var filtered = activeCategory
+        // Each selected filter is an additional AND clause -- a journey must
+        // carry every active category, not just one of them.
+        var filtered = activeCategories.length
             ? journeys.filter(function (journey) {
-                return (journey.category || []).some(function (cat) {
-                    return categoryValue(cat) === activeCategory;
+                var journeyCategories = (journey.category || []).map(categoryValue);
+                return activeCategories.every(function (active) {
+                    return journeyCategories.indexOf(active) !== -1;
                 });
             })
             : journeys;
@@ -524,9 +536,35 @@
         filtered.forEach(function (journey) {
             var li = document.createElement('li');
 
+            var info = document.createElement('span');
+            info.className = 'journey-info';
+
             var label = document.createElement('span');
+            label.className = 'journey-name';
             label.textContent = journey.name;
-            li.appendChild(label);
+            info.appendChild(label);
+
+            if (journey.subtitle) {
+                var subtitle = document.createElement('span');
+                subtitle.className = 'journey-subtitle';
+                subtitle.textContent = journey.subtitle;
+                info.appendChild(subtitle);
+            }
+
+            var categories = journey.category || [];
+            if (categories.length) {
+                var badges = document.createElement('span');
+                badges.className = 'journey-categories';
+                categories.forEach(function (cat) {
+                    var badge = document.createElement('span');
+                    badge.className = 'tag-badge';
+                    badge.textContent = categoryValue(cat);
+                    badges.appendChild(badge);
+                });
+                info.appendChild(badges);
+            }
+
+            li.appendChild(info);
 
             var btn = document.createElement('button');
             btn.type = 'button';
@@ -542,7 +580,7 @@
     }
 
     function openAddJourneyModal() {
-        activeCategory = null;
+        activeCategories = [];
         if (addModalFilters) {
             addModalFilters.innerHTML = '';
         }

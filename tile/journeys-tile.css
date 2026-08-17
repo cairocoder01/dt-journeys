@@ -285,6 +285,16 @@
         }
     }
 
+    .tag-badge {
+        display: inline-block;
+        border: 1px solid var(--border-color, #cecece);
+        background: var(--surface-1, #fefefe);
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 0.78em;
+        color: var(--gray-0, #666);
+    }
+
     .available-list {
         list-style: none;
         margin: 0;
@@ -296,6 +306,23 @@
             align-items: center;
             padding: 8px 0;
             border-bottom: 1px solid var(--surface-2, #f5f5f5);
+        }
+
+        .journey-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .journey-subtitle {
+            font-size: 0.8em;
+            color: var(--medium-text-color, #666);
+        }
+
+        .journey-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
         }
     }
 

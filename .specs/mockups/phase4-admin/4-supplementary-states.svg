@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1100" width="1440" height="1100" font-family="Helvetica, Arial, sans-serif">
+<title>Phase 4 — Supplementary states</title>
+<rect x="0" y="0" width="1440" height="1100" fill="#f4f4f4"/>
+<rect x="0" y="0" width="1440" height="64" rx="0" fill="#eaeaea" stroke="#cccccc" stroke-width="1.5" stroke-dasharray="4,3"/><text x="720.0" y="37" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#999" text-anchor="middle" style="font-style:italic;">Existing Disciple.Tools admin header / navigation — unchanged</text>
+<text x="40" y="142" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#222" text-anchor="start" style="">Supplementary states</text>
+<text x="40" y="164" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#888" text-anchor="start" style="">Delete confirmation, permission-denied, and empty-state, referenced from sheets 1–2</text>
+<text x="40" y="194" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#333" text-anchor="start" style="">A. Delete confirmation (dt-modal)</text>
+<rect x="40" y="210" width="460" height="260" rx="4" fill="#fff" stroke="#666" stroke-width="2"/>
+<text x="64" y="250" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#222" text-anchor="start" style="">Delete “Seeker Path”?</text>
+<text x="64" y="280" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">This permanently deletes the journey and all</text>
+<text x="64" y="300" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">5 of its stages.</text>
+<text x="64" y="320" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style=""></text>
+<text x="64" y="340" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">Records that already have progress on this</text>
+<text x="64" y="360" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">journey keep their history — it just can no</text>
+<text x="64" y="380" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">longer be started fresh from this list.</text>
+<text x="64" y="408" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">confirm copy above is a suggestion — verify against actual</text>
+<text x="64" y="425" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">delete-cascade behavior before shipping</text>
+<rect x="240" y="414" width="110" height="36" rx="5" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="295.0" y="436.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="middle" style="">Cancel</text>
+<rect x="364" y="414" width="112" height="36" rx="5" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/><text x="420.0" y="436.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#b23b3b" text-anchor="middle" style="">Delete</text>
+<text x="540" y="194" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#333" text-anchor="start" style="">B. Permission denied (no manage_journeys)</text>
+<rect x="540" y="210" width="420" height="260" rx="4" fill="#fff" stroke="#999" stroke-width="1.5"/>
+<circle cx="750.0" cy="280" r="28" fill="#f7f7f7" stroke="#bbb" stroke-width="1.5"/>
+<text x="750.0" y="288" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#999" text-anchor="middle" style="">!</text>
+<text x="750.0" y="340" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#333" text-anchor="middle" style="">You don't have access to Journeys admin</text>
+<text x="750.0" y="360" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#888" text-anchor="middle" style="">Ask an administrator to grant you</text>
+<text x="750.0" y="378" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#888" text-anchor="middle" style="">“Journeys Admin” or the manage_journeys capability.</text>
+<text x="540" y="492" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">Route guard: /admin/journeys itself (not just its REST calls)</text>
+<text x="540" y="509" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">must 403/redirect for users without manage_journeys or</text>
+<text x="540" y="526" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">manage_dt</text>
+<text x="1000" y="194" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#333" text-anchor="start" style="">C. Empty state (no journeys yet)</text>
+<rect x="1000" y="210" width="400" height="260" rx="4" fill="#fff" stroke="#999" stroke-width="1.5" stroke-dasharray="3,3"/>
+<text x="1200.0" y="300" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#333" text-anchor="middle" style="">No journeys yet</text>
+<text x="1200.0" y="322" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#888" text-anchor="middle" style="">Build one from scratch, or import a</text>
+<text x="1200.0" y="338" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#888" text-anchor="middle" style="">starter preset (Seeker Path, T4T, Zúme…)</text>
+<rect x="1010.0" y="360" width="170" height="38" rx="5" fill="#2a2a2a" stroke="#2a2a2a" stroke-width="1.5"/><text x="1095.0" y="383.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle" style="">+ New Journey</text>
+<rect x="1220.0" y="360" width="170" height="38" rx="5" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1305.0" y="383.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="middle" style="">Import Preset</text>
+<text x="1000" y="492" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">“Import Preset” is a Phase 5 feature — fine to stub/hide the</text>
+<text x="1000" y="509" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">button now and wire it up later</text>
+<text x="40" y="544" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#333" text-anchor="start" style="">D. Remove-stage confirmation</text>
+<rect x="40" y="560" width="460" height="220" rx="4" fill="#fff" stroke="#666" stroke-width="2"/>
+<text x="64" y="600" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#222" text-anchor="start" style="">Remove “Day 3 — Group Discussion”?</text>
+<text x="64" y="628" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">Any record currently on this stage keeps its</text>
+<text x="64" y="648" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">recorded history; the stage just won't appear</text>
+<text x="64" y="668" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#666" text-anchor="start" style="">in this journey going forward.</text>
+<rect x="240" y="724" width="110" height="36" rx="5" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="295.0" y="746.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="middle" style="">Cancel</text>
+<rect x="364" y="724" width="112" height="36" rx="5" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/><text x="420.0" y="746.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#b23b3b" text-anchor="middle" style="">Remove</text>
+<text x="540" y="544" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#333" text-anchor="start" style="">E. Category autocomplete detail</text>
+<rect x="540" y="560" width="420" height="220" rx="4" fill="#fff" stroke="#999" stroke-width="1.5"/>
+<text x="560" y="590" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="">Category</text>
+<rect x="560" y="600" width="380" height="34" rx="4" fill="#fff" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="570" y="622" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#222" text-anchor="start" style="">T4</text>
+<rect x="560" y="634" width="380" height="100" rx="4" fill="#fff" stroke="#ccc" stroke-width="1.5"/>
+<text x="574" y="658" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#444" text-anchor="start" style="">T4T</text>
+<rect x="562" y="646" width="376" height="24" rx="4" fill="#f2f2f2" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="574" y="658" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#444" text-anchor="start" style="">T4T</text>
+<text x="574" y="684" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#444" text-anchor="start" style="">T4T — Advanced</text>
+<text x="574" y="710" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#444" text-anchor="start" style="">T4T Coaching Track</text>
+<text x="540" y="802" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">Suggest existing values as you type; still allow free entry of</text>
+<text x="540" y="819" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">a brand-new category</text>
+<text x="1000" y="544" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#333" text-anchor="start" style="">F. Link label syntax detail</text>
+<rect x="1000" y="560" width="400" height="220" rx="4" fill="#fff" stroke="#999" stroke-width="1.5"/>
+<text x="1020" y="590" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="">Links</text>
+<rect x="1020" y="600" width="360" height="34" rx="4" fill="#fff" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="1030" y="622" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#222" text-anchor="start" style="">[Lessons](https://t4t.org/lessons.pdf)</text>
+<text x="1020" y="656" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#999" text-anchor="start" style="font-style:italic;">renders as →</text>
+<rect x="1120" y="642" width="100" height="24" rx="12.0" fill="#eef4fb" stroke="#a9c7e6" stroke-width="1.5"/><text x="1170.0" y="658.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#2a5a8c" text-anchor="middle" style="">Lessons 🔗</text>
+<text x="1020" y="700" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#999" text-anchor="start" style="font-style:italic;">Plain URL with no [Label](…) still works —</text>
+<text x="1020" y="718" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" fill="#999" text-anchor="start" style="font-style:italic;">displays the raw URL as its own label.</text>
+<rect x="40" y="1070" width="26" height="16" rx="2" fill="#eaeaea" stroke="#cccccc" stroke-width="1.5" stroke-dasharray="4,3"/>
+<text x="74" y="1082" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#777" text-anchor="start" style="">existing / out of scope for this build</text>
+<rect x="370" y="1070" width="26" height="16" rx="2" fill="#fff" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="404" y="1082" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#777" text-anchor="start" style="">new UI for Phase 4</text>
+<text x="600" y="1082" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">red italic = implementation note</text>
+</svg>
