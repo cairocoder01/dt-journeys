@@ -539,6 +539,19 @@
                 info.appendChild(subtitle);
             }
 
+            var categories = journey.category || [];
+            if (categories.length) {
+                var badges = document.createElement('span');
+                badges.className = 'journey-categories';
+                categories.forEach(function (cat) {
+                    var badge = document.createElement('span');
+                    badge.className = 'tag-badge';
+                    badge.textContent = categoryValue(cat);
+                    badges.appendChild(badge);
+                });
+                info.appendChild(badges);
+            }
+
             li.appendChild(info);
 
             var btn = document.createElement('button');
