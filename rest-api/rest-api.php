@@ -157,6 +157,7 @@ class Dt_Journeys_Endpoints {
             $available[] = [
                 'ID'            => $journey['ID'],
                 'name'          => $journey['name'] ?? $journey['title'] ?? '',
+                'subtitle'      => $journey['subtitle'] ?? '',
                 'category'      => $journey['journey_category'] ?? [],
                 'is_sequential' => !empty( $journey['is_sequential'] ),
                 'display_type'  => $journey['display_type']['key'] ?? 'timeline',

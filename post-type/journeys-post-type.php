@@ -170,6 +170,26 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             $fields['name']['font-icon'] = 'mdi mdi-star-four-points-outline';
             $fields['name']['icon'] = null;
         }
+
+        // Short tagline shown alongside the name in journey selection lists.
+        $fields['subtitle'] = [
+            'name'        => __( 'Subtitle', 'dt-journeys' ),
+            'description' => __( 'A short tagline shown under the journey name when selecting a journey to start.', 'dt-journeys' ),
+            'type'        => 'text',
+            'default'     => '',
+            'tile'        => 'status',
+            'font-icon'   => 'mdi mdi-format-title',
+        ];
+
+        $fields['description'] = [
+            'name'        => __( 'Description', 'dt-journeys' ),
+            'description' => __( 'A longer description of this journey.', 'dt-journeys' ),
+            'type'        => 'textarea',
+            'default'     => '',
+            'tile'        => 'details',
+            'font-icon'   => 'mdi mdi-text',
+        ];
+
         // Grouping by ministry model (T4T, Zúme, DMM, …). Tags so categories can be
         // added dynamically as needed rather than from a fixed list.
         $fields['journey_category'] = [

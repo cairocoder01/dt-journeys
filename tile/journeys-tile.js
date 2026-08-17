@@ -524,9 +524,22 @@
         filtered.forEach(function (journey) {
             var li = document.createElement('li');
 
+            var info = document.createElement('span');
+            info.className = 'journey-info';
+
             var label = document.createElement('span');
+            label.className = 'journey-name';
             label.textContent = journey.name;
-            li.appendChild(label);
+            info.appendChild(label);
+
+            if (journey.subtitle) {
+                var subtitle = document.createElement('span');
+                subtitle.className = 'journey-subtitle';
+                subtitle.textContent = journey.subtitle;
+                info.appendChild(subtitle);
+            }
+
+            li.appendChild(info);
 
             var btn = document.createElement('button');
             btn.type = 'button';
