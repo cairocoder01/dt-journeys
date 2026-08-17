@@ -169,6 +169,137 @@ class JourneysRestApiTest extends TestCase {
         $this->assertNotContains( $non_matching_id, $ids );
     }
 
+    public function test_get_available_orders_journeys_by_journey_order_within_same_category() {
+        list( $third_id ) = $this->create_journey( true, 1, [
+            'name'            => 'Third',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 3,
+        ] );
+        list( $first_id ) = $this->create_journey( true, 1, [
+            'name'            => 'First',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 1,
+        ] );
+        list( $second_id ) = $this->create_journey( true, 1, [
+            'name'            => 'Second',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 2,
+        ] );
+
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
+        $this->assertSame( 200, $response->get_status() );
+
+        $ids = array_column( $response->get_data()['journeys'], 'ID' );
+        $this->assertSame( [ $first_id, $second_id, $third_id ], $ids );
+    }
+
+    public function test_get_available_keeps_separate_category_sets_independently_ordered() {
+        // Two unrelated "sets" of journeys, each numbered 1-2 within its own
+        // category -- their order values should never be compared against
+        // each other, only against journeys sharing the exact same category set.
+        list( $t4t_2 ) = $this->create_journey( true, 1, [
+            'name'            => 'T4T Second',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 2,
+        ] );
+        list( $dmm_1 ) = $this->create_journey( true, 1, [
+            'name'            => 'DMM First',
+            'journey_category' => [ 'values' => [ [ 'value' => 'DMM' ] ] ],
+            'journey_order'   => 1,
+        ] );
+        list( $t4t_1 ) = $this->create_journey( true, 1, [
+            'name'            => 'T4T First',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 1,
+        ] );
+        list( $dmm_2 ) = $this->create_journey( true, 1, [
+            'name'            => 'DMM Second',
+            'journey_category' => [ 'values' => [ [ 'value' => 'DMM' ] ] ],
+            'journey_order'   => 2,
+        ] );
+
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
+        $this->assertSame( 200, $response->get_status() );
+
+        // Category sets sort alphabetically ("DMM" before "T4T"); within each
+        // set, journeys sort by their own journey_order.
+        $ids = array_column( $response->get_data()['journeys'], 'ID' );
+        $this->assertSame( [ $dmm_1, $dmm_2, $t4t_1, $t4t_2 ], $ids );
+    }
+
+    public function test_get_available_sorts_uncategorized_journeys_after_categorized_ones() {
+        list( $uncategorized_id ) = $this->create_journey( true, 1, [
+            'name'          => 'Uncategorized',
+            'journey_order' => 1,
+        ] );
+        list( $categorized_id ) = $this->create_journey( true, 1, [
+            'name'            => 'Categorized',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 9,
+        ] );
+
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
+        $this->assertSame( 200, $response->get_status() );
+
+        // A lower order number does not let an uncategorized journey jump
+        // ahead of one that belongs to a category set.
+        $ids = array_column( $response->get_data()['journeys'], 'ID' );
+        $this->assertSame( [ $categorized_id, $uncategorized_id ], $ids );
+    }
+
+    public function test_get_available_breaks_order_ties_alphabetically_by_name() {
+        list( $zebra_id ) = $this->create_journey( true, 1, [
+            'name'            => 'Zebra',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 1,
+        ] );
+        list( $apple_id ) = $this->create_journey( true, 1, [
+            'name'            => 'Apple',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 1,
+        ] );
+
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
+        $this->assertSame( 200, $response->get_status() );
+
+        $ids = array_column( $response->get_data()['journeys'], 'ID' );
+        $this->assertSame( [ $apple_id, $zebra_id ], $ids );
+    }
+
+    public function test_get_available_groups_multi_category_journeys_separately_from_single_category_ones() {
+        // A journey tagged with two categories forms its own group -- distinct
+        // from journeys tagged with just one of those same categories -- so it
+        // doesn't inherit either single-category set's order sequence.
+        list( $multi_id_1 ) = $this->create_journey( true, 1, [
+            'name'            => 'Multi 1',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ], [ 'value' => 'DMM' ] ] ],
+            'journey_order'   => 1,
+        ] );
+        list( $multi_id_2 ) = $this->create_journey( true, 1, [
+            'name'            => 'Multi 2',
+            'journey_category' => [ 'values' => [ [ 'value' => 'DMM' ], [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 1,
+        ] );
+        list( $dmm_only_id ) = $this->create_journey( true, 1, [
+            'name'            => 'DMM Only',
+            'journey_category' => [ 'values' => [ [ 'value' => 'DMM' ] ] ],
+            'journey_order'   => 1,
+        ] );
+        list( $t4t_only_id ) = $this->create_journey( true, 1, [
+            'name'            => 'T4T Only',
+            'journey_category' => [ 'values' => [ [ 'value' => 'T4T' ] ] ],
+            'journey_order'   => 1,
+        ] );
+
+        $response = $this->dispatch( 'GET', "/dt-journeys/v1/contacts/{$this->contact_id}/available" );
+        $this->assertSame( 200, $response->get_status() );
+
+        // Group keys: "DMM" (DMM Only), "DMM|T4T" (Multi), "T4T" (T4T Only) --
+        // alphabetical order of the joined, sorted category values.
+        $ids = array_column( $response->get_data()['journeys'], 'ID' );
+        $this->assertSame( [ $dmm_only_id, $multi_id_1, $multi_id_2, $t4t_only_id ], $ids );
+    }
+
     public function test_start_journey_via_rest() {
         list( $journey_id ) = $this->create_journey( true );
 
