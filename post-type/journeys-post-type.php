@@ -44,6 +44,9 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
 
         // sort connected stages by their stage_order field
         add_filter( 'dt_after_get_post_fields_filter', [ $this, 'dt_after_get_post_fields_filter' ], 10, 2 );
+
+        // sort journeys by journey_order in connection field typeahead lookups
+        add_filter( 'dt_get_viewable_compact_search_query', [ $this, 'dt_get_viewable_compact_search_query' ], 10, 2 );
     }
 
     public function after_setup_theme(){
@@ -203,14 +206,15 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'show_in_table' => 15,
         ];
 
-        // Which DT roles this journey applies to. Options are the current DT roles.
-        $fields['journey_roles'] = [
-            'name'        => __( 'Applies to Roles', 'dt-journeys' ),
-            'description' => __( 'Which roles this journey applies to. Dispatcher/admin always have access.', 'dt-journeys' ),
-            'type'        => 'multi_select',
-            'default'     => $this->get_role_options(),
+        // Manual display order -- used to sort the journey selection modal and
+        // any connection field/typeahead lookup targeting journeys.
+        $fields['journey_order'] = [
+            'name'        => __( 'Order', 'dt-journeys' ),
+            'description' => __( 'Controls the display order of this journey in selection lists and lookups. Lower numbers come first.', 'dt-journeys' ),
+            'type'        => 'number',
+            'default'     => 0,
             'tile'        => 'details',
-            'font-icon'   => 'mdi mdi-account-key',
+            'font-icon'   => 'mdi mdi-sort-numeric-ascending',
         ];
 
         // Timeline vs. list/grid behaviour.
@@ -269,6 +273,18 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'p2p_key'       => 'journeys_to_journeys',
             'tile'          => 'details',
             'font-icon'     => 'mdi mdi-skip-previous',
+        ];
+
+        // Which DT roles this journey applies to. Options are the current DT roles.
+        // Kept last among 'details' tile fields -- an access-control setting,
+        // not a defining property of the journey.
+        $fields['journey_roles'] = [
+            'name'        => __( 'Applies to Roles', 'dt-journeys' ),
+            'description' => __( 'Which roles this journey applies to. Dispatcher/admin always have access.', 'dt-journeys' ),
+            'type'        => 'multi_select',
+            'default'     => $this->get_role_options(),
+            'tile'        => 'details',
+            'font-icon'   => 'mdi mdi-account-key',
         ];
 
         return $fields;
@@ -337,5 +353,16 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
         } );
 
         return $fields;
+    }
+
+    /**
+     * Sort connection-field typeahead lookups against journeys by journey_order
+     * instead of the default last_modified sort.
+     */
+    public function dt_get_viewable_compact_search_query( $query, $post_type ){
+        if ( $post_type === $this->post_type ){
+            $query['sort'] = 'journey_order';
+        }
+        return $query;
     }
 }

@@ -162,8 +162,14 @@ class Dt_Journeys_Endpoints {
                 'is_sequential' => !empty( $journey['is_sequential'] ),
                 'display_type'  => $journey['display_type']['key'] ?? 'timeline',
                 'stage_count'   => count( $journey['stages'] ?? [] ),
+                'order'         => (int) ( $journey['journey_order'] ?? 0 ),
             ];
         }
+
+        // Manual order first (ties broken alphabetically for a stable, predictable list).
+        usort( $available, function ( $a, $b ) {
+            return ( $a['order'] <=> $b['order'] ) ?: strcasecmp( $a['name'], $b['name'] );
+        } );
 
         return [ 'journeys' => $available ];
     }
