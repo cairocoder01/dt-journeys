@@ -157,6 +157,150 @@ class Dt_Journeys {
          * To remove: delete the line below and remove the folder named /workflows
          */
         require_once( 'workflows/workflows.php' );
+        add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ], 99 );
+        
+        add_action( 'init', [ $this, 'add_rewrite_rules' ] );
+        add_filter( 'query_vars', [ $this, 'register_query_vars' ] );
+        add_action( 'template_include', [ $this, 'load_journeys_template' ] );
+        add_filter( 'dt_nav', function ( $nav ){
+            $nav['admin']['settings']['submenu']['journeys'] = [
+                'label'  => __( 'Journeys', 'disciple_tools' ),
+                'link'   => site_url( '/admin/journeys/' ),
+                'hidden' => ( ! current_user_can( 'manage_dt' ) ),
+                'icon'   => get_template_directory_uri() . '/dt-assets/images/settings.svg'
+            ];
+            return $nav;
+        });
+
+        add_filter( 'script_loader_tag', [ $this, 'script_loader_tag' ], 10, 3 );
+
+        add_action( 'rest_api_init', [ $this, 'add_api_routes' ] );
+    }
+
+    public function add_api_routes() {
+        $namespace = 'dt-journeys/v1';
+
+        register_rest_route(
+            $namespace, '/get-journeys', [
+                [
+                    'methods'  => 'POST',
+                    'callback' => [ $this, 'get_journeys_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ],
+            ]
+        );
+
+        register_rest_route(
+            $namespace, '/delete-journey', [
+                [
+                    'methods'  => 'POST',
+                    'callback' => [ $this, 'delete_journey_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
+
+        register_rest_route(
+            $namespace, '/duplicate-journey', [
+                [
+                    'methods'  => 'POST',
+                    'callback' => [ $this, 'duplicate_journey_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
+    }
+
+    public function get_journeys_endpoint( WP_REST_Request $request ) {
+        $params = $request->get_params();
+        $raw_journeys = self::get_journeys($params);
+
+        return [
+            'journeys'       => $raw_journeys['posts'],
+            'total_journeys' => $raw_journeys['total']
+        ];
+    }
+
+    public function delete_journey_endpoint( WP_REST_Request $request ) {
+        $params = $request->get_params();
+        $journey_id = isset($params['journey_id']) ? $params['journey_id'] : null;
+
+        if (!$journey_id) {
+            return new WP_REST_Response(['error' => 'Invalid journey ID'], 400);
+        }
+
+        self::delete_journey($journey_id);
+        return new WP_REST_Response(['message' => 'Journey deleted successfully'], 200);
+    }
+
+    public function duplicate_journey_endpoint( WP_REST_Request $request ) {
+        $params = $request->get_params();
+        $journey_id = isset($params['journey_id']) ? $params['journey_id'] : null;
+
+        if (!$journey_id) {
+            return new WP_REST_Response(['error' => 'Invalid journey ID'], 400);
+        }
+
+        $new_journey_id = self::duplicate_journey($journey_id);
+        return new WP_REST_Response(['journey_id' => $new_journey_id], 200);
+    }
+
+    public function add_rewrite_rules() {
+        add_rewrite_rule( '^admin/journeys/?$', 'index.php?dt_journeys_page=1', 'top' );
+    }
+
+    public function register_query_vars( $query_vars ) {
+        $query_vars[] = 'dt_journeys_page';
+        return $query_vars;
+    }
+
+    public function load_journeys_template( $template ) {
+        if ( get_query_var( 'dt_journeys_page' ) == false || get_query_var( 'dt_journeys_page' ) == '' ) {
+            return $template;
+        }
+
+        if ( ! current_user_can( 'manage_dt' ) ) {
+            wp_die( __( 'You do not have permission to view this page.', 'disciple_tools' ) );
+        }
+
+        $plugin_dir = plugin_dir_path( __FILE__ );
+        $custom_template = $plugin_dir . 'templates/template-journeys.php';
+
+        if ( file_exists( $custom_template ) ) {
+            return $custom_template;
+        }
+
+        return $template;
+    }
+
+    public function scripts() {
+        if ( get_query_var( 'dt_journeys_page' ) == false || get_query_var( 'dt_journeys_page' ) == '' ) {
+            return; 
+        }
+
+        wp_enqueue_script('journeys_table', plugin_dir_url(__FILE__) . 'templates/journeys-table.js', ['jquery'], '1.0', true);
+
+        $post_settings = DT_Posts::get_post_settings( 'journeys' );
+        $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
+        
+        wp_localize_script( 'journeys_table', 'journeys_table', [
+            'translations' => [
+                'go' => __( 'Go', 'disciple_tools' ),
+                'search' => __( 'Search', 'disciple_tools' ),
+                'journeys' => __( 'Journeys', 'disciple_tools' ),
+                'showing_x_of_y' => __( 'Showing %1$s of %2$s', 'disciple_tools' ),
+                'create_journey' => __( 'New Journey', 'disciple_tools' ),
+            ],
+            'fields' => $journey_fields,
+            'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
+        ] );
+    }
+
+    public function script_loader_tag( $tag, $handle, $src ) {
+        if ($handle === 'journeys_table') {
+            return '<script type="module" src="' . esc_url($src) . '"></script>';
+        }
+        return $tag;
     }
 
     /**
@@ -186,6 +330,10 @@ class Dt_Journeys {
         // the journeys/journey_stages access capabilities are granted to existing
         // roles (e.g. admins, multipliers) without waiting for a theme roles bump.
         delete_option( 'dt_roles_number' );
+
+        // Add the routing rules and flush so they work immediately upon activation
+        self::instance()->add_rewrite_rules();
+        flush_rewrite_rules();
     }
 
     /**
@@ -198,6 +346,7 @@ class Dt_Journeys {
     public static function deactivation() {
         // add functions here that need to happen on deactivation
         delete_option( 'dismissed-dt-journeys' );
+        flush_rewrite_rules();
     }
 
     /**
@@ -258,6 +407,87 @@ class Dt_Journeys {
         _doing_it_wrong( 'dt_journeys::' . esc_html( $method ), 'Method does not exist.', '0.1' );
         unset( $method, $args );
         return null;
+    }
+
+    public static function get_journeys($params = []) {
+        $searchParameters = [];
+        foreach ($params['searchParameters'] as $key => $value) {
+            if ($key === 'sort' || $key === 'text') {
+                $searchParameters[$key] = $value;
+            } else if ($key === 'is_sequential' && $value === 0) {
+                $searchParameters[$key] = [''];
+            } else {
+                $searchParameters[$key] = [$value];
+            }
+        }
+        $journeys = DT_Posts::list_posts( 'journeys', $searchParameters );
+        return $journeys;
+    }
+
+    public static function delete_journey($journey_id) {
+        DT_Posts::delete_post( 'journeys', $journey_id );
+    }
+
+    function duplicate_journey( $original_id ) {
+        $wp_post = get_post( $original_id );
+        if ( ! $wp_post ) {
+            return new WP_Error( 'not_found', 'Original post not found.' );
+        }
+
+        $new_post_args = array(
+            'post_title'   => $wp_post->post_title . ' (Copy)',
+            'post_type'    => $wp_post->post_type,
+            'post_status'  => 'publish', 
+            'post_author'  => get_current_user_id(),
+        );
+
+        $new_post_id = wp_insert_post( $new_post_args );
+        if ( is_wp_error( $new_post_id ) ) {
+            return $new_post_id;
+        }
+
+        $original_post = DT_Posts::get_post( 'journeys', $original_id );
+        
+        $field_settings = DT_Posts::get_post_field_settings( $wp_post->post_type );
+        
+        $update_args = array();
+
+        foreach ( $field_settings as $field_key => $field_config ) {
+            
+            // Look for connection field types because they don't copy like standard fields
+            if ( isset( $field_config['type'] ) && $field_config['type'] === 'connection' ) {
+                
+                if ( ! empty( $original_post[ $field_key ] ) ) {
+                    
+                    $update_args[ $field_key ] = array(
+                        'values'       => array(),
+                        'force_values' => true,
+                    );
+                    
+                    foreach ( $original_post[ $field_key ] as $connection ) {
+                        $update_args[ $field_key ]['values'][] = array(
+                            'value' => $connection['ID']
+                        );
+                    }
+                }
+            }
+        }
+
+        if ( ! empty( $update_args ) ) {
+            DT_Posts::update_post( $wp_post->post_type, $new_post_id, $update_args, false, false );
+        }
+
+        $post_meta = get_post_custom( $original_id );
+        foreach ( $post_meta as $key => $values ) {
+            if ( strpos( $key, '_' ) === 0 ) {
+                continue; 
+            }
+            foreach ( $values as $value ) {
+                add_post_meta( $new_post_id, $key, maybe_unserialize( $value ) );
+            }
+        }
+
+        return $new_post_id;
     }
 }
 
