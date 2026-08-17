@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 940" width="1440" height="940" font-family="Helvetica, Arial, sans-serif">
+<title>Phase 4 — Journeys list (/admin/journeys)</title>
+<rect x="0" y="0" width="1440" height="940" fill="#f4f4f4"/>
+<rect x="0" y="0" width="1440" height="64" rx="0" fill="#eaeaea" stroke="#cccccc" stroke-width="1.5" stroke-dasharray="4,3"/><text x="720.0" y="37" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#999" text-anchor="middle" style="font-style:italic;">Existing Disciple.Tools admin header / navigation — unchanged</text>
+<text x="40" y="100" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#888" text-anchor="start" style="">Admin  /  Journeys</text>
+<text x="40" y="142" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#222" text-anchor="start" style="">Journeys</text>
+<text x="40" y="164" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#888" text-anchor="start" style="">Manage journey definitions and their stages</text>
+<rect x="1230" y="108" width="170" height="42" rx="5" fill="#2a2a2a" stroke="#2a2a2a" stroke-width="1.5"/><text x="1315.0" y="133.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle" style="">+ New Journey</text>
+<text x="1230" y="166" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">opens Journey Editor</text>
+<text x="1230" y="183" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">(new)</text>
+<rect x="40" y="194" width="280" height="36" rx="4" fill="#fff" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="54" y="217" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#aaa" text-anchor="start" style="font-style:italic;">Search journeys…</text>
+<rect x="336" y="194" width="190" height="36" rx="4" fill="#fff" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="350" y="217" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Category: All ▾</text>
+<rect x="542" y="194" width="190" height="36" rx="4" fill="#fff" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="556" y="217" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Role: All ▾</text>
+<text x="1400" y="217" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#888" text-anchor="end" style="">12 journeys</text>
+<text x="40" y="250" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">Search + Category/Role filters — Category options = distinct journey_category tag values in use (it's a freeform tags field, not a fixed</text>
+<text x="40" y="267" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">list)</text>
+<rect x="40" y="284" width="1360" height="40" rx="0" fill="#eeeeee" stroke="#cccccc" stroke-width="1.5"/>
+<text x="56" y="309" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="" letter-spacing="0.5">NAME</text>
+<text x="360" y="309" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="" letter-spacing="0.5">CATEGORY</text>
+<text x="520" y="309" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="" letter-spacing="0.5">ROLES</text>
+<text x="750" y="309" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="" letter-spacing="0.5">TYPE</text>
+<text x="950" y="309" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="" letter-spacing="0.5">STAGES</text>
+<text x="1040" y="309" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="" letter-spacing="0.5">UPDATED</text>
+<text x="1215" y="309" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#333" text-anchor="start" style="" letter-spacing="0.5">ACTIONS</text>
+<rect x="40" y="324" width="1360" height="60" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<line x1="40" y1="384" x2="1400" y2="384" stroke="#e0e0e0" stroke-width="1"/>
+<text x="56" y="358" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#222" text-anchor="start" style="">Seeker Path</text>
+<rect x="360" y="342" width="130" height="24" rx="12.0" fill="#eeeeee" stroke="#c9c9c9" stroke-width="1.5"/><text x="425.0" y="358.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#555" text-anchor="middle" style="">Media Follow-up</text>
+<text x="520" y="358" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Dispatcher, +2</text>
+<text x="750" y="358" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Timeline · Sequential</text>
+<text x="965" y="358" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#555" text-anchor="middle" style="">5</text>
+<text x="1040" y="358" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#999" text-anchor="start" style="">2 days ago</text>
+<circle cx="1215" cy="354" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1215" y="359.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">E</text>
+<circle cx="1255" cy="354" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1255" y="359.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">D</text>
+<circle cx="1295" cy="354" r="13" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/><text x="1295" y="359.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#b23b3b" text-anchor="middle" style="">X</text>
+<rect x="40" y="384" width="1360" height="60" rx="0" fill="#fafafa" stroke="none" stroke-width="1.5"/>
+<line x1="40" y1="444" x2="1400" y2="444" stroke="#e0e0e0" stroke-width="1"/>
+<text x="56" y="418" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#222" text-anchor="start" style="">T4T — 7 Lessons</text>
+<rect x="360" y="402" width="130" height="24" rx="12.0" fill="#eeeeee" stroke="#c9c9c9" stroke-width="1.5"/><text x="425.0" y="418.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#555" text-anchor="middle" style="">T4T</text>
+<text x="520" y="418" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">All roles</text>
+<text x="750" y="418" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Timeline · Sequential</text>
+<text x="965" y="418" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#555" text-anchor="middle" style="">7</text>
+<text x="1040" y="418" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#999" text-anchor="start" style="">1 week ago</text>
+<circle cx="1215" cy="414" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1215" y="419.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">E</text>
+<circle cx="1255" cy="414" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1255" y="419.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">D</text>
+<circle cx="1295" cy="414" r="13" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/><text x="1295" y="419.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#b23b3b" text-anchor="middle" style="">X</text>
+<rect x="40" y="444" width="1360" height="60" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<line x1="40" y1="504" x2="1400" y2="504" stroke="#e0e0e0" stroke-width="1"/>
+<text x="56" y="478" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#222" text-anchor="start" style="">Waha — Foundations 1</text>
+<rect x="360" y="462" width="130" height="24" rx="12.0" fill="#eeeeee" stroke="#c9c9c9" stroke-width="1.5"/><text x="425.0" y="478.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#555" text-anchor="middle" style="">Waha</text>
+<text x="520" y="478" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Multiplier, Coach</text>
+<text x="750" y="478" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">List · Non-sequential</text>
+<text x="965" y="478" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#555" text-anchor="middle" style="">8</text>
+<text x="1040" y="478" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#999" text-anchor="start" style="">3 weeks ago</text>
+<circle cx="1215" cy="474" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1215" y="479.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">E</text>
+<circle cx="1255" cy="474" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1255" y="479.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">D</text>
+<circle cx="1295" cy="474" r="13" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/><text x="1295" y="479.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#b23b3b" text-anchor="middle" style="">X</text>
+<rect x="40" y="504" width="1360" height="60" rx="0" fill="#fafafa" stroke="none" stroke-width="1.5"/>
+<line x1="40" y1="564" x2="1400" y2="564" stroke="#e0e0e0" stroke-width="1"/>
+<text x="56" y="538" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#222" text-anchor="start" style="">Zúme</text>
+<rect x="360" y="522" width="130" height="24" rx="12.0" fill="#eeeeee" stroke="#c9c9c9" stroke-width="1.5"/><text x="425.0" y="538.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#555" text-anchor="middle" style="">Zúme</text>
+<text x="520" y="538" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">All roles</text>
+<text x="750" y="538" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Grid · Non-sequential</text>
+<text x="965" y="538" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#555" text-anchor="middle" style="">10</text>
+<text x="1040" y="538" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#999" text-anchor="start" style="">1 month ago</text>
+<circle cx="1215" cy="534" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1215" y="539.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">E</text>
+<circle cx="1255" cy="534" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1255" y="539.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">D</text>
+<circle cx="1295" cy="534" r="13" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/><text x="1295" y="539.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#b23b3b" text-anchor="middle" style="">X</text>
+<rect x="40" y="564" width="1360" height="60" rx="0" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<line x1="40" y1="624" x2="1400" y2="624" stroke="#e0e0e0" stroke-width="1"/>
+<text x="56" y="598" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#222" text-anchor="start" style="">New Hope</text>
+<rect x="360" y="582" width="130" height="24" rx="12.0" fill="#eeeeee" stroke="#c9c9c9" stroke-width="1.5"/><text x="425.0" y="598.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#555" text-anchor="middle" style="">Multiplying Hope</text>
+<text x="520" y="598" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Dispatcher</text>
+<text x="750" y="598" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="start" style="">Timeline · Sequential</text>
+<text x="965" y="598" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#555" text-anchor="middle" style="">4</text>
+<text x="1040" y="598" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#999" text-anchor="start" style="">2 months ago</text>
+<circle cx="1215" cy="594" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1215" y="599.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">E</text>
+<circle cx="1255" cy="594" r="13" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.5"/><text x="1255" y="599.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#555" text-anchor="middle" style="">D</text>
+<circle cx="1295" cy="594" r="13" fill="#ffffff" stroke="#b23b3b" stroke-width="1.5"/><text x="1295" y="599.2" font-family="Helvetica, Arial, sans-serif" font-size="12.35" font-weight="600" fill="#b23b3b" text-anchor="middle" style="">X</text>
+<text x="40" y="654" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#888" text-anchor="start" style="">Showing 1–5 of 14</text>
+<text x="1400" y="654" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" fill="#555" text-anchor="end" style="">‹  1  2  3  ›</text>
+<text x="1215" y="686" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="end" style="font-style:italic;">Row icons: E = Edit (→ Journey Editor), D = Duplicate, X = Delete (confirm dialog — see sheet 4)</text>
+<rect x="40" y="724" width="1360" height="150" rx="4" fill="#fff" stroke="#cccccc" stroke-width="1.5" stroke-dasharray="3,3"/>
+<text x="60" y="752" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#333" text-anchor="start" style="">Notes for implementation</text>
+<text x="60" y="774" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">•  Entire page + every action here (create/edit/delete/reorder) must be gated behind the manage_journeys capability, matching Phase 1's roles model.</text>
+<text x="60" y="796" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">•  Category filter and the Category field elsewhere are a freeform tags field — offer autocomplete against existing values so authors don't fragment e.g. "T4T" vs "t4t".</text>
+<text x="60" y="818" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">•  Route via dt_templates_for_urls at /admin/journeys, following the same pattern as User Management.</text>
+<rect x="40" y="910" width="26" height="16" rx="2" fill="#eaeaea" stroke="#cccccc" stroke-width="1.5" stroke-dasharray="4,3"/>
+<text x="74" y="922" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#777" text-anchor="start" style="">existing / out of scope for this build</text>
+<rect x="370" y="910" width="26" height="16" rx="2" fill="#fff" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="404" y="922" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#777" text-anchor="start" style="">new UI for Phase 4</text>
+<text x="600" y="922" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" fill="#b23b3b" text-anchor="start" style="font-style:italic;">red italic = implementation note</text>
+</svg>
