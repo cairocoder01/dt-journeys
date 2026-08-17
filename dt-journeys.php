@@ -5,7 +5,7 @@
  * Description: Disciple.Tools - Journeys is intended to help developers and integrator jumpstart their extension of the Disciple.Tools system.
  * Text Domain: dt-journeys
  * Domain Path: /languages
- * Version:  0.1.2
+ * Version:  0.1.3
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/cairocoder01/dt-journeys
  * Requires at least: 4.7.0
