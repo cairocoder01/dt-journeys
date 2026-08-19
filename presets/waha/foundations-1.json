@@ -1,0 +1,142 @@
+{
+  "id": "waha-foundations-1-en",
+  "name": "Foundations 1: From Creation to the Birth of Jesus",
+  "language": "en",
+  "journey_category": ["Waha", "Foundations"],
+  "journey_order": 1,
+  "is_sequential": true,
+  "display_type": "timeline",
+  "description": "Start your journey toward discovering God by learning how He created the universe and everything in it. Find out how God began His relationship with mankind and what went wrong early on. These lessons give an overview of God's loving character and our need for forgiveness.",
+  "source": {
+    "name": "Waha Story Set",
+    "url": "https://web.waha.app/eng/01.001"
+  },
+  "stages": [
+    {
+      "name": "Creation",
+      "description": "Genesis 1:1-25",
+      "stage_order": 1,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.001)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.001)"
+      ]
+    },
+    {
+      "name": "Creation of Humans",
+      "description": "Genesis 1:26-27, 2:7-9, 2:15-25",
+      "stage_order": 2,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.002)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.002)"
+      ]
+    },
+    {
+      "name": "Humans Disobey God",
+      "description": "Genesis 3:1-24",
+      "stage_order": 3,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.003)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.003)"
+      ]
+    },
+    {
+      "name": "God Destroys an Evil Humanity",
+      "description": "Genesis 6:5-6, 6:9-22, 7:17-24",
+      "stage_order": 4,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.004)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.004)"
+      ]
+    },
+    {
+      "name": "Tower of Babel",
+      "description": "Genesis 11:1-9",
+      "stage_order": 5,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.005)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.005)"
+      ]
+    },
+    {
+      "name": "Abraham Trusted God",
+      "description": "Genesis 12:1-7, 15:1-6",
+      "stage_order": 6,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.006)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.006)"
+      ]
+    },
+    {
+      "name": "Abraham Obeyed God",
+      "description": "Genesis 22:1-19",
+      "stage_order": 7,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.007)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.007)"
+      ]
+    },
+    {
+      "name": "God's Call to Moses",
+      "description": "Exodus 2:23-3:14, 7:1-5",
+      "stage_order": 8,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.008)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.008)"
+      ]
+    },
+    {
+      "name": "The Passover Sacrifice",
+      "description": "Exodus 12:1-3, 12:21-31, 12:40-42",
+      "stage_order": 9,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.009)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.009)"
+      ]
+    },
+    {
+      "name": "The Ten Commandments and Sacrifice",
+      "description": "Exodus 20:1-17, Leviticus 6:1-7",
+      "stage_order": 10,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.010)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.010)"
+      ]
+    },
+    {
+      "name": "Cycle of Disobedience",
+      "description": "Judges 2:10-23",
+      "stage_order": 11,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.011)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.011)"
+      ]
+    },
+    {
+      "name": "The Suffering Servant of God",
+      "description": "Isaiah 52:13-53:12",
+      "stage_order": 12,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.012)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.012)"
+      ]
+    },
+    {
+      "name": "The Promised Saviour",
+      "description": "Isaiah 9:1-7, Luke 1:26-38",
+      "stage_order": 13,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.013)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.013)"
+      ]
+    },
+    {
+      "name": "The Birth of Jesus",
+      "description": "Luke 2:1-20",
+      "stage_order": 14,
+      "links": [
+        "[Lesson Page](https://web.waha.app/eng/01.001/01.001.014)",
+        "[Download Audio (MP3)](https://web.waha.app/api/download-lesson?languageId=eng&setId=01.001&lessonId=01.001.014)"
+      ]
+    }
+  ]
+}
