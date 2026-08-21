@@ -103,7 +103,7 @@ class Dt_Journeys_Endpoints {
 
     public function get_journeys_endpoint( WP_REST_Request $request ) {
         $params = $request->get_params();
-        $raw_journeys = self::get_journeys($params);
+        $raw_journeys = self::get_journeys( $params );
 
         return [
             'journeys'       => $raw_journeys['posts'],
@@ -113,49 +113,49 @@ class Dt_Journeys_Endpoints {
 
     public function delete_journey_endpoint( WP_REST_Request $request ) {
         $params = $request->get_params();
-        $journey_id = isset($params['journey_id']) ? $params['journey_id'] : null;
+        $journey_id = isset( $params['journey_id'] ) ? $params['journey_id'] : null;
 
-        if (!$journey_id) {
-            return new WP_REST_Response(['error' => 'Invalid journey ID'], 400);
+        if ( !$journey_id ) {
+            return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
         }
 
-        self::delete_journey($journey_id);
-        return new WP_REST_Response(['message' => 'Journey deleted successfully'], 200);
+        self::delete_journey( $journey_id );
+        return new WP_REST_Response( [ 'message' => 'Journey deleted successfully' ], 200 );
     }
 
     public function duplicate_journey_endpoint( WP_REST_Request $request ) {
         $params = $request->get_params();
-        $journey_id = isset($params['journey_id']) ? $params['journey_id'] : null;
+        $journey_id = isset( $params['journey_id'] ) ? $params['journey_id'] : null;
 
-        if (!$journey_id) {
-            return new WP_REST_Response(['error' => 'Invalid journey ID'], 400);
+        if ( !$journey_id ) {
+            return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
         }
 
-        $new_journey_id = self::duplicate_journey($journey_id);
-        return new WP_REST_Response(['journey_id' => $new_journey_id], 200);
+        $new_journey_id = self::duplicate_journey( $journey_id );
+        return new WP_REST_Response( [ 'journey_id' => $new_journey_id ], 200 );
     }
 
-    public static function get_journeys($params = []) {
-        $searchParameters = [];
-        foreach ($params['searchParameters'] as $key => $value) {
-            if ($key === 'sort' || $key === 'text') {
-                $searchParameters[$key] = $value;
-            } else if ($key === 'is_sequential' && $value === 0) {
-                $searchParameters[$key] = [''];
+    public function get_journeys( $params = [] ) {
+        $search_parameters = [];
+        foreach ( $params['search_parameters'] as $key => $value ) {
+            if ( $key === 'sort' || $key === 'text' ) {
+                $search_parameters[$key] = $value;
+            } else if ( $key === 'is_sequential' && $value === 0 ) {
+                $search_parameters[$key] = [ '' ];
             } else {
-                // if it's a field, build searchParameters['fields'] as in custom filters
-                $searchParameters['fields'][][$key] = $value;
+                // if it's a field, build search_parameters['fields'] as in custom filters
+                $search_parameters['fields'][][$key] = $value;
             }
         }
-        $journeys = DT_Posts::list_posts( 'journeys', $searchParameters );
+        $journeys = DT_Posts::list_posts( 'journeys', $search_parameters );
         return $journeys;
     }
 
-    public static function delete_journey($journey_id) {
+    public function delete_journey( $journey_id ) {
         DT_Posts::delete_post( 'journeys', $journey_id );
     }
 
-    function duplicate_journey( $original_id ) {
+    public function duplicate_journey( $original_id ) {
         $wp_post = get_post( $original_id );
         if ( ! $wp_post ) {
             return new WP_Error( 'not_found', 'Original post not found.' );
@@ -164,7 +164,7 @@ class Dt_Journeys_Endpoints {
         $new_post_args = array(
             'post_title'   => $wp_post->post_title . ' (Copy)',
             'post_type'    => $wp_post->post_type,
-            'post_status'  => 'publish', 
+            'post_status'  => 'publish',
             'post_author'  => get_current_user_id(),
         );
 
@@ -174,23 +174,23 @@ class Dt_Journeys_Endpoints {
         }
 
         $original_post = DT_Posts::get_post( 'journeys', $original_id );
-        
+
         $field_settings = DT_Posts::get_post_field_settings( $wp_post->post_type );
-        
+
         $update_args = array();
 
         foreach ( $field_settings as $field_key => $field_config ) {
-            
+
             // Look for connection field types because they don't copy like standard fields
             if ( isset( $field_config['type'] ) && $field_config['type'] === 'connection' ) {
-                
+
                 if ( ! empty( $original_post[ $field_key ] ) ) {
-                    
+
                     $update_args[ $field_key ] = array(
                         'values'       => array(),
                         'force_values' => true,
                     );
-                    
+
                     foreach ( $original_post[ $field_key ] as $connection ) {
                         if ( $field_key === 'stages' ) {
                             $new_stage_id = self::duplicate_stage( $connection['ID'] );
@@ -200,7 +200,6 @@ class Dt_Journeys_Endpoints {
                                     'value' => $new_stage_id
                                 );
                             }
-
                         } else {
                             $update_args[ $field_key ]['values'][] = array(
                                 'value' => $connection['ID']
@@ -218,7 +217,7 @@ class Dt_Journeys_Endpoints {
         $post_meta = get_post_custom( $original_id );
         foreach ( $post_meta as $key => $values ) {
             if ( strpos( $key, '_' ) === 0 ) {
-                continue; 
+                continue;
             }
             foreach ( $values as $value ) {
                 add_post_meta( $new_post_id, $key, maybe_unserialize( $value ) );
@@ -228,7 +227,7 @@ class Dt_Journeys_Endpoints {
         return $new_post_id;
     }
 
-    function duplicate_stage( $original_stage_id ) {
+    public function duplicate_stage( $original_stage_id ) {
         $wp_post = get_post( $original_stage_id );
         if ( ! $wp_post ) {
             return false;
@@ -252,7 +251,7 @@ class Dt_Journeys_Endpoints {
         foreach ( $post_meta as $key => $values ) {
             // Skip hidden/system meta keys
             if ( strpos( $key, '_' ) === 0 ) {
-                continue; 
+                continue;
             }
             foreach ( $values as $value ) {
                 add_post_meta( $new_stage_id, $key, maybe_unserialize( $value ) );

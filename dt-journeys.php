@@ -158,7 +158,7 @@ class Dt_Journeys {
          */
         require_once( 'workflows/workflows.php' );
         add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ], 99 );
-        
+
         add_action( 'init', [ $this, 'add_rewrite_rules' ] );
         add_filter( 'query_vars', [ $this, 'register_query_vars' ] );
         add_action( 'template_include', [ $this, 'load_journeys_template' ] );
@@ -190,7 +190,7 @@ class Dt_Journeys {
         }
 
         if ( ! current_user_can( 'manage_dt' ) ) {
-            wp_die( __( 'You do not have permission to view this page.', 'disciple_tools' ) );
+            wp_die( esc_html__( 'You do not have permission to view this page.', 'disciple_tools' ) );
         }
 
         $plugin_dir = plugin_dir_path( __FILE__ );
@@ -205,10 +205,10 @@ class Dt_Journeys {
 
     public function scripts() {
         if ( get_query_var( 'dt_journeys_page' ) == false || get_query_var( 'dt_journeys_page' ) == '' ) {
-            return; 
+            return;
         }
 
-        wp_enqueue_script('journeys_table', plugin_dir_url(__FILE__) . 'templates/journeys-table.js', ['jquery'], '1.0', true);
+        wp_enqueue_script( 'journeys_table', plugin_dir_url( __FILE__ ) . 'templates/journeys-table.js', [ 'jquery' ], '1.0', true );
 
         $post_settings = DT_Posts::get_post_settings( 'journeys' );
         $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
@@ -246,8 +246,8 @@ class Dt_Journeys {
     }
 
     public function script_loader_tag( $tag, $handle, $src ) {
-        if ($handle === 'journeys_table') {
-            return '<script type="module" src="' . esc_url($src) . '"></script>';
+        if ( $handle === 'journeys_table' ) {
+            return '<script type="module" src="' . esc_url( $src ) . '"></script>';
         }
         return $tag;
     }
@@ -267,7 +267,7 @@ class Dt_Journeys {
         return $links_array;
     }
 
-    function get_journey_category_options() {
+    public function get_journey_category_options() {
         global $wpdb;
 
         $results = $wpdb->get_col( "

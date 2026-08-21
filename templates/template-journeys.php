@@ -34,7 +34,7 @@ $template_dir = get_template_directory_uri();
     }
 </style>
 
-<?php 
+<?php
 // Load the Disciple.Tools footer
-get_footer(); 
+get_footer();
 ?>
