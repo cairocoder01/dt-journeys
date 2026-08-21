@@ -212,7 +212,7 @@ class Dt_Journeys {
 
         $post_settings = DT_Posts::get_post_settings( 'journeys' );
         $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
-        $role_options = $journey_fields['journey_roles']['options'] ?? [];
+        $role_options = $journey_fields['journey_roles']['default'] ?? [];
         $role_labels = [];
         foreach ( $role_options as $key => $data ) {
             $role_labels[] = [
