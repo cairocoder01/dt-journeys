@@ -4,7 +4,9 @@
  */
 
 // Load the Disciple.Tools header (which includes the top nav bar)
-get_header(); 
+get_header();
+
+$template_dir = get_template_directory_uri();
 
 ?>
 
@@ -16,13 +18,21 @@ get_header();
             <section id="metrics-container" class="medium-12 cell">
                 <div class="bordered-box">
                     <div id="journey-chart">
-
-                    </div><!-- Container for charts -->
+                        <journeys-table/>
+                    </div>
                 </div>
             </section>
         </div>
     </div>
 </div>
+
+<style>
+    journeys-table {
+        --sort-both: url('<?php echo esc_url( $template_dir . '/dt-assets/images/sort_both.png' ); ?>');
+        --sort-desc: url('<?php echo esc_url( $template_dir . '/dt-assets/images/sort_desc.png' ); ?>');
+        --sort-asc: url('<?php echo esc_url( $template_dir . '/dt-assets/images/sort_asc.png' ); ?>');
+    }
+</style>
 
 <?php 
 // Load the Disciple.Tools footer

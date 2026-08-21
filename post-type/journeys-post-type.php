@@ -226,10 +226,6 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'default'     => true,
             'tile'        => 'details',
             'font-icon'        => 'mdi mdi-order-numeric-ascending',
-            'options'     => [
-                1 => [ 'label' => __( 'True', 'dt-journeys' ) ],
-                0 => [ 'label' => __( 'False', 'dt-journeys' ) ],
-            ],
         ];
 
         $fields['display_type'] = [
@@ -244,11 +240,6 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'default_color' => '#366184',
             'tile'          => 'details',
             'font-icon'     => 'mdi mdi-view-dashboard',
-            'options'       => [
-                'timeline' => [ 'label' => __( 'Timeline', 'dt-journeys' ) ],
-                'list'     => [ 'label' => __( 'List', 'dt-journeys' ) ],
-                'grid'     => [ 'label' => __( 'Grid', 'dt-journeys' ) ],
-            ],
         ];
 
         // The ordered set of stages that belong to this journey.

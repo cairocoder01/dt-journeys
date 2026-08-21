@@ -173,76 +173,6 @@ class Dt_Journeys {
         });
 
         add_filter( 'script_loader_tag', [ $this, 'script_loader_tag' ], 10, 3 );
-
-        add_action( 'rest_api_init', [ $this, 'add_api_routes' ] );
-    }
-
-    public function add_api_routes() {
-        $namespace = 'dt-journeys/v1';
-
-        register_rest_route(
-            $namespace, '/get-journeys', [
-                [
-                    'methods'  => 'POST',
-                    'callback' => [ $this, 'get_journeys_endpoint' ],
-                    'permission_callback' => '__return_true',
-                ],
-            ]
-        );
-
-        register_rest_route(
-            $namespace, '/delete-journey', [
-                [
-                    'methods'  => 'POST',
-                    'callback' => [ $this, 'delete_journey_endpoint' ],
-                    'permission_callback' => '__return_true',
-                ]
-            ]
-        );
-
-        register_rest_route(
-            $namespace, '/duplicate-journey', [
-                [
-                    'methods'  => 'POST',
-                    'callback' => [ $this, 'duplicate_journey_endpoint' ],
-                    'permission_callback' => '__return_true',
-                ]
-            ]
-        );
-    }
-
-    public function get_journeys_endpoint( WP_REST_Request $request ) {
-        $params = $request->get_params();
-        $raw_journeys = self::get_journeys($params);
-
-        return [
-            'journeys'       => $raw_journeys['posts'],
-            'total_journeys' => $raw_journeys['total']
-        ];
-    }
-
-    public function delete_journey_endpoint( WP_REST_Request $request ) {
-        $params = $request->get_params();
-        $journey_id = isset($params['journey_id']) ? $params['journey_id'] : null;
-
-        if (!$journey_id) {
-            return new WP_REST_Response(['error' => 'Invalid journey ID'], 400);
-        }
-
-        self::delete_journey($journey_id);
-        return new WP_REST_Response(['message' => 'Journey deleted successfully'], 200);
-    }
-
-    public function duplicate_journey_endpoint( WP_REST_Request $request ) {
-        $params = $request->get_params();
-        $journey_id = isset($params['journey_id']) ? $params['journey_id'] : null;
-
-        if (!$journey_id) {
-            return new WP_REST_Response(['error' => 'Invalid journey ID'], 400);
-        }
-
-        $new_journey_id = self::duplicate_journey($journey_id);
-        return new WP_REST_Response(['journey_id' => $new_journey_id], 200);
     }
 
     public function add_rewrite_rules() {
@@ -282,7 +212,24 @@ class Dt_Journeys {
 
         $post_settings = DT_Posts::get_post_settings( 'journeys' );
         $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
-        
+        $role_options = $journey_fields['journey_roles']['options'] ?? [];
+        $role_labels = [];
+        foreach ( $role_options as $key => $data ) {
+            $role_labels[] = [
+                'id'    => $key,
+                'label' => isset( $data['label'] ) ? $data['label'] : $key,
+            ];
+        }
+
+        $category_options = $this->get_journey_category_options();
+        $category_labels = [];
+        foreach ( $category_options as $category ) {
+            $category_labels[] = [
+                'id'    => $category,
+                'label' => $category,
+            ];
+        }
+
         wp_localize_script( 'journeys_table', 'journeys_table', [
             'translations' => [
                 'go' => __( 'Go', 'disciple_tools' ),
@@ -293,6 +240,8 @@ class Dt_Journeys {
             ],
             'fields' => $journey_fields,
             'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
+            'role_options' => $role_labels,
+            'category_options' => $category_labels,
         ] );
     }
 
@@ -316,6 +265,21 @@ class Dt_Journeys {
         }
 
         return $links_array;
+    }
+
+    function get_journey_category_options() {
+        global $wpdb;
+
+        $results = $wpdb->get_col( "
+            SELECT DISTINCT meta_value
+            FROM $wpdb->postmeta
+            WHERE meta_key = 'journey_category'
+            AND meta_value != ''
+        " );
+
+        sort( $results );
+
+        return $results;
     }
 
     /**
@@ -407,87 +371,6 @@ class Dt_Journeys {
         _doing_it_wrong( 'dt_journeys::' . esc_html( $method ), 'Method does not exist.', '0.1' );
         unset( $method, $args );
         return null;
-    }
-
-    public static function get_journeys($params = []) {
-        $searchParameters = [];
-        foreach ($params['searchParameters'] as $key => $value) {
-            if ($key === 'sort' || $key === 'text') {
-                $searchParameters[$key] = $value;
-            } else if ($key === 'is_sequential' && $value === 0) {
-                $searchParameters[$key] = [''];
-            } else {
-                $searchParameters[$key] = [$value];
-            }
-        }
-        $journeys = DT_Posts::list_posts( 'journeys', $searchParameters );
-        return $journeys;
-    }
-
-    public static function delete_journey($journey_id) {
-        DT_Posts::delete_post( 'journeys', $journey_id );
-    }
-
-    function duplicate_journey( $original_id ) {
-        $wp_post = get_post( $original_id );
-        if ( ! $wp_post ) {
-            return new WP_Error( 'not_found', 'Original post not found.' );
-        }
-
-        $new_post_args = array(
-            'post_title'   => $wp_post->post_title . ' (Copy)',
-            'post_type'    => $wp_post->post_type,
-            'post_status'  => 'publish', 
-            'post_author'  => get_current_user_id(),
-        );
-
-        $new_post_id = wp_insert_post( $new_post_args );
-        if ( is_wp_error( $new_post_id ) ) {
-            return $new_post_id;
-        }
-
-        $original_post = DT_Posts::get_post( 'journeys', $original_id );
-        
-        $field_settings = DT_Posts::get_post_field_settings( $wp_post->post_type );
-        
-        $update_args = array();
-
-        foreach ( $field_settings as $field_key => $field_config ) {
-            
-            // Look for connection field types because they don't copy like standard fields
-            if ( isset( $field_config['type'] ) && $field_config['type'] === 'connection' ) {
-                
-                if ( ! empty( $original_post[ $field_key ] ) ) {
-                    
-                    $update_args[ $field_key ] = array(
-                        'values'       => array(),
-                        'force_values' => true,
-                    );
-                    
-                    foreach ( $original_post[ $field_key ] as $connection ) {
-                        $update_args[ $field_key ]['values'][] = array(
-                            'value' => $connection['ID']
-                        );
-                    }
-                }
-            }
-        }
-
-        if ( ! empty( $update_args ) ) {
-            DT_Posts::update_post( $wp_post->post_type, $new_post_id, $update_args, false, false );
-        }
-
-        $post_meta = get_post_custom( $original_id );
-        foreach ( $post_meta as $key => $values ) {
-            if ( strpos( $key, '_' ) === 0 ) {
-                continue; 
-            }
-            foreach ( $values as $value ) {
-                add_post_meta( $new_post_id, $key, maybe_unserialize( $value ) );
-            }
-        }
-
-        return $new_post_id;
     }
 }
 
