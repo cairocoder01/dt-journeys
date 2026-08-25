@@ -268,14 +268,8 @@ class Dt_Journeys {
     }
 
     public function get_journey_category_options() {
-        global $wpdb;
 
-        $results = $wpdb->get_col( "
-            SELECT DISTINCT meta_value
-            FROM $wpdb->postmeta
-            WHERE meta_key = 'journey_category'
-            AND meta_value != ''
-        " );
+        $results = DT_Posts::get_multi_select_options( 'journeys', 'journey_category', $search = '' );
 
         sort( $results );
 

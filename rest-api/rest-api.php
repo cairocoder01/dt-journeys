@@ -71,9 +71,9 @@ class Dt_Journeys_Endpoints {
         ] );
 
         register_rest_route(
-            $namespace, '/get-journeys', [
+            $namespace, '/journeys', [
                 [
-                    'methods'  => 'POST',
+                    'methods'  => 'GET',
                     'callback' => [ $this, 'get_journeys_endpoint' ],
                     'permission_callback' => '__return_true',
                 ],
@@ -81,9 +81,9 @@ class Dt_Journeys_Endpoints {
         );
 
         register_rest_route(
-            $namespace, '/delete-journey', [
+            $namespace, '/journeys/(?P<id>\d+)', [
                 [
-                    'methods'  => 'POST',
+                    'methods'  => 'DELETE',
                     'callback' => [ $this, 'delete_journey_endpoint' ],
                     'permission_callback' => '__return_true',
                 ]
@@ -91,7 +91,7 @@ class Dt_Journeys_Endpoints {
         );
 
         register_rest_route(
-            $namespace, '/duplicate-journey', [
+            $namespace, '/journeys/(?P<id>\d+)/duplicate', [
                 [
                     'methods'  => 'POST',
                     'callback' => [ $this, 'duplicate_journey_endpoint' ],
@@ -102,7 +102,12 @@ class Dt_Journeys_Endpoints {
     }
 
     public function get_journeys_endpoint( WP_REST_Request $request ) {
+        $limit             = $request->get_param( 'limit' );             // Returns 500
+        $search_param_one  = $request->get_param( 'your_search_key' );
+
         $params = $request->get_params();
+
+        dt_write_log($params);
         $raw_journeys = self::get_journeys( $params );
 
         return [
@@ -112,8 +117,7 @@ class Dt_Journeys_Endpoints {
     }
 
     public function delete_journey_endpoint( WP_REST_Request $request ) {
-        $params = $request->get_params();
-        $journey_id = isset( $params['journey_id'] ) ? $params['journey_id'] : null;
+        $journey_id = isset( $request['id'] ) ? $request['id'] : null;
 
         if ( !$journey_id ) {
             return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
@@ -124,8 +128,7 @@ class Dt_Journeys_Endpoints {
     }
 
     public function duplicate_journey_endpoint( WP_REST_Request $request ) {
-        $params = $request->get_params();
-        $journey_id = isset( $params['journey_id'] ) ? $params['journey_id'] : null;
+        $journey_id = isset( $request['id'] ) ? $request['id'] : null;
 
         if ( !$journey_id ) {
             return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
@@ -137,14 +140,11 @@ class Dt_Journeys_Endpoints {
 
     public function get_journeys( $params = [] ) {
         $search_parameters = [];
-        foreach ( $params['searchParameters'] as $key => $value ) {
-            if ( $key === 'sort' || $key === 'text' ) {
+        foreach ( $params as $key => $value ) {
+            if ( $key === 'sort' || $key === 'text' || $key === 'limit' ) {
                 $search_parameters[$key] = $value;
-            } else if ( $key === 'is_sequential' && $value === 0 ) {
-                $search_parameters[$key] = [ '' ];
             } else {
-                // if it's a field, build search_parameters['fields'] as in custom filters
-                $search_parameters['fields'][][$key] = $value;
+                $search_parameters['fields'][][$key] = explode(',', $value);
             }
         }
         $journeys = DT_Posts::list_posts( 'journeys', $search_parameters );

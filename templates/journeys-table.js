@@ -59,12 +59,13 @@ export class JourneysTable extends LitElement {
       }
     }
 
-    let response = await fetch(window.journeys_table.rest_endpoint + `get-journeys`, {
-      method: 'POST',
-      body: JSON.stringify({
+    const queryParams = new URLSearchParams({
         limit: 500,
-        searchParameters,
-      }),
+        ...searchParameters // Spreads existing keys (e.g., status, order, etc.)
+    });
+
+    let response = await fetch(window.journeys_table.rest_endpoint + `journeys?${queryParams.toString()}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'X-WP-Nonce': window.wpApiShare.nonce,
@@ -152,11 +153,8 @@ export class JourneysTable extends LitElement {
 
   async duplicateJourney(e, journey_id) {
     e.stopPropagation();
-    let response = await fetch(window.journeys_table.rest_endpoint + `duplicate-journey`, {
+    let response = await fetch(window.journeys_table.rest_endpoint + `journeys/${journey_id}/duplicate`, {
       method: 'POST',
-      body: JSON.stringify({
-        journey_id: journey_id
-      }),
       headers: {
         'Content-Type': 'application/json',
         'X-WP-Nonce': window.wpApiShare.nonce,
@@ -166,11 +164,8 @@ export class JourneysTable extends LitElement {
 
   async deleteJourney(e, journey_id) {
     e.stopPropagation();
-    let response = await fetch(window.journeys_table.rest_endpoint + `delete-journey`, {
-      method: 'POST',
-      body: JSON.stringify({
-        journey_id: journey_id
-      }),
+    let response = await fetch(window.journeys_table.rest_endpoint + `journeys/${journey_id}`, {
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         'X-WP-Nonce': window.wpApiShare.nonce,
