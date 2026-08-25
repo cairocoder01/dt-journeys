@@ -137,7 +137,7 @@ class Dt_Journeys_Endpoints {
 
     public function get_journeys( $params = [] ) {
         $search_parameters = [];
-        foreach ( $params['search_parameters'] as $key => $value ) {
+        foreach ( $params['searchParameters'] as $key => $value ) {
             if ( $key === 'sort' || $key === 'text' ) {
                 $search_parameters[$key] = $value;
             } else if ( $key === 'is_sequential' && $value === 0 ) {
@@ -152,6 +152,19 @@ class Dt_Journeys_Endpoints {
     }
 
     public function delete_journey( $journey_id ) {
+        $journey = DT_Posts::get_post( 'journeys', $journey_id );
+        foreach ( $journey[ 'stages' ] as $stage ) {
+            $wp_post = DT_Posts::get_post( 'journey_stages', $stage['ID'] );
+
+            $filtered = array_filter($wp_post['journey'], function($value) use ($journey_id) {
+                return $value['ID'] != $journey_id;
+            });
+
+            if ( empty( $filtered ) ) {
+                DT_Posts::delete_post( 'journey_stages', $stage['ID'] );
+            }
+            
+        }
         DT_Posts::delete_post( 'journeys', $journey_id );
     }
 
@@ -235,7 +248,7 @@ class Dt_Journeys_Endpoints {
 
         // 1. Create the new Stage
         $new_post_args = array(
-            'post_title'   => $wp_post->post_title . ' (Copy)',
+            'post_title'   => $wp_post->post_title,
             'post_type'    => $wp_post->post_type,
             'post_status'  => 'publish',
             'post_author'  => get_current_user_id(),
