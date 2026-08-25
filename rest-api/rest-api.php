@@ -107,7 +107,7 @@ class Dt_Journeys_Endpoints {
 
         $params = $request->get_params();
 
-        dt_write_log($params);
+        dt_write_log( $params );
         $raw_journeys = self::get_journeys( $params );
 
         return [
@@ -144,7 +144,7 @@ class Dt_Journeys_Endpoints {
             if ( $key === 'sort' || $key === 'text' || $key === 'limit' ) {
                 $search_parameters[$key] = $value;
             } else {
-                $search_parameters['fields'][][$key] = explode(',', $value);
+                $search_parameters['fields'][][$key] = explode( ',', $value );
             }
         }
         $journeys = DT_Posts::list_posts( 'journeys', $search_parameters );
@@ -153,17 +153,16 @@ class Dt_Journeys_Endpoints {
 
     public function delete_journey( $journey_id ) {
         $journey = DT_Posts::get_post( 'journeys', $journey_id );
-        foreach ( $journey[ 'stages' ] as $stage ) {
+        foreach ( $journey['stages'] as $stage ) {
             $wp_post = DT_Posts::get_post( 'journey_stages', $stage['ID'] );
 
-            $filtered = array_filter($wp_post['journey'], function($value) use ($journey_id) {
+            $filtered = array_filter($wp_post['journey'], function( $value ) use ( $journey_id ) {
                 return $value['ID'] != $journey_id;
             });
 
             if ( empty( $filtered ) ) {
                 DT_Posts::delete_post( 'journey_stages', $stage['ID'] );
             }
-            
         }
         DT_Posts::delete_post( 'journeys', $journey_id );
     }
