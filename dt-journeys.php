@@ -159,7 +159,7 @@ class Dt_Journeys {
         require_once( 'workflows/workflows.php' );
         add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ], 99 );
 
-        add_action( 'init', [ $this, 'add_rewrite_rules' ] );
+        add_action( 'init', [ self::class, 'add_rewrite_rules' ] );
         add_filter( 'query_vars', [ $this, 'register_query_vars' ] );
         add_action( 'template_include', [ $this, 'load_journeys_template' ] );
         add_filter( 'dt_nav', function ( $nav ){
@@ -175,7 +175,7 @@ class Dt_Journeys {
         add_filter( 'script_loader_tag', [ $this, 'script_loader_tag' ], 10, 3 );
     }
 
-    public function add_rewrite_rules() {
+    public static function add_rewrite_rules() {
         add_rewrite_rule( '^admin/journeys/?$', 'index.php?dt_journeys_page=1', 'top' );
     }
 
@@ -290,7 +290,7 @@ class Dt_Journeys {
         delete_option( 'dt_roles_number' );
 
         // Add the routing rules and flush so they work immediately upon activation
-        self::instance()->add_rewrite_rules();
+        self::add_rewrite_rules();
         flush_rewrite_rules();
     }
 
