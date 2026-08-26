@@ -102,12 +102,8 @@ class Dt_Journeys_Endpoints {
     }
 
     public function get_journeys_endpoint( WP_REST_Request $request ) {
-        $limit             = $request->get_param( 'limit' );             // Returns 500
-        $search_param_one  = $request->get_param( 'your_search_key' );
-
         $params = $request->get_params();
 
-        dt_write_log( $params );
         $raw_journeys = self::get_journeys( $params );
 
         return [
