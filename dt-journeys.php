@@ -172,7 +172,7 @@ class Dt_Journeys {
             return $nav;
         });
 
-        add_filter( 'script_loader_tag', [ $this, 'script_loader_tag' ], 10, 3 );
+        add_filter( 'wp_script_attributes', [ $this, 'script_attributes' ] );
     }
 
     public static function add_rewrite_rules() {
@@ -245,11 +245,11 @@ class Dt_Journeys {
         ] );
     }
 
-    public function script_loader_tag( $tag, $handle, $src ) {
-        if ( $handle === 'journeys_table' ) {
-            return '<script type="module" src="' . esc_url( $src ) . '"></script>';
+    public function script_attributes( $attributes ) {
+        if ( isset( $attributes['id'] ) && $attributes['id'] === 'journeys_table-js' ) {
+            $attributes['type'] = 'module';
         }
-        return $tag;
+        return $attributes;
     }
 
     /**
