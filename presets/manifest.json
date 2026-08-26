@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-08-19",
+  "presets": [
+    {
+      "id": "waha-foundations-1-en",
+      "file": "waha/foundations-1.json",
+      "name": "Foundations 1: From Creation to the Birth of Jesus",
+      "category": "Waha",
+      "language": "en",
+      "journey_order": 1,
+      "stage_count": 14,
+      "source_url": "https://web.waha.app/eng/01.001",
+      "last_updated": "2026-08-19"
+    }
+  ]
+}
