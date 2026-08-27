@@ -215,6 +215,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             'default'     => 0,
             'tile'        => 'details',
             'font-icon'   => 'mdi mdi-sort-numeric-ascending',
+            'options'     => $this->get_role_options(),
         ];
 
         // Timeline vs. list/grid behaviour.

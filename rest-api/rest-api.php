@@ -69,6 +69,205 @@ class Dt_Journeys_Endpoints {
             'callback'            => [ $this, 'remove_journey' ],
             'permission_callback' => [ $this, 'can_update' ],
         ] );
+
+        register_rest_route(
+            $namespace, '/journeys', [
+                [
+                    'methods'  => 'GET',
+                    'callback' => [ $this, 'get_journeys_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ],
+            ]
+        );
+
+        register_rest_route(
+            $namespace, '/journeys/(?P<id>\d+)', [
+                [
+                    'methods'  => 'DELETE',
+                    'callback' => [ $this, 'delete_journey_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
+
+        register_rest_route(
+            $namespace, '/journeys/(?P<id>\d+)/duplicate', [
+                [
+                    'methods'  => 'POST',
+                    'callback' => [ $this, 'duplicate_journey_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
+    }
+
+    public function get_journeys_endpoint( WP_REST_Request $request ) {
+        $params = $request->get_params();
+
+        $raw_journeys = self::get_journeys( $params );
+
+        return [
+            'journeys'       => $raw_journeys['posts'],
+            'total_journeys' => $raw_journeys['total']
+        ];
+    }
+
+    public function delete_journey_endpoint( WP_REST_Request $request ) {
+        $journey_id = isset( $request['id'] ) ? $request['id'] : null;
+
+        if ( !$journey_id ) {
+            return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
+        }
+
+        self::delete_journey( $journey_id );
+        return new WP_REST_Response( [ 'message' => 'Journey deleted successfully' ], 200 );
+    }
+
+    public function duplicate_journey_endpoint( WP_REST_Request $request ) {
+        $journey_id = isset( $request['id'] ) ? $request['id'] : null;
+
+        if ( !$journey_id ) {
+            return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
+        }
+
+        $new_journey_id = self::duplicate_journey( $journey_id );
+        return new WP_REST_Response( [ 'journey_id' => $new_journey_id ], 200 );
+    }
+
+    public function get_journeys( $params = [] ) {
+        $search_parameters = [];
+        foreach ( $params as $key => $value ) {
+            if ( $key === 'sort' || $key === 'text' || $key === 'limit' ) {
+                $search_parameters[$key] = $value;
+            } else {
+                $search_parameters['fields'][][$key] = explode( ',', $value );
+            }
+        }
+        $journeys = DT_Posts::list_posts( 'journeys', $search_parameters );
+        return $journeys;
+    }
+
+    public function delete_journey( $journey_id ) {
+        $journey = DT_Posts::get_post( 'journeys', $journey_id );
+        foreach ( $journey['stages'] as $stage ) {
+            $wp_post = DT_Posts::get_post( 'journey_stages', $stage['ID'] );
+
+            $filtered = array_filter($wp_post['journey'], function( $value ) use ( $journey_id ) {
+                return $value['ID'] != $journey_id;
+            });
+
+            if ( empty( $filtered ) ) {
+                DT_Posts::delete_post( 'journey_stages', $stage['ID'] );
+            }
+        }
+        DT_Posts::delete_post( 'journeys', $journey_id );
+    }
+
+    public function duplicate_journey( $original_id ) {
+        $wp_post = get_post( $original_id );
+        if ( ! $wp_post ) {
+            return new WP_Error( 'not_found', 'Original post not found.' );
+        }
+
+        $new_post_args = array(
+            'post_title'   => $wp_post->post_title . ' (Copy)',
+            'post_type'    => $wp_post->post_type,
+            'post_status'  => 'publish',
+            'post_author'  => get_current_user_id(),
+        );
+
+        $new_post_id = wp_insert_post( $new_post_args );
+        if ( is_wp_error( $new_post_id ) ) {
+            return $new_post_id;
+        }
+
+        $original_post = DT_Posts::get_post( 'journeys', $original_id );
+
+        $field_settings = DT_Posts::get_post_field_settings( $wp_post->post_type );
+
+        $update_args = array();
+
+        foreach ( $field_settings as $field_key => $field_config ) {
+
+            // Look for connection field types because they don't copy like standard fields
+            if ( isset( $field_config['type'] ) && $field_config['type'] === 'connection' ) {
+
+                if ( ! empty( $original_post[ $field_key ] ) ) {
+
+                    $update_args[ $field_key ] = array(
+                        'values'       => array(),
+                        'force_values' => true,
+                    );
+
+                    foreach ( $original_post[ $field_key ] as $connection ) {
+                        if ( $field_key === 'stages' ) {
+                            $new_stage_id = self::duplicate_stage( $connection['ID'] );
+
+                            if ( $new_stage_id ) {
+                                $update_args[ $field_key ]['values'][] = array(
+                                    'value' => $new_stage_id
+                                );
+                            }
+                        } else {
+                            $update_args[ $field_key ]['values'][] = array(
+                                'value' => $connection['ID']
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        if ( ! empty( $update_args ) ) {
+            DT_Posts::update_post( $wp_post->post_type, $new_post_id, $update_args, false, false );
+        }
+
+        $post_meta = get_post_custom( $original_id );
+        foreach ( $post_meta as $key => $values ) {
+            if ( strpos( $key, '_' ) === 0 ) {
+                continue;
+            }
+            foreach ( $values as $value ) {
+                add_post_meta( $new_post_id, $key, maybe_unserialize( $value ) );
+            }
+        }
+
+        return $new_post_id;
+    }
+
+    public function duplicate_stage( $original_stage_id ) {
+        $wp_post = get_post( $original_stage_id );
+        if ( ! $wp_post ) {
+            return false;
+        }
+
+        // 1. Create the new Stage
+        $new_post_args = array(
+            'post_title'   => $wp_post->post_title,
+            'post_type'    => $wp_post->post_type,
+            'post_status'  => 'publish',
+            'post_author'  => get_current_user_id(),
+        );
+
+        $new_stage_id = wp_insert_post( $new_post_args );
+        if ( is_wp_error( $new_stage_id ) ) {
+            return false;
+        }
+
+        // 2. Copy the standard metadata for the Stage
+        $post_meta = get_post_custom( $original_stage_id );
+        foreach ( $post_meta as $key => $values ) {
+            // Skip hidden/system meta keys
+            if ( strpos( $key, '_' ) === 0 ) {
+                continue;
+            }
+            foreach ( $values as $value ) {
+                add_post_meta( $new_stage_id, $key, maybe_unserialize( $value ) );
+            }
+        }
+
+        // Return the brand new ID so the Journey can link to it
+        return $new_stage_id;
     }
 
     public function can_view( WP_REST_Request $request ) {
