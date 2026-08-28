@@ -162,6 +162,7 @@ class Dt_Journeys {
         add_action( 'init', [ self::class, 'add_rewrite_rules' ] );
         add_filter( 'query_vars', [ $this, 'register_query_vars' ] );
         add_action( 'template_include', [ $this, 'load_journeys_template' ] );
+        add_action( 'wp_ajax_update_stage_order', [ $this, 'my_plugin_update_stage_order' ] );
         add_filter( 'dt_nav', function ( $nav ){
             $nav['admin']['settings']['submenu']['journeys'] = [
                 'label'  => __( 'Journeys', 'disciple_tools' ),
@@ -177,72 +178,127 @@ class Dt_Journeys {
 
     public static function add_rewrite_rules() {
         add_rewrite_rule( '^admin/journeys/?$', 'index.php?dt_journeys_page=1', 'top' );
+        add_rewrite_rule( '^admin/journeys/seeker-path?$', 'index.php?dt_seeker_path=1', 'top' );
+        add_rewrite_rule( '^admin/journeys/seeker-path/([^/]+)/?$', 'index.php?dt_seeker_path=1&dt_seeker_id=$matches[1]', 'top' );
     }
 
     public function register_query_vars( $query_vars ) {
         $query_vars[] = 'dt_journeys_page';
+        $query_vars[] = 'dt_seeker_path';
+        $query_vars[] = 'dt_seeker_id';
         return $query_vars;
     }
 
     public function load_journeys_template( $template ) {
-        if ( get_query_var( 'dt_journeys_page' ) == false || get_query_var( 'dt_journeys_page' ) == '' ) {
-            return $template;
-        }
-
-        if ( ! current_user_can( 'manage_dt' ) ) {
-            wp_die( esc_html__( 'You do not have permission to view this page.', 'disciple_tools' ) );
-        }
-
         $plugin_dir = plugin_dir_path( __FILE__ );
-        $custom_template = $plugin_dir . 'templates/template-journeys.php';
 
-        if ( file_exists( $custom_template ) ) {
-            return $custom_template;
+        if ( get_query_var( 'dt_journeys_page' ) ) {
+            if ( ! current_user_can( 'manage_dt' ) ) {
+                wp_die( esc_html__( 'You do not have permission to view this page.', 'disciple_tools' ) );
+            }
+            $custom_template = $plugin_dir . 'templates/template-journeys.php';
+            if ( file_exists( $custom_template ) ) {
+                return $custom_template;
+            }
+        }
+
+        if ( get_query_var( 'dt_seeker_path' ) ) {
+            if ( ! current_user_can( 'manage_dt' ) ) {
+                wp_die( esc_html__( 'You do not have permission to view this page.', 'disciple_tools' ) );
+            }
+            $custom_template = $plugin_dir . 'templates/template-journeys-seeker.php';
+            if ( file_exists( $custom_template ) ) {
+                return $custom_template;
+            }
         }
 
         return $template;
     }
 
     public function scripts() {
-        if ( get_query_var( 'dt_journeys_page' ) == false || get_query_var( 'dt_journeys_page' ) == '' ) {
-            return;
+        if ( get_query_var( 'dt_journeys_page' ) ) {
+
+            wp_enqueue_script( 'journeys_table', plugin_dir_url( __FILE__ ) . 'templates/journeys-table.js', [ 'jquery' ], '1.0', true );
+
+            $post_settings = DT_Posts::get_post_settings( 'journeys' );
+            $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
+            $role_options = $journey_fields['journey_roles']['default'] ?? [];
+            $role_labels = [];
+            foreach ( $role_options as $key => $data ) {
+                $role_labels[] = [
+                    'id'    => $key,
+                    'label' => isset( $data['label'] ) ? $data['label'] : $key,
+                ];
+            }
+
+            $category_options = DT_Posts::get_multi_select_options( 'journeys', 'journey_category', $search = '' );
+            $category_labels = [];
+            foreach ( $category_options as $category ) {
+                $category_labels[] = [
+                    'id'    => $category,
+                    'label' => $category,
+                ];
+            }
+
+            wp_localize_script( 'journeys_table', 'journeys_table', [
+                'translations' => [
+                    'go' => __( 'Go', 'disciple_tools' ),
+                    'search' => __( 'Search', 'disciple_tools' ),
+                    'journeys' => __( 'Journeys', 'disciple_tools' ),
+                    'showing_x_of_y' => __( 'Showing %1$s of %2$s', 'disciple_tools' ),
+                    'create_journey' => __( 'New Journey', 'disciple_tools' ),
+                ],
+                'fields' => $journey_fields,
+                'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
+                'role_options' => $role_labels,
+                'category_options' => $category_labels,
+            ] );
+        }
+        if ( get_query_var( 'dt_seeker_path' ) ) {
+
+            wp_enqueue_script( 'jquery-ui-sortable' );
+
+            wp_enqueue_script( 'seeker_path_js', plugin_dir_url( __FILE__ ) . 'templates/seeker-path.js', [ 'jquery', 'jquery-ui-sortable' ], '1.0', true );
+
+            $post_settings = DT_Posts::get_post_settings( 'journeys' );
+            $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
+
+            wp_localize_script( 'seeker_path_js', 'seeker_path_js', [
+                'translations' => [
+                    'edit' => __( 'Edit Journey', 'disciple_tools' ),
+                    'details' => __( 'Journey Details', 'disciple_tools' ),
+                    'save' => __( 'Save Journey', 'disciple_tools' ),
+                ],
+                'fields' => $journey_fields,
+                'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
+                'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'nonce'    => wp_create_nonce( 'stage_sort_nonce' )
+            ] );
+        }
+    }
+
+    public function my_plugin_update_stage_order() {
+        check_ajax_referer( 'stage_sort_nonce', 'security' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'Unauthorized' );
         }
 
-        wp_enqueue_script( 'journeys_table', plugin_dir_url( __FILE__ ) . 'templates/journeys-table.js', [ 'jquery' ], '1.0', true );
+        if ( isset( $_POST['new_order'] ) && is_array( $_POST['new_order'] ) ) {
 
-        $post_settings = DT_Posts::get_post_settings( 'journeys' );
-        $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
-        $role_options = $journey_fields['journey_roles']['default'] ?? [];
-        $role_labels = [];
-        foreach ( $role_options as $key => $data ) {
-            $role_labels[] = [
-                'id'    => $key,
-                'label' => isset( $data['label'] ) ? $data['label'] : $key,
-            ];
+            $post_order = sanitize_text_field( wp_unslash( $_POST['new_order'] ?? '' ) );
+
+            foreach ( $post_order as $item ) {
+                $id = intval( $item['id'] );
+                $order = intval( $item['order'] );
+
+                DT_Posts::update_post( 'journey_stages', $id, [ 'stage_order' => $order ] );
+            }
+
+            wp_send_json_success();
         }
 
-        $category_options = $this->get_journey_category_options();
-        $category_labels = [];
-        foreach ( $category_options as $category ) {
-            $category_labels[] = [
-                'id'    => $category,
-                'label' => $category,
-            ];
-        }
-
-        wp_localize_script( 'journeys_table', 'journeys_table', [
-            'translations' => [
-                'go' => __( 'Go', 'disciple_tools' ),
-                'search' => __( 'Search', 'disciple_tools' ),
-                'journeys' => __( 'Journeys', 'disciple_tools' ),
-                'showing_x_of_y' => __( 'Showing %1$s of %2$s', 'disciple_tools' ),
-                'create_journey' => __( 'New Journey', 'disciple_tools' ),
-            ],
-            'fields' => $journey_fields,
-            'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
-            'role_options' => $role_labels,
-            'category_options' => $category_labels,
-        ] );
+        wp_send_json_error( 'No data received' );
     }
 
     public function script_attributes( $attributes ) {
@@ -265,15 +321,6 @@ class Dt_Journeys {
         }
 
         return $links_array;
-    }
-
-    public function get_journey_category_options() {
-
-        $results = DT_Posts::get_multi_select_options( 'journeys', 'journey_category', $search = '' );
-
-        sort( $results );
-
-        return $results;
     }
 
     /**

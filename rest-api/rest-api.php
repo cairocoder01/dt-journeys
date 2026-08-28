@@ -99,6 +99,16 @@ class Dt_Journeys_Endpoints {
                 ]
             ]
         );
+
+        register_rest_route(
+            $namespace, '/journeys/stage/(?P<id>\d+)', [
+                [
+                    'methods'  => 'DELETE',
+                    'callback' => [ $this, 'delete_stage_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
     }
 
     public function get_journeys_endpoint( WP_REST_Request $request ) {
@@ -132,6 +142,17 @@ class Dt_Journeys_Endpoints {
 
         $new_journey_id = self::duplicate_journey( $journey_id );
         return new WP_REST_Response( [ 'journey_id' => $new_journey_id ], 200 );
+    }
+
+    public function delete_stage_endpoint( WP_REST_Request $request ) {
+        $stage_id = isset( $request['id'] ) ? $request['id'] : null;
+
+        if ( !$stage_id ) {
+            return new WP_REST_Response( [ 'error' => 'Invalid stage ID' ], 400 );
+        }
+
+        self::delete_stage( $stage_id );
+        return new WP_REST_Response( [ 'message' => 'Stage deleted successfully' ], 200 );
     }
 
     public function get_journeys( $params = [] ) {
@@ -233,6 +254,10 @@ class Dt_Journeys_Endpoints {
         }
 
         return $new_post_id;
+    }
+
+    public function delete_stage( $stage_id ) {
+        DT_Posts::delete_post( 'journey_stages', $stage_id );
     }
 
     public function duplicate_stage( $original_stage_id ) {
