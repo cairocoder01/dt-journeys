@@ -141,13 +141,11 @@ export class JourneysTable extends LitElement {
   }
 
   run_create() {
-    console.log('Create New Journey');
     window.location.href = '/admin/journeys/seeker-path/';
   }
 
   run_edit(e, journey_id) {
     e.stopPropagation();
-    console.log("ran");
     window.location.href = '/admin/journeys/seeker-path/' + journey_id;
   }
 
