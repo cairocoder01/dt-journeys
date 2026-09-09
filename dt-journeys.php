@@ -162,7 +162,7 @@ class Dt_Journeys {
         add_action( 'init', [ self::class, 'add_rewrite_rules' ] );
         add_filter( 'query_vars', [ $this, 'register_query_vars' ] );
         add_action( 'template_include', [ $this, 'load_journeys_template' ] );
-        add_action( 'wp_ajax_update_stage_order', [ $this, 'my_plugin_update_stage_order' ] );
+        add_action( 'wp_ajax_update_stage_order', [ $this, 'update_stage_order' ] );
         add_filter( 'dt_nav', function ( $nav ){
             $nav['admin']['settings']['submenu']['journeys'] = [
                 'label'  => __( 'Journeys', 'disciple_tools' ),
@@ -177,15 +177,15 @@ class Dt_Journeys {
     }
 
     public static function add_rewrite_rules() {
+        add_rewrite_rule( '^admin/journeys/new/?$', 'index.php?dt_journey=1', 'top' );
+        add_rewrite_rule( '^admin/journeys/([0-9]+)/?$', 'index.php?dt_journey=1&dt_journey_id=$matches[1]', 'top' );
         add_rewrite_rule( '^admin/journeys/?$', 'index.php?dt_journeys_page=1', 'top' );
-        add_rewrite_rule( '^admin/journeys/seeker-path?$', 'index.php?dt_seeker_path=1', 'top' );
-        add_rewrite_rule( '^admin/journeys/seeker-path/([^/]+)/?$', 'index.php?dt_seeker_path=1&dt_seeker_id=$matches[1]', 'top' );
     }
 
     public function register_query_vars( $query_vars ) {
         $query_vars[] = 'dt_journeys_page';
-        $query_vars[] = 'dt_seeker_path';
-        $query_vars[] = 'dt_seeker_id';
+        $query_vars[] = 'dt_journey';
+        $query_vars[] = 'dt_journey_id';
         return $query_vars;
     }
 
@@ -202,11 +202,11 @@ class Dt_Journeys {
             }
         }
 
-        if ( get_query_var( 'dt_seeker_path' ) ) {
+        if ( get_query_var( 'dt_journey' ) ) {
             if ( ! current_user_can( 'manage_dt' ) ) {
                 wp_die( esc_html__( 'You do not have permission to view this page.', 'disciple_tools' ) );
             }
-            $custom_template = $plugin_dir . 'templates/template-journeys-seeker.php';
+            $custom_template = $plugin_dir . 'templates/template-journey-details.php';
             if ( file_exists( $custom_template ) ) {
                 return $custom_template;
             }
@@ -254,16 +254,16 @@ class Dt_Journeys {
                 'category_options' => $category_labels,
             ] );
         }
-        if ( get_query_var( 'dt_seeker_path' ) ) {
+        if ( get_query_var( 'dt_journey' ) ) {
 
-            wp_enqueue_script( 'jquery-ui-sortable' );
+            wp_enqueue_script( 'sortablejs', 'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js', [], null, true );
 
-            wp_enqueue_script( 'seeker_path_js', plugin_dir_url( __FILE__ ) . 'templates/seeker-path.js', [ 'jquery', 'jquery-ui-sortable' ], '1.0', true );
+            wp_enqueue_script( 'journey_details_js', plugin_dir_url( __FILE__ ) . 'templates/journey-details.js', [ 'sortablejs' ], '1.0', true );
 
             $post_settings = DT_Posts::get_post_settings( 'journeys' );
             $journey_fields = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
 
-            wp_localize_script( 'seeker_path_js', 'seeker_path_js', [
+            wp_localize_script( 'journey_details_js', 'journey_details_js', [
                 'translations' => [
                     'edit' => __( 'Edit Journey', 'disciple_tools' ),
                     'details' => __( 'Journey Details', 'disciple_tools' ),
@@ -271,34 +271,56 @@ class Dt_Journeys {
                 ],
                 'fields' => $journey_fields,
                 'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
+                'journeyId' => get_query_var( 'dt_journey_id' ),
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'nonce'    => wp_create_nonce( 'stage_sort_nonce' )
             ] );
         }
     }
 
-    public function my_plugin_update_stage_order() {
+    public function update_stage_order() {
         check_ajax_referer( 'stage_sort_nonce', 'security' );
 
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_send_json_error( 'Unauthorized' );
         }
 
-        if ( isset( $_POST['new_order'] ) && is_array( $_POST['new_order'] ) ) {
+        if ( isset( $_POST['new_order'] ) && isset( $_POST['journey_id'] ) ) {
+            $journey_id = sanitize_text_field( wp_unslash( $_POST['journey_id'] ) );
+            $sanitized_json = sanitize_text_field( wp_unslash( $_POST['new_order'] ) );
+            $post_order = json_decode( $sanitized_json, true );
 
-            $post_order = sanitize_text_field( wp_unslash( $_POST['new_order'] ?? '' ) );
+            if ( is_array( $post_order ) ) {
+                $p2p_type = 'journeys_to_journey_stages';
 
-            foreach ( $post_order as $item ) {
-                $id = intval( $item['id'] );
-                $order = intval( $item['order'] );
+                foreach ( $post_order as $item ) {
+                    $stage_id = intval( $item['id'] );
+                    $order = intval( $item['order'] );
 
-                DT_Posts::update_post( 'journey_stages', $id, [ 'stage_order' => $order ] );
+                    $p2p_ids = p2p_get_connections( $p2p_type, array(
+                        'from'   => $journey_id,
+                        'to'     => $stage_id,
+                        'fields' => 'p2p_id',
+                    ) );
+
+                    $p2p_id = !empty( $p2p_ids ) ? (int) $p2p_ids[0] : false;
+
+                    if ( ! $p2p_id ) {
+                        $p2p_id = p2p_create_connection( $p2p_type, array(
+                            'from' => $journey_id,
+                            'to'   => $stage_id,
+                        ) );
+                    }
+
+                    if ( $p2p_id ) {
+                        p2p_update_meta( $p2p_id, 'stage_order', $order );
+                    }
+                }
+                wp_send_json_success();
             }
-
-            wp_send_json_success();
         }
 
-        wp_send_json_error( 'No data received' );
+        wp_send_json_error( 'Invalid data' );
     }
 
     public function script_attributes( $attributes ) {

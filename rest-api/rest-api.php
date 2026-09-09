@@ -109,6 +109,16 @@ class Dt_Journeys_Endpoints {
                 ]
             ]
         );
+
+        register_rest_route(
+            $namespace, '/journeys', [
+                [
+                    'methods'  => 'POST',
+                    'callback' => [ $this, 'create_journey_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
     }
 
     public function get_journeys_endpoint( WP_REST_Request $request ) {
@@ -210,30 +220,37 @@ class Dt_Journeys_Endpoints {
 
         foreach ( $field_settings as $field_key => $field_config ) {
 
-            // Look for connection field types because they don't copy like standard fields
-            if ( isset( $field_config['type'] ) && $field_config['type'] === 'connection' ) {
+            if ( isset( $field_config['type'] ) ) {
+                // Look for connection field types because they don't copy like standard fields
+                if ( $field_config['type'] === 'connection' ) {
 
-                if ( ! empty( $original_post[ $field_key ] ) ) {
+                    if ( ! empty( $original_post[ $field_key ] ) ) {
 
-                    $update_args[ $field_key ] = array(
-                        'values'       => array(),
-                        'force_values' => true,
-                    );
+                        $update_args[ $field_key ] = array(
+                            'values'       => array(),
+                            'force_values' => true,
+                        );
 
-                    foreach ( $original_post[ $field_key ] as $connection ) {
-                        if ( $field_key === 'stages' ) {
-                            $new_stage_id = self::duplicate_stage( $connection['ID'] );
+                        foreach ( $original_post[ $field_key ] as $connection ) {
+                            if ( $field_key === 'stages' ) {
+                                $new_stage_id = self::duplicate_stage( $connection['ID'] );
 
-                            if ( $new_stage_id ) {
+                                if ( $new_stage_id ) {
+                                    $update_args[ $field_key ]['values'][] = array(
+                                        'value' => $new_stage_id
+                                    );
+                                }
+                            } else {
                                 $update_args[ $field_key ]['values'][] = array(
-                                    'value' => $new_stage_id
+                                    'value' => $connection['ID']
                                 );
                             }
-                        } else {
-                            $update_args[ $field_key ]['values'][] = array(
-                                'value' => $connection['ID']
-                            );
                         }
+                    }
+                // Look for favorite as well, because it is missed in the later get_post_custom()
+                } elseif ( $field_key === 'favorite' ) {
+                    if ( isset( $original_post[$field_key] ) ) {
+                        $update_args[$field_key] = $original_post[$field_key];
                     }
                 }
             }
@@ -254,6 +271,68 @@ class Dt_Journeys_Endpoints {
         }
 
         return $new_post_id;
+    }
+
+    public function create_journey_endpoint( WP_REST_Request $request ) {
+
+        $raw_body = $request->get_body();
+        $params   = json_decode( $raw_body, true );
+
+        if ( empty( $params ) ) {
+            $params = [];
+        }
+
+        $post_id = wp_insert_post( [
+            'post_type'   => 'journeys',
+            'post_title'  => isset( $params['name'] ) ? sanitize_text_field( $params['name'] ) : 'New Journey',
+            'post_status' => 'publish',
+        ] );
+
+        if ( is_wp_error( $post_id ) || empty( $post_id ) ) {
+            return new WP_Error( 'create_failed', 'Failed to create journey in the database.', [ 'status' => 500 ] );
+        }
+
+        $valid_fields = DT_Posts::get_post_field_settings( 'journeys' );
+        $formatted_params  = [];
+
+        foreach ( $params as $key => $value ) {
+
+            if ( empty( $key ) ) {
+                continue;
+            }
+
+            if ( array_key_exists( $key, $valid_fields ) ) {
+
+                $field_type = $valid_fields[$key]['type'] ?? '';
+                $array_types = [ 'connection', 'tags', 'multi_select', 'user_select' ];
+
+                if ( in_array( $field_type, $array_types, true ) ) {
+                    $formatted_values = [];
+
+                    if ( is_array( $value ) ) {
+                        foreach ( $value as $item ) {
+                            if ( is_array( $item ) && isset( $item['id'] ) ) {
+                                $formatted_values[] = [ 'value' => $item['id'] ];
+                            } else {
+                                $formatted_values[] = [ 'value' => $item ];
+                            }
+                        }
+                    }
+                    $formatted_params[ $key ] = [ 'values' => $formatted_values ];
+                }
+                else {
+                    $formatted_params[ $key ] = $value;
+                }
+            }
+        }
+
+        $update_result = DT_Posts::update_post( 'journeys', $post_id, $formatted_params, false );
+
+        if ( is_wp_error( $update_result ) ) {
+            error_log( 'DT Update Error: ' . $update_result->get_error_message() );
+        }
+
+        return rest_ensure_response( [ 'id' => $post_id ] );
     }
 
     public function delete_stage( $stage_id ) {
