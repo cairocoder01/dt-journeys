@@ -42,9 +42,6 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
         add_filter( 'dt_custom_fields_settings', [ $this, 'dt_custom_fields_settings' ], 10, 2 );
         add_filter( 'dt_get_post_type_settings', [ $this, 'dt_get_post_type_settings' ], 20, 2 );
 
-        // sort connected stages by their stage_order field
-        add_filter( 'dt_after_get_post_fields_filter', [ $this, 'dt_after_get_post_fields_filter' ], 10, 2 );
-
         // sort journeys by journey_order in connection field typeahead lookups
         add_filter( 'dt_get_viewable_compact_search_query', [ $this, 'dt_get_viewable_compact_search_query' ], 10, 2 );
     }
@@ -306,54 +303,6 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
             }
         }
         return $options;
-    }
-
-    /**
-     * Sort a journey's connected stages by their stage_order value.
-     *
-     * DT does not sort p2p connections, so we order the `stages` connection here
-     * and attach each stage's stage_order for convenience.
-     */
-    public function dt_after_get_post_fields_filter( $fields, $post_type ){
-        if ( $post_type !== $this->post_type || empty( $fields['stages'] ) || !is_array( $fields['stages'] ) ){
-            return $fields;
-        }
-
-        global $wpdb;
-        $stage_ids = array_filter( array_map( function ( $stage ){
-            return isset( $stage['ID'] ) ? (int) $stage['ID'] : 0;
-        }, $fields['stages'] ) );
-
-        if ( empty( $stage_ids ) ){
-            return $fields;
-        }
-
-        $ids_sql = dt_array_to_sql( $stage_ids );
-        //phpcs:disable
-        //WordPress.WP.PreparedSQL.NotPrepared
-        $orders = $wpdb->get_results( "
-            SELECT post_id, meta_value
-            FROM $wpdb->postmeta
-            WHERE meta_key = 'stage_order'
-            AND post_id IN ( $ids_sql )
-        ", ARRAY_A );
-        //phpcs:enable
-
-        $order_by_id = [];
-        foreach ( $orders as $row ){
-            $order_by_id[ (int) $row['post_id'] ] = (int) $row['meta_value'];
-        }
-
-        foreach ( $fields['stages'] as &$stage ){
-            $stage['stage_order'] = $order_by_id[$stage['ID']] ?? 0;
-        }
-        unset( $stage );
-
-        usort( $fields['stages'], function ( $a, $b ){
-            return ( $a['stage_order'] ?? 0 ) <=> ( $b['stage_order'] ?? 0 );
-        } );
-
-        return $fields;
     }
 
     /**

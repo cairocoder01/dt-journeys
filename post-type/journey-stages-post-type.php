@@ -203,15 +203,6 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
             'font-icon'   => 'mdi mdi-marker-check',
         ];
 
-        $fields['stage_order'] = [
-            'name'        => __( 'Order', 'dt-journeys' ),
-            'description' => __( 'The order of this stage within its journey.', 'dt-journeys' ),
-            'type'        => 'number',
-            'default'     => 0,
-            'tile'        => 'details',
-            'font-icon'   => 'mdi mdi-sort-numeric-ascending',
-        ];
-
         // Reverse of journeys.stages — the journey this stage belongs to.
         $fields['journey'] = [
             'name'          => __( 'Journey', 'dt-journeys' ),

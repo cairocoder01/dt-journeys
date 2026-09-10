@@ -32,7 +32,6 @@ class JourneysProgressTest extends TestCase {
         foreach ( range( 1, $stage_count ) as $i ) {
             $stage = DT_Posts::create_post( 'journey_stages', [
                 'name'        => "Stage $i",
-                'stage_order' => $i,
             ], true, false );
             $this->assertNotWPError( $stage );
             $stage_ids[] = $stage['ID'];
@@ -267,7 +266,7 @@ class JourneysProgressTest extends TestCase {
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
 
         // Add a second stage to the journey after progress has already started.
-        $new_stage = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Late Stage', 'stage_order' => 2 ], true, false );
+        $new_stage = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Late Stage' ], true, false );
         $this->assertNotWPError( $new_stage );
         DT_Posts::update_post( 'journeys', $journey_id, [
             'stages' => [ 'values' => [ [ 'value' => $new_stage['ID'] ] ] ],
@@ -296,7 +295,7 @@ class JourneysProgressTest extends TestCase {
         DT_Journeys_Progress::start_journey( 'contacts', $this->contact_id, $journey_id );
         DT_Journeys_Progress::complete_journey( 'contacts', $this->contact_id, $journey_id, true );
 
-        $new_stage = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Late Stage', 'stage_order' => 2 ], true, false );
+        $new_stage = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Late Stage' ], true, false );
         DT_Posts::update_post( 'journeys', $journey_id, [
             'stages' => [ 'values' => [ [ 'value' => $new_stage['ID'] ] ] ],
         ], true, false );
