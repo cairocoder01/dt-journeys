@@ -9,30 +9,6 @@ $journey_id = get_query_var( 'dt_journey_id' );
 $post_settings = DT_Posts::get_post_settings( 'journeys' );
 $field_options = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
 
-function get_role_options( $field_options ) {
-    $role_options = $field_options['journey_roles']['default'] ?? [];
-    $role_labels = [];
-    foreach ( $role_options as $key => $data ) {
-        $role_labels[] = [
-            'id'    => $key,
-            'label' => isset( $data['label'] ) ? $data['label'] : $key,
-        ];
-    }
-    return wp_json_encode( $role_labels );
-}
-
-function get_category_options() {
-    $category_options = DT_Posts::get_multi_select_options( 'journeys', 'journey_category', $search = '' );
-    $category_labels = [];
-    foreach ( $category_options as $category ) {
-        $category_labels[] = [
-            'id'    => $category,
-            'label' => $category,
-        ];
-    }
-    return wp_json_encode( $category_labels );
-}
-
 if ( empty( $journey_id ) ) {
     $journey = [
         'post_type' => 'journeys',
@@ -41,13 +17,17 @@ if ( empty( $journey_id ) ) {
 } else {
     $journey = DT_Posts::get_post( 'journeys', $journey_id );
 
-    if ( is_wp_error( $journey ) ) {
-        return null;
+    if ( empty( $journey ) || is_wp_error( $journey ) ) {
+        global $wp_query;
+        $wp_query->set_404();
+        status_header( 404 );
+        include get_404_template();
+        exit;
     }
 }
 
 $stages = [];
-$p2p_type = 'journeys_to_journey_stages';
+$p2p_type = 'journeys_to_stages';
 
 foreach ( $journey['stages'] ?? [] as $connected_stage ) {
     $stage_id = $connected_stage['ID'];
@@ -124,7 +104,7 @@ usort( $stages, function ( $a, $b ) {
 
                     foreach ( $field_options as $field_key => $field ) {
 
-                        if ( !$field['tile'] || $field_key === 'stages' ) {
+                        if ( !isset( $field['tile'] ) || $field_key === 'stages' ) {
                             continue;
                         }
 

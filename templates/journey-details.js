@@ -17,21 +17,26 @@ document.addEventListener("DOMContentLoaded", function() {
                     });
                 });
 
-                const formData = new FormData();
-                formData.append('action', 'update_stage_order');
-                formData.append('security', journey_details_js.nonce);
-                formData.append('journey_id', journey_details_js.journeyId);
-                formData.append('new_order', JSON.stringify(stageOrder));
+                // Inside the Sortable onEnd callback in journey-details.js
+                const payload = {
+                    journey_id: journey_details_js.journeyId,
+                    new_order: stageOrder
+                };
 
-                fetch(journey_details_js.ajax_url, {
+                fetch(journey_details_js.rest_endpoint + 'journeys/reorder-stages', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': window.wpApiShare.nonce // Matches the auth pattern used elsewhere in the template
+                    },
+                    body: JSON.stringify(payload)
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         console.log('Order updated successfully!');
                     } else {
+                        console.log(data);
                         console.error('Failed to update order.', data);
                     }
                 })

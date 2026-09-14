@@ -106,7 +106,7 @@ class JourneysPostTypeTest extends TestCase {
         $this->assertNotWPError( $journey );
         $journey_id = $journey['ID'];
 
-        $p2p_type = 'journeys_to_journey_stages';
+        $p2p_type = 'journeys_to_stages';
 
         // Create three stages, deliberately out of order.
         $stage_c = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Stage C' ], true, false );

@@ -101,6 +101,16 @@ class Dt_Journeys_Endpoints {
         );
 
         register_rest_route(
+            $namespace, '/journeys/reorder-stages', [
+                [
+                    'methods'             => 'POST',
+                    'callback'            => [ $this, 'update_stage_order_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
+
+        register_rest_route(
             $namespace, '/journeys/stage/(?P<id>\d+)', [
                 [
                     'methods'  => 'DELETE',
@@ -152,6 +162,28 @@ class Dt_Journeys_Endpoints {
 
         $new_journey_id = self::duplicate_journey( $journey_id );
         return new WP_REST_Response( [ 'journey_id' => $new_journey_id ], 200 );
+    }
+
+    public static function update_stage_order_endpoint( WP_REST_Request $request ) {
+        $journey_id = sanitize_text_field( $request->get_param( 'journey_id' ) );
+
+        // The WP REST API automatically decodes the JSON body into an array
+        $post_order = $request->get_param( 'new_order' );
+
+        if ( is_array( $post_order ) ) {
+            $p2p_type = 'journeys_to_stages';
+
+            foreach ( $post_order as $item ) {
+                $stage_id = intval( $item['id'] );
+                $order    = intval( $item['order'] );
+
+                $p2p_id = self::get_p2p_id( $p2p_type, $journey_id, $stage_id );
+                p2p_update_meta( $p2p_id, 'stage_order', $order );
+            }
+            return rest_ensure_response( [ 'success' => true ] );
+        }
+
+        return new WP_Error( 'invalid_data', 'Invalid data', [ 'status' => 400 ] );
     }
 
     public function delete_stage_endpoint( WP_REST_Request $request ) {
@@ -233,7 +265,7 @@ class Dt_Journeys_Endpoints {
 
                         foreach ( $original_post[ $field_key ] as $connection ) {
                             if ( $field_key === 'stages' ) {
-                                $new_stage_id = self::duplicate_stage( $connection['ID'] );
+                                $new_stage_id = self::duplicate_stage( $connection['ID'], $original_id, $new_post_id );
 
                                 if ( $new_stage_id ) {
                                     $update_args[ $field_key ]['values'][] = array(
@@ -282,11 +314,7 @@ class Dt_Journeys_Endpoints {
             $params = [];
         }
 
-        $post_id = wp_insert_post( [
-            'post_type'   => 'journeys',
-            'post_title'  => isset( $params['name'] ) ? sanitize_text_field( $params['name'] ) : 'New Journey',
-            'post_status' => 'publish',
-        ] );
+        $post_id = DT_Posts::create_post( 'journeys', $params );
 
         if ( is_wp_error( $post_id ) || empty( $post_id ) ) {
             return new WP_Error( 'create_failed', 'Failed to create journey in the database.', [ 'status' => 500 ] );
@@ -329,17 +357,21 @@ class Dt_Journeys_Endpoints {
         $update_result = DT_Posts::update_post( 'journeys', $post_id, $formatted_params, false );
 
         if ( is_wp_error( $update_result ) ) {
-            error_log( 'DT Update Error: ' . $update_result->get_error_message() );
+            return new WP_Error( 'update_failed', 'Failed to update journey.', [ 'status' => 500 ] );
         }
 
         return rest_ensure_response( [ 'id' => $post_id ] );
     }
 
     public function delete_stage( $stage_id ) {
-        DT_Posts::delete_post( 'journey_stages', $stage_id );
+        $delete_result = DT_Posts::delete_post( 'journey_stages', $stage_id );
+
+        if ( is_wp_error( $delete_result ) ) {
+            return new WP_Error( 'delete_failed', 'Failed to delete stage.', [ 'status' => 500 ] );
+        }
     }
 
-    public function duplicate_stage( $original_stage_id ) {
+    public function duplicate_stage( $original_stage_id, $original_journey_id, $new_journey_id ) {
         $wp_post = get_post( $original_stage_id );
         if ( ! $wp_post ) {
             return false;
@@ -370,8 +402,39 @@ class Dt_Journeys_Endpoints {
             }
         }
 
+        $p2p_type = 'journeys_to_stages';
+
+        $original_p2p_id = self::get_p2p_id( $p2p_type, $original_journey_id, $original_stage_id );
+        $order_val = $original_p2p_id ? p2p_get_meta( $original_p2p_id, 'stage_order', true ) : 0;
+
+        $new_p2p_id = self::get_p2p_id( $p2p_type, $new_journey_id, $new_stage_id );
+        p2p_update_meta( $new_p2p_id, 'stage_order', $order_val );
+
         // Return the brand new ID so the Journey can link to it
         return $new_stage_id;
+    }
+
+    public static function get_p2p_id( $p2p_type, $journey_id, $stage_id ) {
+        $p2p_ids = p2p_get_connections( $p2p_type, [
+            'from'   => $journey_id,
+            'to'     => $stage_id,
+            'fields' => 'p2p_id',
+        ]);
+
+        $p2p_id = !empty( $p2p_ids ) ? (int) $p2p_ids[0] : false;
+        if ( ! $p2p_id ) {
+            $p2p_id = p2p_create_connection( $p2p_type, [
+                'from' => $journey_id,
+                'to'   => $stage_id,
+            ]);
+        }
+
+        $array_size = count( $p2p_ids );
+        for ( $i = 1; $i < $array_size; $i++ ) {
+            p2p_delete_connection( $p2p_ids[$i] );
+        }
+
+        return $p2p_id;
     }
 
     public function can_view( WP_REST_Request $request ) {
@@ -661,6 +724,13 @@ class Dt_Journeys_Endpoints {
                 continue;
             }
 
+            if ( ! is_wp_error( $stage ) && ! empty( $stage ) ) {
+                $p2p_id = self::get_p2p_id( 'journeys_to_stages', $journey_id, $connected_stage['ID'] );
+                $order_val = $p2p_id ? p2p_get_meta( $p2p_id, 'stage_order', true ) : 0;
+
+                $stage['stage_order'] = (int) $order_val;
+            }
+
             $stage_progress = $progress_entry['stages'][ (string) $stage['ID'] ] ?? [
                 'status' => 'not_started',
                 'date'   => null,
@@ -679,8 +749,13 @@ class Dt_Journeys_Endpoints {
                 'status'               => $stage_progress['status'],
                 'date'                 => $stage_progress['date'],
                 'note'                 => $stage_progress['note'],
+                'stage_order'          => $stage['stage_order'] ?? 0,
             ];
         }
+
+        usort( $stages, function ( $a, $b ) {
+            return ( $a['stage_order'] ?? 0 ) <=> ( $b['stage_order'] ?? 0 );
+        } );
 
         return [
             'ID'             => $journey_id,
