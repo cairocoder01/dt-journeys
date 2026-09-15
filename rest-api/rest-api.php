@@ -101,7 +101,7 @@ class Dt_Journeys_Endpoints {
         );
 
         register_rest_route(
-            $namespace, '/journeys/reorder-stages', [
+            $namespace, '/journeys/(?P<id>\d+)/reorder-stages', [
                 [
                     'methods'             => 'POST',
                     'callback'            => [ $this, 'update_stage_order_endpoint' ],
@@ -165,7 +165,7 @@ class Dt_Journeys_Endpoints {
     }
 
     public static function update_stage_order_endpoint( WP_REST_Request $request ) {
-        $journey_id = sanitize_text_field( $request->get_param( 'journey_id' ) );
+        $journey_id = sanitize_text_field( $request['id'] );
 
         // The WP REST API automatically decodes the JSON body into an array
         $post_order = $request->get_param( 'new_order' );
@@ -193,7 +193,12 @@ class Dt_Journeys_Endpoints {
             return new WP_REST_Response( [ 'error' => 'Invalid stage ID' ], 400 );
         }
 
-        self::delete_stage( $stage_id );
+        $delete_result = DT_Posts::delete_post( 'journey_stages', $stage_id );
+
+        if ( is_wp_error( $delete_result ) ) {
+            return new WP_Error( 'delete_failed', 'Failed to delete stage.', [ 'status' => 500 ] );
+        }
+
         return new WP_REST_Response( [ 'message' => 'Stage deleted successfully' ], 200 );
     }
 
@@ -314,12 +319,6 @@ class Dt_Journeys_Endpoints {
             $params = [];
         }
 
-        $post_id = DT_Posts::create_post( 'journeys', $params );
-
-        if ( is_wp_error( $post_id ) || empty( $post_id ) ) {
-            return new WP_Error( 'create_failed', 'Failed to create journey in the database.', [ 'status' => 500 ] );
-        }
-
         $valid_fields = DT_Posts::get_post_field_settings( 'journeys' );
         $formatted_params  = [];
 
@@ -354,21 +353,13 @@ class Dt_Journeys_Endpoints {
             }
         }
 
-        $update_result = DT_Posts::update_post( 'journeys', $post_id, $formatted_params, false );
+        $post_id = DT_Posts::create_post( 'journeys', $formatted_params );
 
-        if ( is_wp_error( $update_result ) ) {
-            return new WP_Error( 'update_failed', 'Failed to update journey.', [ 'status' => 500 ] );
+        if ( is_wp_error( $post_id ) || empty( $post_id ) ) {
+            return new WP_Error( 'create_failed', 'Failed to create journey in the database.', [ 'status' => 500 ] );
         }
 
         return rest_ensure_response( [ 'id' => $post_id ] );
-    }
-
-    public function delete_stage( $stage_id ) {
-        $delete_result = DT_Posts::delete_post( 'journey_stages', $stage_id );
-
-        if ( is_wp_error( $delete_result ) ) {
-            return new WP_Error( 'delete_failed', 'Failed to delete stage.', [ 'status' => 500 ] );
-        }
     }
 
     public function duplicate_stage( $original_stage_id, $original_journey_id, $new_journey_id ) {

@@ -318,6 +318,8 @@ usort( $stages, function ( $a, $b ) {
 
     .stage-name {
         font-weight: bold;
+        display: flex;
+        align-items: center;
     }
 
     .stage-description {
@@ -366,6 +368,35 @@ usort( $stages, function ( $a, $b ) {
         transform: scale(1.5);
         padding-inline-start: .5em;
         padding-inline-end: .5em;
+    }
+
+    @keyframes fadeOut {
+        0% {
+        opacity: 1;
+        }
+        75% {
+        opacity: 1;
+        }
+        100% {
+        opacity: 0;
+        }
+    }
+
+    .icon-overlay.fade-out {
+        opacity: 0;
+        animation: fadeOut 4s;
+    }
+
+    .icon-overlay {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 0.75rem;
+        pointer-events: none;
+    }
+
+    .icon-overlay.success {
+        color: var(--success-color);
+        width: 1.4rem;
     }
 
 </style>
