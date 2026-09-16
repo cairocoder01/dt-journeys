@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const el = document.getElementById('stage-list');
 
     function renderStageLoadingIcon(stageId) {
-        const nameContainer = document.getElementById(`stage-name-${stageId}`);
+        const nameContainer = document.getElementById(`stage-list-header`);
         if (!nameContainer) return;
 
         const existingIcon = nameContainer.querySelector('.icon-overlay');
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function renderStageSavedIcon(stageId) {
-        const nameContainer = document.getElementById(`stage-name-${stageId}`);
+        const nameContainer = document.getElementById(`stage-list-header`);
         if (!nameContainer) return;
 
         const existingIcon = nameContainer.querySelector('.icon-overlay');

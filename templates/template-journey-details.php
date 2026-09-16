@@ -142,7 +142,9 @@ usort( $stages, function ( $a, $b ) {
         <section class="medium-8 small-12 cell">
             <div class="bordered-box">
                 <div class="title-row">
-                    <h6 class="journey-header"><?php esc_html_e( 'Stages', 'disciple_tools' ); ?></h6>
+                    <div class="stage-list-header" id="stage-list-header">
+                        <h6 class="journey-header"><?php esc_html_e( 'Stages', 'disciple_tools' ); ?></h6>
+                    </div>
                     <button class="button" onclick="add_stage()">
                         <?php esc_html_e( 'Add Stage', 'disciple_tools' ); ?>
                     </button>
@@ -318,6 +320,9 @@ usort( $stages, function ( $a, $b ) {
 
     .stage-name {
         font-weight: bold;
+    }
+
+    .stage-list-header {
         display: flex;
         align-items: center;
     }
@@ -391,6 +396,7 @@ usort( $stages, function ( $a, $b ) {
         display: inline-flex;
         align-items: center;
         margin-left: 0.75rem;
+        margin-bottom: 0.5rem;
         pointer-events: none;
     }
 
@@ -517,7 +523,7 @@ usort( $stages, function ( $a, $b ) {
 
             let result = await response.json();
 
-            const newId = result.id || ''; 
+            const newId = result.id || '';
 
             if (currentSaveMode === 'continue' && newId) {
                 window.location.href = `/admin/journeys/${newId}/`;
