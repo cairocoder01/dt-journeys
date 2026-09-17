@@ -1,0 +1,10 @@
+name: local
+values:
+  - key: host
+    value: ''
+  - key: wp_app_password
+    value: ''
+    description: User Profile -> Add Application Password
+  - key: wp_user
+    value: ''
+    description: Username matching app password
