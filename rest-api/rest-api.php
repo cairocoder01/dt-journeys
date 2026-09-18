@@ -71,16 +71,6 @@ class Dt_Journeys_Endpoints {
         ] );
 
         register_rest_route(
-            $namespace, '/journeys', [
-                [
-                    'methods'  => 'GET',
-                    'callback' => [ $this, 'get_journeys_endpoint' ],
-                    'permission_callback' => '__return_true',
-                ],
-            ]
-        );
-
-        register_rest_route(
             $namespace, '/journeys/(?P<id>\d+)', [
                 [
                     'methods'  => 'DELETE',
@@ -123,6 +113,11 @@ class Dt_Journeys_Endpoints {
         register_rest_route(
             $namespace, '/journeys', [
                 [
+                    'methods'  => 'GET',
+                    'callback' => [ $this, 'get_journeys_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ],
+                [
                     'methods'  => 'POST',
                     'callback' => [ $this, 'create_journey_endpoint' ],
                     'permission_callback' => '__return_true',
@@ -149,8 +144,7 @@ class Dt_Journeys_Endpoints {
             return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
         }
 
-        self::delete_journey( $journey_id );
-        return new WP_REST_Response( [ 'message' => 'Journey deleted successfully' ], 200 );
+        return self::delete_journey( $journey_id );
     }
 
     public function duplicate_journey_endpoint( WP_REST_Request $request ) {
@@ -160,8 +154,7 @@ class Dt_Journeys_Endpoints {
             return new WP_REST_Response( [ 'error' => 'Invalid journey ID' ], 400 );
         }
 
-        $new_journey_id = self::duplicate_journey( $journey_id );
-        return new WP_REST_Response( [ 'journey_id' => $new_journey_id ], 200 );
+        return self::duplicate_journey( $journey_id );
     }
 
     public static function update_stage_order_endpoint( WP_REST_Request $request ) {
@@ -202,13 +195,7 @@ class Dt_Journeys_Endpoints {
             return new WP_Error( 'invalid_post_type', __( 'Target ID is not a stage.', 'disciple_tools' ), [ 'status' => 400 ] );
         }
 
-        $delete_result = DT_Posts::delete_post( 'journey_stages', $stage_id );
-
-        if ( ! $delete_result || is_wp_error( $delete_result ) ) {
-            return new WP_Error( 'delete_failed', 'Failed to delete stage.', [ 'status' => 500 ] );
-        }
-
-        return new WP_REST_Response( [ 'message' => 'Stage deleted successfully' ], 200 );
+        return DT_Posts::delete_post( 'journey_stages', $stage_id );
     }
 
     public function get_journeys( $params = [] ) {
@@ -225,6 +212,16 @@ class Dt_Journeys_Endpoints {
     }
 
     public function delete_journey( $journey_id ) {
+        $post_type = get_post_type( $journey_id );
+
+        if ( ! $post_type || is_wp_error( $post_type ) ) {
+            return new WP_Error( 'not_found', __( 'Journey not found.', 'disciple_tools' ), [ 'status' => 404 ] );
+        }
+
+        if ( 'journeys' !== $post_type ) {
+            return new WP_Error( 'invalid_post_type', __( 'Target ID is not a journey.', 'disciple_tools' ), [ 'status' => 400 ] );
+        }
+
         $journey = DT_Posts::get_post( 'journeys', $journey_id );
         foreach ( $journey['stages'] as $stage ) {
             $wp_post = DT_Posts::get_post( 'journey_stages', $stage['ID'] );
@@ -237,7 +234,7 @@ class Dt_Journeys_Endpoints {
                 DT_Posts::delete_post( 'journey_stages', $stage['ID'] );
             }
         }
-        DT_Posts::delete_post( 'journeys', $journey_id );
+        return DT_Posts::delete_post( 'journeys', $journey_id );
     }
 
     public function duplicate_journey( $original_id ) {
@@ -362,13 +359,7 @@ class Dt_Journeys_Endpoints {
             }
         }
 
-        $post = DT_Posts::create_post( 'journeys', $formatted_params );
-
-        if ( is_wp_error( $post ) || empty( $post ) ) {
-            return new WP_Error( 'create_failed', 'Failed to create journey in the database.', [ 'status' => 500 ] );
-        }
-
-        return rest_ensure_response( [ 'id' => $post['ID'] ] );
+        return DT_Posts::create_post( 'journeys', $formatted_params );
     }
 
     public function duplicate_stage( $original_stage_id, $original_journey_id, $new_journey_id ) {

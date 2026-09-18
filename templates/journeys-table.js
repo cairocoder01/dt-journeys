@@ -151,7 +151,7 @@ export class JourneysTable extends LitElement {
 
   async duplicateJourney(e, journey_id) {
     e.stopPropagation();
-    let response = await fetch(window.journeys_table.rest_endpoint + `journeys/${journey_id}/duplicate`, {
+    await fetch(window.journeys_table.rest_endpoint + `journeys/${journey_id}/duplicate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ export class JourneysTable extends LitElement {
 
   async deleteJourney(e, journey_id) {
     e.stopPropagation();
-    let response = await fetch(window.journeys_table.rest_endpoint + `journeys/${journey_id}`, {
+    await fetch(window.journeys_table.rest_endpoint + `journeys/${journey_id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

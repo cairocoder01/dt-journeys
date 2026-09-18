@@ -69,7 +69,7 @@ usort( $stages, function ( $a, $b ) {
             <?php else : ?>
                 <!-- Split Save Button with LocalStorage Mode Selection -->
                 <div class="split-button-wrapper" id="save-split-button">
-                    <button class="button split-main-btn" id="save-btn" onclick="save_journey()">
+                    <button type="submit" form="journey-form" class="button split-main-btn" id="save-btn">
                         <span id="save-btn-label"><?php esc_html_e( 'Save & Go Back', 'disciple_tools' ); ?></span>
                     </button>
                     <button class="button split-toggle-btn" type="button" onclick="toggle_save_dropdown(event)">
@@ -99,44 +99,42 @@ usort( $stages, function ( $a, $b ) {
         <section class="medium-4 small-12 cell">
             <div class="bordered-box">
                 <h6 class="journey-header"><?php esc_html_e( 'Journey Details', 'disciple_tools' ); ?></h6>
-                <div class="margin-top-1">
-                    <?php
+                <form id="journey-form" onsubmit="save_journey(event)">
+                    <div class="margin-top-1">
+                        <?php
 
-                    foreach ( $field_options as $field_key => $field ) {
+                        foreach ( $field_options as $field_key => $field ) {
 
-                        if ( !isset( $field['tile'] ) || $field_key === 'stages' ) {
-                            continue;
-                        }
-
-                        if ( ! array_key_exists( $field_key, $journey ) ) {
-
-                            $array_types = [ 'tags', 'multi_select', 'connection', 'user_select' ];
-
-                            if ( isset( $field['type'] ) && in_array( $field['type'], $array_types, true ) ) {
-                                $journey[ $field_key ] = [];
-                            } elseif ( isset( $field['type'] ) && $field['type'] === 'key_select' ) {
-                                $journey[ $field_key ] = [ 'key' => '' ];
-                            } else {
-                                $journey[ $field_key ] = '';
+                            if ( !isset( $field['tile'] ) || $field_key === 'stages' ) {
+                                continue;
                             }
+
+                            if ( ! array_key_exists( $field_key, $journey ) ) {
+
+                                $array_types = [ 'tags', 'multi_select', 'connection', 'user_select' ];
+
+                                if ( isset( $field['type'] ) && in_array( $field['type'], $array_types, true ) ) {
+                                    $journey[ $field_key ] = [];
+                                } elseif ( isset( $field['type'] ) && $field['type'] === 'key_select' ) {
+                                    $journey[ $field_key ] = [ 'key' => '' ];
+                                } else {
+                                    $journey[ $field_key ] = '';
+                                }
+                            }
+
+                            echo '<div style="margin-bottom: 15px;">';
+
+                            $is_required = ! empty( $field['required'] ) ? true : false;
+                            $display_settings = $field_options;
+                            $display_settings[ $field_key ]['required'] = $is_required;
+
+                            render_field_for_display( $field_key, $display_settings, $journey, true, true, '', [] );
+
+                            echo '</div>';
                         }
-
-                        echo '<div style="margin-bottom: 15px;">';
-
-                        $is_required = ! empty( $field['required'] ) ? true : false;
-                        $display_settings = $field_options;
-                        $display_settings[ $field_key ]['required'] = $is_required;
-
-                        render_field_for_display( $field_key, $display_settings, $journey, true, true, '', [] );
-                        if ( isset( $display_settings[ $field_key ]['required'] ) && $display_settings[ $field_key ]['required'] === true ) { ?>
-                            <p class="help-text"
-                            id="name-help-text"><?php esc_html_e( 'This is required', 'disciple_tools' ); ?></p>
-                        <?php }
-
-                        echo '</div>';
-                    }
-                    ?>
-                </div>
+                        ?>
+                    </div>
+                </form>
             </div>
         </section>
         <section class="medium-8 small-12 cell">
@@ -479,16 +477,27 @@ usort( $stages, function ( $a, $b ) {
 
     async function delete_journey(journey_id) {
 
-        let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/${journey_id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': window.wpApiShare.nonce,
-            },
-        }).then((res) => res.json()).then(() => window.location.href = '/admin/journeys/');
+        try {
+            let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/${journey_id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': window.wpApiShare.nonce,
+                },
+            });
+
+            let result = await response.json();
+
+            if (response.ok) {
+                window.location.href = '/admin/journeys/';
+            }
+        } catch (error) {
+            console.error("Delete Journey Error:", error);
+        }
     }
 
-    async function save_journey() {
+    async function save_journey(event) {
+        event.preventDefault();
 
         const journeyFields = <?php
             $js_fields = array_map( function( $field ) {
@@ -517,13 +526,9 @@ usort( $stages, function ( $a, $b ) {
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) {
-                throw new Error("Failed to save journey.");
-            }
-
             let result = await response.json();
 
-            const newId = result.id || '';
+            const newId = result.ID || '';
 
             if (currentSaveMode === 'continue' && newId) {
                 window.location.href = `/admin/journeys/${newId}/`;
@@ -534,8 +539,7 @@ usort( $stages, function ( $a, $b ) {
                 window.location.href = '/admin/journeys/';
             }
         } catch (error) {
-            console.error(error);
-            alert("Error saving journey. Please check the console.");
+            console.error("Create Journey Error:", error);
         }
     }
 
