@@ -451,7 +451,7 @@ usort( $stages, function ( $a, $b ) {
     });
 
     function go_back() {
-        window.location.href = '/admin/journeys/';
+        window.location.href = window.journey_details_js.base_url;
     }
 
     function add_stage() {
@@ -489,7 +489,7 @@ usort( $stages, function ( $a, $b ) {
             let result = await response.json();
 
             if (response.ok) {
-                window.location.href = '/admin/journeys/';
+                window.location.href = window.journey_details_js.base_url;
             }
         } catch (error) {
             console.error("Delete Journey Error:", error);
@@ -531,12 +531,12 @@ usort( $stages, function ( $a, $b ) {
             const newId = result.ID || '';
 
             if (currentSaveMode === 'continue' && newId) {
-                window.location.href = `/admin/journeys/${newId}/`;
+                window.location.href = window.journey_details_js.base_url + newId + '/';
             } else if (currentSaveMode === 'add_new') {
-                window.location.href = '/admin/journeys/new/';
+                window.location.href = window.journey_details_js.base_url + 'new/';
             } else {
                 // Default: 'go_back'
-                window.location.href = '/admin/journeys/';
+                window.location.href = window.journey_details_js.base_url;
             }
         } catch (error) {
             console.error("Create Journey Error:", error);

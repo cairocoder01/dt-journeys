@@ -249,6 +249,7 @@ class Dt_Journeys {
                 ],
                 'fields' => $journey_fields,
                 'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
+                'base_url' => trailingslashit( site_url( '/admin/journeys' ) ),
                 'role_options' => $role_labels,
                 'category_options' => $category_labels,
             ] );
@@ -270,6 +271,7 @@ class Dt_Journeys {
                 ],
                 'fields' => $journey_fields,
                 'rest_endpoint' => trailingslashit( rest_url( 'dt-journeys/v1/' ) ),
+                'base_url' => trailingslashit( site_url( '/admin/journeys' ) ),
                 'journeyId' => get_query_var( 'dt_journey_id' ),
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'nonce'    => wp_create_nonce( 'stage_sort_nonce' )

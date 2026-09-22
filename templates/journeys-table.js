@@ -141,12 +141,12 @@ export class JourneysTable extends LitElement {
   }
 
   run_create() {
-    window.location.href = '/admin/journeys/new/';
+    window.location.href = window.journeys_table.base_url + 'new/';
   }
 
   run_edit(e, journey_id) {
     e.stopPropagation();
-    window.location.href = '/admin/journeys/' + journey_id;
+    window.location.href = window.journeys_table.base_url + journey_id;
   }
 
   async duplicateJourney(e, journey_id) {
