@@ -223,10 +223,18 @@ class Dt_Journeys_Endpoints {
         }
 
         $journey = DT_Posts::get_post( 'journeys', $journey_id );
-        foreach ( $journey['stages'] as $stage ) {
-            $wp_post = DT_Posts::get_post( 'journey_stages', $stage['ID'] );
+        if ( is_wp_error( $journey ) ) {
+            return $journey;
+        }
 
-            $filtered = array_filter($wp_post['journey'], function( $value ) use ( $journey_id ) {
+        $stages = $journey['stages'] ?? [];
+        foreach ( $stages as $stage ) {
+            $wp_post = DT_Posts::get_post( 'journey_stages', $stage['ID'] );
+            if ( is_wp_error( $wp_post ) ) {
+                continue;
+            }
+
+            $filtered = array_filter( $wp_post['journey'] ?? [], function( $value ) use ( $journey_id ) {
                 return $value['ID'] != $journey_id;
             });
 
@@ -250,12 +258,16 @@ class Dt_Journeys_Endpoints {
             'post_author'  => get_current_user_id(),
         );
 
+        // Load the original before creating anything, so a failure leaves no orphaned copy behind.
+        $original_post = DT_Posts::get_post( 'journeys', $original_id );
+        if ( is_wp_error( $original_post ) ) {
+            return $original_post;
+        }
+
         $new_post_id = wp_insert_post( $new_post_args );
         if ( is_wp_error( $new_post_id ) ) {
             return $new_post_id;
         }
-
-        $original_post = DT_Posts::get_post( 'journeys', $original_id );
 
         $field_settings = DT_Posts::get_post_field_settings( $wp_post->post_type );
 
