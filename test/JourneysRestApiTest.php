@@ -49,7 +49,6 @@ class JourneysRestApiTest extends TestCase {
             $stage = DT_Posts::create_post( 'journey_stages', [
                 'name'        => "Stage $i",
                 'description' => "Stage $i description",
-                'stage_order' => $i,
             ], true, false );
             $this->assertNotWPError( $stage );
             $stage_ids[] = $stage['ID'];

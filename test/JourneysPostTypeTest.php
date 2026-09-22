@@ -44,13 +44,12 @@ class JourneysPostTypeTest extends TestCase {
 
     public function test_journey_stage_fields_exist() {
         $fields = DT_Posts::get_post_field_settings( 'journey_stages', false );
-        foreach ( [ 'description', 'instructions', 'attachments', 'related_fields', 'success_action_label', 'stage_order', 'journey' ] as $key ) {
+        foreach ( [ 'description', 'instructions', 'attachments', 'related_fields', 'success_action_label', 'journey' ] as $key ) {
             $this->assertArrayHasKey( $key, $fields, "journey_stages missing field: $key" );
         }
         $this->assertSame( 'connection', $fields['journey']['type'] );
         $this->assertSame( 'journeys', $fields['journey']['post_type'] );
         $this->assertSame( 'journeys_to_stages', $fields['journey']['p2p_key'] );
-        $this->assertSame( 'number', $fields['stage_order']['type'] );
 
         // location fields are not relevant to a stage
         $this->assertArrayNotHasKey( 'location_grid', $fields );
@@ -107,12 +106,34 @@ class JourneysPostTypeTest extends TestCase {
         $this->assertNotWPError( $journey );
         $journey_id = $journey['ID'];
 
+        $p2p_type = 'journeys_to_stages';
+
         // Create three stages, deliberately out of order.
-        $stage_c = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Stage C', 'stage_order' => 3 ], true, false );
-        $stage_a = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Stage A', 'stage_order' => 1 ], true, false );
-        $stage_b = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Stage B', 'stage_order' => 2 ], true, false );
-        foreach ( [ $stage_a, $stage_b, $stage_c ] as $stage ) {
+        $stage_c = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Stage C' ], true, false );
+        $stage_a = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Stage A' ], true, false );
+        $stage_b = DT_Posts::create_post( 'journey_stages', [ 'name' => 'Stage B' ], true, false );
+        foreach ( [ $stage_a, $stage_b, $stage_c ] as $order => $stage ) {
             $this->assertNotWPError( $stage );
+            $stage_id = intval( $stage['ID'] );
+
+            $p2p_ids = p2p_get_connections( $p2p_type, array(
+                'from'   => $journey_id,
+                'to'     => $stage_id,
+                'fields' => 'p2p_id',
+            ) );
+
+            $p2p_id = !empty( $p2p_ids ) ? (int) $p2p_ids[0] : false;
+
+            if ( ! $p2p_id ) {
+                $p2p_id = p2p_create_connection( $p2p_type, array(
+                    'from' => $journey_id,
+                    'to'   => $stage_id,
+                ) );
+            }
+
+            if ( $p2p_id ) {
+                p2p_update_meta( $p2p_id, 'stage_order', $order + 1 );
+            }
         }
 
         // Connect the stages to the journey (in scrambled order).
@@ -132,9 +153,22 @@ class JourneysPostTypeTest extends TestCase {
         $this->assertNotWPError( $fetched );
         $this->assertCount( 3, $fetched['stages'], 'journey should have 3 connected stages' );
 
-        $ordered_ids = array_map( function ( $s ) {
-            return $s['ID'];
-        }, $fetched['stages'] );
+        $ordered_ids = array_fill( 0, 3, null );
+
+        foreach ( $fetched['stages'] as $stage ) {
+            $p2p_ids = p2p_get_connections( $p2p_type, array(
+                'from'   => $journey_id,
+                'to'     => $stage['ID'],
+                'fields' => 'p2p_id',
+            ) );
+
+            $p2p_id = !empty( $p2p_ids ) ? (int) $p2p_ids[0] : false;
+
+            $order_val = $p2p_id ? p2p_get_meta( $p2p_id, 'stage_order', true ) : 0;
+
+            $ordered_ids[$order_val - 1] = $stage['ID'];
+        }
+
         $this->assertSame(
             [ $stage_a['ID'], $stage_b['ID'], $stage_c['ID'] ],
             $ordered_ids,

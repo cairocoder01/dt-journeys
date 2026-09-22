@@ -1,0 +1,12 @@
+# Use this workspace to collaborate
+workspace:
+  id: acdf20dc-f051-4075-b00c-f13d11e530ce
+
+localResources:
+  collections: []
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/dt-journeys: 3dd9d63b-8521-4177-8354-8a4f589d1eee

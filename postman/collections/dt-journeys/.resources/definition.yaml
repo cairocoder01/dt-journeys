@@ -1,0 +1,7 @@
+$kind: collection
+description: ""
+auth:
+  type: basic
+  credentials:
+    username: "{{wp_user}}"
+    password: "{{wp_app_password}}"

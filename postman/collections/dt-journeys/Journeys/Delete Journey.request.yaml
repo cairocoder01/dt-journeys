@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{host}}/wp-json/dt-journeys/v1/journeys/:id"
+method: DELETE
+pathVariables:
+  - key: id
+    value: "9999"
+    description: ""
+order: 4362134121989479

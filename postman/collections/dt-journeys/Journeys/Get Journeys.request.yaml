@@ -1,0 +1,5 @@
+$kind: http-request
+url: "{{host}}/wp-json/dt-journeys/v1/journeys"
+method: GET
+settings: {}
+order: 1789632173308

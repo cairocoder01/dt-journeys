@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{host}}/wp-json/dt-journeys/v1/journeys"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "name": "Postman test",
+        "journey_category": "999"
+    }
+order: 3756165160093245
