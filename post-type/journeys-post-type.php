@@ -163,7 +163,7 @@ class Disciple_Tools_Journeys_Post_Type extends DT_Module_Base {
         }
 
         // A journey template has no geographic location; drop the base location fields.
-        unset( $fields['location_grid'], $fields['location_grid_meta'] );
+        unset( $fields['location_grid'], $fields['location_grid_meta'], $fields['tags'] );
 
         if ( isset( $fields['name'] ) ){
             $fields['name']['tile'] = 'status';
