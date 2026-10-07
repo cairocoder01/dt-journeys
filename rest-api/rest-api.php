@@ -111,6 +111,16 @@ class Dt_Journeys_Endpoints {
         );
 
         register_rest_route(
+            $namespace, '/journeys/stage', [
+                [
+                    'methods'  => 'POST',
+                    'callback' => [ $this, 'create_stage_endpoint' ],
+                    'permission_callback' => '__return_true',
+                ]
+            ]
+        );
+
+        register_rest_route(
             $namespace, '/journeys', [
                 [
                     'methods'  => 'GET',
@@ -160,7 +170,6 @@ class Dt_Journeys_Endpoints {
     public static function update_stage_order_endpoint( WP_REST_Request $request ) {
         $journey_id = sanitize_text_field( $request['id'] );
 
-        // The WP REST API automatically decodes the JSON body into an array
         $post_order = $request->get_param( 'new_order' );
 
         if ( is_array( $post_order ) ) {
@@ -258,7 +267,6 @@ class Dt_Journeys_Endpoints {
             'post_author'  => get_current_user_id(),
         );
 
-        // Load the original before creating anything, so a failure leaves no orphaned copy behind.
         $original_post = DT_Posts::get_post( 'journeys', $original_id );
         if ( is_wp_error( $original_post ) ) {
             return $original_post;
@@ -302,11 +310,6 @@ class Dt_Journeys_Endpoints {
                             }
                         }
                     }
-                // Look for favorite as well, because it is missed in the later get_post_custom()
-                } elseif ( $field_key === 'favorite' ) {
-                    if ( isset( $original_post[$field_key] ) ) {
-                        $update_args[$field_key] = $original_post[$field_key];
-                    }
                 }
             }
         }
@@ -328,21 +331,98 @@ class Dt_Journeys_Endpoints {
         return $new_post_id;
     }
 
-    public function create_journey_endpoint( WP_REST_Request $request ) {
+    private function create_stage( array $params ) {
+        $stage_order = isset( $params['stage_order'] ) ? (int) $params['stage_order'] : 0;
+        $journey_id  = 0;
 
-        $raw_body = $request->get_body();
-        $params   = json_decode( $raw_body, true );
-
-        if ( empty( $params ) ) {
-            $params = [];
+        if ( ! empty( $params['journey'] ) && is_array( $params['journey'] ) ) {
+            $journey_id = (int) ( $params['journey'][0]['id'] ?? 0 );
         }
 
-        $valid_fields = DT_Posts::get_post_field_settings( 'journeys' );
-        $formatted_params  = [];
+        $valid_fields = DT_Posts::get_post_field_settings( 'journey_stages' );
+        $formatted_params = [];
 
         foreach ( $params as $key => $value ) {
 
             if ( empty( $key ) ) {
+                continue;
+            }
+
+            if ( array_key_exists( $key, $valid_fields ) ) {
+
+                $field_type = $valid_fields[$key]['type'] ?? '';
+                $array_types = [ 'connection', 'tags', 'multi_select', 'user_select', 'link' ];
+
+                if ( in_array( $field_type, $array_types, true ) ) {
+                    $formatted_values = [];
+
+                    if ( is_array( $value ) ) {
+                        foreach ( $value as $item ) {
+                            if ( is_array( $item ) && isset( $item['id'] ) ) {
+                                $formatted_values[] = [ 'value' => $item['id'] ];
+                            } else {
+                                if ( $field_type !== 'link' ) {
+                                    $formatted_values[] = [ 'value' => $item ];
+                                } else if ( ! empty( $item['value'] ) ) {
+                                    $formatted_values[] = $item;
+                                }
+                            }
+                        }
+                    }
+                    $formatted_params[ $key ] = [ 'values' => $formatted_values ];
+                }
+                else {
+                    $formatted_params[ $key ] = $value;
+                }
+            }
+        }
+
+        $result = DT_Posts::create_post( 'journey_stages', $formatted_params );
+
+        if ( ! is_wp_error( $result ) && ! empty( $journey_id ) ) {
+            $new_stage_id = $result['ID'];
+            $p2p_type     = 'journeys_to_stages';
+
+            $p2p_ids = p2p_get_connections( $p2p_type, array(
+                'from'   => $journey_id,
+                'to'     => $new_stage_id,
+                'fields' => 'p2p_id',
+            ) );
+
+            $p2p_id = ! empty( $p2p_ids ) ? (int) $p2p_ids[0] : false;
+
+            if ( ! $p2p_id ) {
+                $p2p_id = p2p_type( $p2p_type )->connect(
+                    $journey_id,
+                    $new_stage_id,
+                    [ 'date' => current_time( 'mysql' ) ]
+                );
+            }
+
+            if ( ! is_wp_error( $p2p_id ) && $p2p_id ) {
+                p2p_update_meta( $p2p_id, 'stage_order', $stage_order );
+            }
+        }
+
+        return $result;
+    }
+
+    public function create_stage_endpoint( WP_REST_Request $request ) {
+        $raw_body = $request->get_body();
+        $params   = json_decode( $raw_body, true );
+
+        return $this->create_stage( $params ) ?: [];
+    }
+
+    public function create_journey_endpoint( WP_REST_Request $request ) {
+        $raw_body = $request->get_body();
+        $params = json_decode( $raw_body, true ) ?: [];
+
+        $valid_fields = DT_Posts::get_post_field_settings( 'journeys' );
+        $formatted_params = [];
+
+        foreach ( $params as $key => $value ) {
+            if ( empty( $key ) || $key == 'stages' ) {
                 continue;
             }
 
@@ -371,7 +451,31 @@ class Dt_Journeys_Endpoints {
             }
         }
 
-        return DT_Posts::create_post( 'journeys', $formatted_params );
+        $journey_result = DT_Posts::create_post( 'journeys', $formatted_params );
+
+        if ( is_wp_error( $journey_result ) || empty( $journey_result['ID'] ) ) {
+            return $journey_result;
+        }
+
+        $journey_id = (int) $journey_result['ID'];
+
+        if ( ! empty( $params['stages'] ) && is_array( $params['stages'] ) ) {
+            $created_stages = [];
+
+            foreach ( $params['stages'] as $stage_data ) {
+                $stage_data['journey'] = [ [ 'id' => $journey_id ] ];
+
+                $stage_result = $this->create_stage( $stage_data );
+
+                if ( ! is_wp_error( $stage_result ) ) {
+                    $created_stages[] = $stage_result;
+                }
+            }
+
+            $journey_result['stages'] = $created_stages;
+        }
+
+        return $journey_result;
     }
 
     public function duplicate_stage( $original_stage_id, $original_journey_id, $new_journey_id ) {
@@ -380,7 +484,6 @@ class Dt_Journeys_Endpoints {
             return false;
         }
 
-        // 1. Create the new Stage
         $new_post_args = array(
             'post_title'   => $wp_post->post_title,
             'post_type'    => $wp_post->post_type,
@@ -393,7 +496,6 @@ class Dt_Journeys_Endpoints {
             return false;
         }
 
-        // 2. Copy the standard metadata for the Stage
         $post_meta = get_post_custom( $original_stage_id );
         foreach ( $post_meta as $key => $values ) {
             // Skip hidden/system meta keys
@@ -413,7 +515,6 @@ class Dt_Journeys_Endpoints {
         $new_p2p_id = self::get_p2p_id( $p2p_type, $new_journey_id, $new_stage_id );
         p2p_update_meta( $new_p2p_id, 'stage_order', $order_val );
 
-        // Return the brand new ID so the Journey can link to it
         return $new_stage_id;
     }
 

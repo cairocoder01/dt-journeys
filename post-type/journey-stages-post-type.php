@@ -127,7 +127,7 @@ class Disciple_Tools_Journey_Stages_Post_Type extends DT_Module_Base {
         }
 
         // A stage has no geographic location; drop the base location fields.
-        unset( $fields['location_grid'], $fields['location_grid_meta'] );
+        unset( $fields['location_grid'], $fields['location_grid_meta'], $fields['tags'] );
 
         if ( isset( $fields['name'] ) ){
             $fields['name']['tile'] = 'status';

@@ -3,11 +3,13 @@
  * Template Name: Journeys Admin Page
  */
 
-get_header();
 $journey_id = get_query_var( 'dt_journey_id' );
 
 $post_settings = DT_Posts::get_post_settings( 'journeys' );
 $field_options = isset( $post_settings['fields'] ) ? $post_settings['fields'] : [];
+
+$stage_settings = DT_Posts::get_post_settings( 'journey_stages' );
+$stage_fields = isset( $stage_settings['fields'] ) ? $stage_settings['fields'] : [];
 
 if ( empty( $journey_id ) ) {
     $journey = [
@@ -54,135 +56,271 @@ usort( $stages, function ( $a, $b ) {
     return ( $a['stage_order'] ?? 0 ) <=> ( $b['stage_order'] ?? 0 );
 } );
 
+foreach ( $stages as &$stage ) {
+    foreach ( $stage_fields as $field_key => $field_config ) {
+        $field_type = $field_config['type'] ?? '';
+
+        if ( in_array( $field_type, [ 'connection', 'user_select', 'multi_select' ], true ) && ! empty( $stage[ $field_key ] ) ) {
+            if ( is_array( $stage[ $field_key ] ) ) {
+                foreach ( $stage[ $field_key ] as &$item ) {
+                    if ( is_array( $item ) ) {
+                        $item['id'] = $item['id'] ?? $item['ID'] ?? 0;
+                        $item['label'] = $item['label'] ?? $item['name'] ?? $item['post_title'] ?? '';
+                        $item['link'] = $item['link'] ?? $item['permalink'] ?? '';
+                    }
+                }
+            }
+        }
+    }
+}
+unset( $stage );
+
+add_action( 'wp_enqueue_scripts', function () use ( $journey, $stage_fields, $field_options, $stages ) {
+    $stage_js_fields = array_map( function( $field ) {
+        return $field['type'] ?? 'text';
+    }, $stage_fields );
+
+    $journey_js_fields = array_map( function( $field ) {
+        return $field['type'] ?? 'text';
+    }, $field_options );
+
+    wp_localize_script( 'journey_details_js', 'dtJourneyData', [
+        'journeysBaseUrl' => site_url( '/admin/journeys/' ),
+        'journeyName'     => $journey['name'] ?? $journey['post_title'] ?? 'Unknown Journey',
+        'stages'          => $stages,
+        'stageFields'     => $stage_js_fields,
+        'journeyFields'   => $journey_js_fields,
+        'i18n'            => [
+            'continue' => __( 'Save & Continue', 'disciple_tools' ),
+            'add_new'  => __( 'Save & Add New', 'disciple_tools' ),
+            'go_back'  => __( 'Save & Go Back', 'disciple_tools' )
+        ]
+    ] );
+}, 99 );
+
+get_header();
+
 ?>
 
 <!-- List Section -->
 <div id="content" class="grid-container" style="min-height: 80vh;">
     <div class="title-row title">
-        <h2 class="title-header"><?php esc_html_e( 'Edit Journey', 'disciple_tools' ); ?></h2>
-            <div class="button-container">
-            <?php if ( ! empty( $journey_id ) ) : ?>
-                <!-- Show Delete only if editing an existing journey -->
-                <button class="button button-delete" onclick="delete_journey(<?php echo esc_js( $journey_id ); ?>)">
-                    <?php esc_html_e( 'Delete Journey', 'disciple_tools' ); ?>
-                </button>
-            <?php else : ?>
-                <!-- Split Save Button with LocalStorage Mode Selection -->
-                <div class="split-button-wrapper" id="save-split-button">
-                    <button type="submit" form="journey-form" class="button split-main-btn" id="save-btn">
-                        <span id="save-btn-label"><?php esc_html_e( 'Save & Go Back', 'disciple_tools' ); ?></span>
-                    </button>
-                    <button class="button split-toggle-btn" type="button" onclick="toggle_save_dropdown(event)">
-                        <dt-icon icon="mdi:chevron-down"></dt-icon>
-                    </button>
-                    <div class="split-dropdown-menu" id="save-dropdown-menu">
-                        <button type="button" class="dropdown-item" onclick="select_save_mode('continue')">
-                            <?php esc_html_e( 'Save & Continue', 'disciple_tools' ); ?>
-                        </button>
-                        <button type="button" class="dropdown-item" onclick="select_save_mode('add_new')">
-                            <?php esc_html_e( 'Save & Add New', 'disciple_tools' ); ?>
-                        </button>
-                        <button type="button" class="dropdown-item" onclick="select_save_mode('go_back')">
-                            <?php esc_html_e( 'Save & Go Back', 'disciple_tools' ); ?>
-                        </button>
-                    </div>
-                </div>
-            <?php endif; ?>
-            
-            <!-- Back button always shows -->
-            <button class="button button-back" id="back-btn" onclick="go_back()">
-                <?php esc_html_e( 'Back', 'disciple_tools' ); ?>
-            </button>
-        </div>
+        <button class="link-button" onclick="go_back()">
+            <dt-icon icon="mdi:chevron-left"></dt-icon>
+            <?php esc_html_e( 'Back', 'disciple_tools' ); ?>
+        </button>
     </div>
-    <div class="grid-x grid-margin-x">
-        <section class="medium-4 small-12 cell">
-            <div class="bordered-box">
-                <h6 class="journey-header"><?php esc_html_e( 'Journey Details', 'disciple_tools' ); ?></h6>
-                <form id="journey-form" onsubmit="save_journey(event)">
-                    <div class="margin-top-1">
-                        <?php
-
-                        foreach ( $field_options as $field_key => $field ) {
-
-                            if ( !isset( $field['tile'] ) || $field_key === 'stages' ) {
-                                continue;
-                            }
-
-                            if ( ! array_key_exists( $field_key, $journey ) ) {
-
-                                $array_types = [ 'tags', 'multi_select', 'connection', 'user_select' ];
-
-                                if ( isset( $field['type'] ) && in_array( $field['type'], $array_types, true ) ) {
-                                    $journey[ $field_key ] = [];
-                                } elseif ( isset( $field['type'] ) && $field['type'] === 'key_select' ) {
-                                    $journey[ $field_key ] = [ 'key' => '' ];
-                                } else {
-                                    $journey[ $field_key ] = '';
-                                }
-                            }
-
-                            echo '<div style="margin-bottom: 15px;">';
-
-                            $is_required = ! empty( $field['required'] ) ? true : false;
-                            $display_settings = $field_options;
-                            $display_settings[ $field_key ]['required'] = $is_required;
-
-                            render_field_for_display( $field_key, $display_settings, $journey, true, true, '', [] );
-
-                            echo '</div>';
-                        }
-                        ?>
-                    </div>
-                </form>
-            </div>
-        </section>
-        <section class="medium-8 small-12 cell">
-            <div class="bordered-box">
-                <div class="title-row">
-                    <div class="stage-list-header" id="stage-list-header">
-                        <h6 class="journey-header"><?php esc_html_e( 'Stages', 'disciple_tools' ); ?></h6>
-                    </div>
-                    <button class="button" onclick="add_stage()">
-                        <?php esc_html_e( 'Add Stage', 'disciple_tools' ); ?>
-                    </button>
-                </div>
-                <div>
-                    <ul id="stage-list">
-                        <?php foreach ( $stages as $stage ) { ?>
-                        <li id="stage-<?php echo esc_attr( $stage['ID'] ); ?>" data-id="<?php echo esc_attr( $stage['ID'] ); ?>" style="border: 1px solid #ccc; padding: 1em; margin: 1em 0; display: flex; justify-content: space-between; background: #fff;">
-                            <div class="item-details">
-                                <div class="stage-order">
-                                    <dt-icon class="drag-handle" icon="mdi:reorder-horizontal"></dt-icon>
-                                </div>
-                                <div class="stage-data">
-                                    <div class="stage-name" id="stage-name-<?php echo esc_attr( $stage['ID'] ); ?>">
-                                        <?php echo esc_html( $stage['name'] ); ?>
-                                    </div>
-                                    <div class="stage-description" id="stage-description-<?php echo esc_attr( $stage['ID'] ); ?>">
-                                        <?php echo esc_html( $stage['description'] ?? '' ); ?>
-                                    </div>
-                                    <div class="stage-fields" id="stage-fields-<?php echo esc_attr( $stage['ID'] ); ?>">
-                                        <?php echo 'Links: ' . esc_html( count( $stage['links'] ?? [] ) ) . ' Attachments: ' . esc_html( count( $stage['attachments'] ?? [] ) ) . ' Related Fields: ' . esc_html( count( $stage['related_fields'] ?? [] ) ); ?>
-                                    </div>
+    <div class="slider-viewport">
+        <div id="slider-track" class="grid-x grid-margin-x">
+            <section id="section-journey-details" class="medium-7 small-12 cell">
+                <div class="bordered-box">
+                    <span class="error-text" id="journey-detail-error" style="display: none;"></span>
+                    <div class="title-row">
+                    <h6 class="journey-header"><?php esc_html_e( 'Journey Details', 'disciple_tools' ); ?></h6>
+                        <?php if ( empty( $journey_id ) ) : ?>
+                            <div class="split-button-wrapper" id="save-split-button">
+                                <button type="submit" form="journey-form" class="button split-main-btn" id="save-btn">
+                                    <span id="top-btn-label"><?php esc_html_e( 'Save & Go Back', 'disciple_tools' ); ?></span>
+                                </button>
+                                <button class="button split-toggle-btn" type="button" onclick="toggle_save_dropdown(event)">
+                                    <dt-icon icon="mdi:chevron-down" id="top-icon"></dt-icon>
+                                </button>
+                                <div class="split-dropdown-menu top" id="save-dropdown-top">
+                                    <button type="button" class="dropdown-item" onclick="select_save_mode('continue')">
+                                        <?php esc_html_e( 'Save & Continue', 'disciple_tools' ); ?>
+                                    </button>
+                                    <button type="button" class="dropdown-item" onclick="select_save_mode('add_new')">
+                                        <?php esc_html_e( 'Save & Add New', 'disciple_tools' ); ?>
+                                    </button>
+                                    <button type="button" class="dropdown-item" onclick="select_save_mode('go_back')">
+                                        <?php esc_html_e( 'Save & Go Back', 'disciple_tools' ); ?>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="stage-actions">
-                                <button class="icon-btn" onclick="run_edit(<?php echo esc_js( $stage['ID'] ); ?>)"><dt-icon icon="mdi:edit"></dt-icon></button>
-                                <button class="icon-btn" onclick="delete_stage(<?php echo esc_js( $stage['ID'] ); ?>)"><dt-icon icon="mdi:delete"></dt-icon></button>
-                            </div>
-                        </li>
+                        <?php endif; ?>
+                    </div>
+                    <form id="journey-form" onsubmit="save_journey(event)">
+                        <div class="margin-top-1 fields-container">
                             <?php
-                        }
-                        ?>
-                    </ul>
+
+                            foreach ( $field_options as $field_key => $field ) {
+
+                                if ( !isset( $field['tile'] ) || $field_key === 'stages' ) {
+                                    continue;
+                                }
+
+                                if ( ! array_key_exists( $field_key, $journey ) ) {
+
+                                    $array_types = [ 'tags', 'multi_select', 'connection', 'user_select' ];
+
+                                    if ( isset( $field['type'] ) && in_array( $field['type'], $array_types, true ) ) {
+                                        $journey[ $field_key ] = [];
+                                    } elseif ( isset( $field['type'] ) && $field['type'] === 'key_select' ) {
+                                        $journey[ $field_key ] = [ 'key' => '' ];
+                                    } else {
+                                        $journey[ $field_key ] = '';
+                                    }
+                                }
+
+                                $is_required = ! empty( $field['required'] ) ? true : false;
+                                $display_settings = $field_options;
+                                $display_settings[ $field_key ]['required'] = $is_required;
+
+                                render_field_for_display( $field_key, $display_settings, $journey, true, true, 'journey_', [] );
+                            }
+                            ?>
+                        </div>
+                    </form>
+                    <div class="button-container">
+                        <?php if ( ! empty( $journey_id ) ) : ?>
+                            <button class="button button-delete" onclick="delete_journey(<?php echo esc_js( $journey_id ); ?>)">
+                                <?php esc_html_e( 'Delete Journey', 'disciple_tools' ); ?>
+                            </button>
+                        <?php else : ?>
+                            <div class="split-button-wrapper" id="save-split-button">
+                                <button type="submit" form="journey-form" class="button split-main-btn" id="save-btn">
+                                    <span id="bottom-btn-label"><?php esc_html_e( 'Save & Go Back', 'disciple_tools' ); ?></span>
+                                </button>
+                                <button class="button split-toggle-btn" type="button" onclick="toggle_save_dropdown(event)">
+                                    <dt-icon icon="mdi:chevron-down" id="bottom-icon"></dt-icon>
+                                </button>
+                                <div class="split-dropdown-menu bottom" id="save-dropdown-bottom">
+                                    <button type="button" class="dropdown-item" onclick="select_save_mode('continue')">
+                                        <?php esc_html_e( 'Save & Continue', 'disciple_tools' ); ?>
+                                    </button>
+                                    <button type="button" class="dropdown-item" onclick="select_save_mode('add_new')">
+                                        <?php esc_html_e( 'Save & Add New', 'disciple_tools' ); ?>
+                                    </button>
+                                    <button type="button" class="dropdown-item" onclick="select_save_mode('go_back')">
+                                        <?php esc_html_e( 'Save & Go Back', 'disciple_tools' ); ?>
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+            <section id="section-stages-list" class="medium-5 small-12 cell">
+                <div class="bordered-box">
+                    <span class="error-text" id="stage-list-error" style="display: none;"></span>
+                    <div class="title-row">
+                        <div class="stage-list-header" id="stage-list-header">
+                            <h6 class="journey-header"><?php esc_html_e( 'Stages', 'disciple_tools' ); ?></h6>
+                        </div>
+                        <button class="button" onclick="edit_stage()">
+                            <?php esc_html_e( 'Add Stage', 'disciple_tools' ); ?>
+                        </button>
+                    </div>
+                    <div>
+                        <div id="no-stages-text" class="margin-top-1">
+                            <?php esc_html_e( 'No journey stages created.', 'disciple_tools' ); ?>
+                            <button class="link-button inline" onclick="edit_stage()"><?php esc_html_e( 'Add Stage', 'disciple_tools' ); ?></button>
+                        </div>
+                        <ul id="stage-list">
+                            <?php foreach ( $stages as $stage ) { ?>
+                            <li id="stage-<?php echo esc_attr( $stage['ID'] ); ?>" data-id="<?php echo esc_attr( $stage['ID'] ); ?>" style="border: 1px solid #ccc; padding: 1em; margin: 1em 0; display: flex; justify-content: space-between; background: #fff;">
+                                <div class="item-details">
+                                    <div class="stage-order">
+                                        <dt-icon class="drag-handle" icon="mdi:reorder-horizontal"></dt-icon>
+                                    </div>
+                                    <div class="stage-data">
+                                        <div class="stage-name" id="stage-name-<?php echo esc_attr( $stage['ID'] ); ?>">
+                                            <?php echo esc_html( $stage['name'] ); ?>
+                                        </div>
+                                        <div class="stage-description" id="stage-description-<?php echo esc_attr( $stage['ID'] ); ?>">
+                                            <?php echo esc_html( $stage['description'] ?? '' ); ?>
+                                        </div>
+                                        <div class="stage-fields" id="stage-fields-<?php echo esc_attr( $stage['ID'] ); ?>">
+                                            <?php echo 'Links: ' . esc_html( count( $stage['links'] ?? [] ) ) . ' Attachments: ' . esc_html( count( $stage['attachments'] ?? [] ) ) . ' Related Fields: ' . esc_html( count( $stage['related_fields'] ?? [] ) ); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stage-actions">
+                                    <button class="icon-btn" onclick="edit_stage(<?php echo esc_js( $stage['ID'] ); ?>)"><dt-icon icon="mdi:edit"></dt-icon></button>
+                                    <button class="icon-btn" onclick="delete_stage(<?php echo esc_js( $stage['ID'] ); ?>)"><dt-icon icon="mdi:delete"></dt-icon></button>
+                                </div>
+                            </li>
+                                <?php
+                            }
+                            ?>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            <section id="section-edit-stage" class="medium-7 small-12 cell">
+                <div class="bordered-box">
+                    <span class="error-text" id="stage-detail-error" style="display: none;"></span>
+                    <div class="title-row">
+                        <h6 id="edit-section-title" class="journey-header"><?php esc_html_e( 'Edit Stage', 'disciple_tools' ); ?></h6>
+                        <button class="icon-btn" onclick="close_edit(<?php echo esc_html( $journey_id > 0 ) ?>)" style="transform: scale(1.2);">
+                            <dt-icon icon="mdi:close"></dt-icon>
+                        </button>
+                    </div>
+
+                    <div id="edit-stage-content" class="margin-top-1">
+                        <form id="stage-form" class="stage-edit-form" onsubmit="save_stage(event)">
+                            <div class="fields-container">
+                            <?php
+                            // Still need to empty the fields for Add Stage
+                            foreach ( $stage_fields as $field_key => $field ) {
+                                if ( empty( $field['tile'] ) || $field_key === 'journey' ) {
+                                    continue;
+                                }
+                                $is_required = ! empty( $field['required'] ) ? true : false;
+                                $display_settings = $stage_fields;
+                                $display_settings[ $field_key ]['required'] = $is_required;
+
+                                if ( $display_settings[$field_key]['type'] === 'multi_select' ) {
+                                    $display_settings[$field_key]['display'] = 'typeahead';
+                                }
+
+                                render_field_for_display( $field_key, $display_settings, [ 'post_type' => 'journey_stages' ], true, true, 'stage_', [] );
+                            }
+                            ?>
+                            </div>
+                            <div id="stage-save-container" class="button-container">
+                                <button type="button" class="button button-back" onclick="close_edit()">
+                                    <?php esc_html_e( 'Cancel', 'disciple_tools' ); ?>
+                                </button>
+                                <button type="submit" class="button">
+                                    <?php esc_html_e( 'Save Stage', 'disciple_tools' ); ?>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </div>
 
 <style>
+    .fields-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem 1.5rem;
+        margin-block-end: 1rem;
+    }
+
+    .slider-viewport {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+    }
+
+    #slider-track {
+        flex-wrap: nowrap !important;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    #slider-track > .cell {
+        flex-shrink: 0 !important;
+    }
+
+    .shift-left {
+        transform: translateX(-58.33333%);
+    }
+
     .title-header {
         font-weight: bold;
         margin: 0;
@@ -208,7 +346,7 @@ usort( $stages, function ( $a, $b ) {
     .button-container {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-end;
         gap: .5rem;
     }
 
@@ -237,9 +375,7 @@ usort( $stages, function ( $a, $b ) {
     .split-dropdown-menu {
         display: none;
         position: absolute;
-        top: 100%;
         right: 0;
-        margin-top: 4px;
         background-color: #ffffff;
         min-width: 170px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -248,7 +384,14 @@ usort( $stages, function ( $a, $b ) {
         z-index: 100;
         overflow: hidden;
     }
-
+    .split-dropdown-menu.top {
+        top: 100%;
+        margin-top: 4px;
+    }
+    .split-dropdown-menu.bottom {
+        bottom: 100%;
+        margin-bottom: 4px;
+    }
     .split-dropdown-menu.show {
         display: block;
     }
@@ -298,14 +441,28 @@ usort( $stages, function ( $a, $b ) {
         color: #000000;
     }
 
-    .journey-header {
-        font-weight: bold;
+    .link-button {
+        background: none;
+        border: none;
+        padding-left: 0.5rem;
+        margin: 0;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
     }
 
-    .subsection {
-        padding: 1em;
-        border-radius: 5px;
-        border: 1px solid #cccccc;
+    .link-button dt-icon {
+        display: inline-flex;
+        align-items: center;
+        font-size: 1.25em;
+    }
+    .link-button.inline {
+        color: #0000ee;
+        text-decoration: underline;
+    }
+
+    .journey-header {
+        font-weight: bold;
     }
 
     .sortable-placeholder {
@@ -403,170 +560,78 @@ usort( $stages, function ( $a, $b ) {
         width: 1.4rem;
     }
 
+    @media screen and (max-width: 39.9375em) {
+
+        .button-container {
+            justify-content: space-between;
+        }
+
+        .fields-container {
+            grid-template-columns: 1fr;
+        }
+
+        #stage-list li {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1em;
+        }
+        .stage-actions {
+            width: 100%;
+            justify-content: flex-end;
+            border-top: 1px solid #eeeeee;
+            padding-top: 0.75em;
+        }
+
+        #slider-track {
+            flex-wrap: wrap !important;
+            transform: none !important;
+            transition: none !important;
+        }
+
+        #slider-track > .cell {
+            flex-shrink: 1 !important;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        #slider-track.shift-left #section-journey-details,
+        #slider-track.shift-left #section-stages-list {
+            display: none;
+        }
+
+        #section-edit-stage {
+            display: none;
+        }
+
+        #slider-track.shift-left #section-edit-stage {
+            display: block;
+        }
+
+        ul {
+            margin: 0;
+        }
+    }
+
 </style>
 
-<script>
-    const SAVE_MODES = {
-        continue: '<?php echo esc_js( __( 'Save & Continue', 'disciple_tools' ) ); ?>',
-        add_new:  '<?php echo esc_js( __( 'Save & Add New', 'disciple_tools' ) ); ?>',
-        go_back:  '<?php echo esc_js( __( 'Save & Go Back', 'disciple_tools' ) ); ?>'
-    };
-
-    let currentSaveMode = localStorage.getItem('dt_journey_save_action') || 'go_back';
-
-    function updateSaveButtonUI() {
-        const labelEl = document.getElementById('save-btn-label');
-        if (labelEl && SAVE_MODES[currentSaveMode]) {
-            labelEl.innerHTML = SAVE_MODES[currentSaveMode];
-        }
-    }
-
-    function toggle_save_dropdown(event) {
-        event.stopPropagation();
-        const menu = document.getElementById('save-dropdown-menu');
-        if (menu) {
-            menu.classList.toggle('show');
-        }
-    }
-
-    function select_save_mode(mode) {
-        if (SAVE_MODES[mode]) {
-            currentSaveMode = mode;
-            localStorage.setItem('dt_journey_save_action', mode);
-            updateSaveButtonUI();
-        }
-        const menu = document.getElementById('save-dropdown-menu');
-        if (menu) {
-            menu.classList.remove('show');
-        }
-    }
-
-    // Close split dropdown on outside clicks
-    document.addEventListener('click', function(e) {
-        const wrapper = document.getElementById('save-split-button');
-        const menu = document.getElementById('save-dropdown-menu');
-        if (menu && wrapper && !wrapper.contains(e.target)) {
-            menu.classList.remove('show');
-        }
-    });
-
-    function go_back() {
-        window.location.href = window.journey_details_js.base_url;
-    }
-
-    function add_stage() {
-        console.log("adding new stage");
-    }
-
-    function run_edit(stage_id) {
-        console.log(stage_id);
-    }
-
-    async function delete_stage(stage_id) {
-
-        const stageRow = document.getElementById(`stage-${stage_id}`);
-
-        let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/stage/${stage_id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': window.wpApiShare.nonce,
-            },
-        }).then((res) => res.json()).then(() => stageRow.remove());
-    }
-
-    async function delete_journey(journey_id) {
-
-        try {
-            let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/${journey_id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': window.wpApiShare.nonce,
-                },
-            });
-
-            let result = await response.json();
-
-            if (response.ok) {
-                window.location.href = window.journey_details_js.base_url;
-            }
-        } catch (error) {
-            console.error("Delete Journey Error:", error);
-        }
-    }
-
-    async function save_journey(event) {
-        event.preventDefault();
-
-        const journeyFields = <?php
-            $js_fields = array_map( function( $field ) {
-                return $field['type'] ?? 'text';
-            }, $field_options );
-
-            echo wp_json_encode( $js_fields );
-            ?>;
-
-        const payload = {};
-
-        for ( const [fieldKey, fieldType] of Object.entries(journeyFields) ) {
-            const el = document.getElementById(fieldKey);
-            if ( ! el ) continue;
-            
-            payload[fieldKey] = el.value;
-        }
-
-        try {
-            let response = await fetch(window.journey_details_js.rest_endpoint + `journeys`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': window.wpApiShare.nonce,
-                },
-                body: JSON.stringify(payload)
-            });
-
-            let result = await response.json();
-
-            const newId = result.ID || '';
-
-            if (currentSaveMode === 'continue' && newId) {
-                window.location.href = window.journey_details_js.base_url + newId + '/';
-            } else if (currentSaveMode === 'add_new') {
-                window.location.href = window.journey_details_js.base_url + 'new/';
-            } else {
-                // Default: 'go_back'
-                window.location.href = window.journey_details_js.base_url;
-            }
-        } catch (error) {
-            console.error("Create Journey Error:", error);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        updateSaveButtonUI();
-
-        const journeyId = <?php echo absint( $journey_id ); ?>;
-        const currentPostType = 'journeys'; // Hardcoded since this is the Journeys admin page
-        
-        const apiNonce = window.wpApiSettings ? window.wpApiSettings.nonce : (window.wpApiShare ? window.wpApiShare.nonce : '');
-        const apiRoot = window.wpApiSettings ? window.wpApiSettings.root : (window.wpApiShare ? window.wpApiShare.root : '/wp-json/');
-
-        if (window.DtWebComponents && window.DtWebComponents.ComponentService) {
-            const service = new window.DtWebComponents.ComponentService(
-                currentPostType,
-                journeyId,
-                apiNonce,
-                apiRoot
-            );
-            
-            service.initialize();
-            
-            window.componentService = service;
-        }
-
-    });
-</script>
+<template id="stage-row-template">
+    <li data-id="" style="border: 1px solid #ccc; padding: 1em; margin: 1em 0; display: flex; justify-content: space-between; background: #fff;">
+        <div class="item-details">
+            <div class="stage-order">
+                <dt-icon class="drag-handle" icon="mdi:reorder-horizontal"></dt-icon>
+            </div>
+            <div class="stage-data">
+                <div class="stage-name" class="stage-name"></div>
+                <div class="stage-description" class="stage-description"></div>
+                <div class="stage-fields" class="stage-fields"></div>
+            </div>
+        </div>
+        <div class="stage-actions">
+            <button class="icon-btn edit-btn"><dt-icon icon="mdi:edit"></dt-icon></button>
+            <button class="icon-btn delete-btn"><dt-icon icon="mdi:delete"></dt-icon></button>
+        </div>
+    </li>
+</template>
 
 <?php
 // Load the Disciple.Tools footer
