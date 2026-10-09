@@ -560,7 +560,8 @@ get_header();
         width: 1.4rem;
     }
 
-    @media screen and (max-width: 39.9375em) {
+    /* Or 39.9375em for standard mobile view */
+    @media screen and (max-width: 63.9375em) {
 
         .button-container {
             justify-content: space-between;
@@ -612,6 +613,37 @@ get_header();
         }
     }
 
+    dialog.dt-delete-dialog {
+        border: 1px solid #cccccc;
+        border-radius: .5rem;
+        padding: 0;
+        max-width: 26rem;
+        box-shadow: 0 .25rem 1rem rgba(0, 0, 0, 0.15);
+        background-color: #ffffff;
+        overflow: hidden;
+        width: 90%;
+    }
+
+    .dialog-content {
+        padding: 1.5rem;
+    }
+
+    dialog.dt-delete-dialog::backdrop {
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(2px);
+    }
+
+    .dialog-title {
+        font-weight: bold;
+        font-size: 1.25rem;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .dialog-message {
+        color: #555555;
+    }
+
 </style>
 
 <template id="stage-row-template">
@@ -632,6 +664,21 @@ get_header();
         </div>
     </li>
 </template>
+
+<dialog id="dt-confirm-dialog" class="dt-delete-dialog">
+    <div class="dialog-content">
+        <h5 id="dialog-title" class="dialog-title">Confirm Delete</h5>
+        <p id="dialog-message" class="dialog-message">Are you sure you want to perform this action?</p>
+        <div class="button-container">
+            <button type="button" class="button button-back" id="dialog-cancel-btn">
+                <?php esc_html_e( 'Cancel', 'disciple_tools' ); ?>
+            </button>
+            <button type="button" class="button button-delete" id="dialog-confirm-btn">
+                <?php esc_html_e( 'Delete', 'disciple_tools' ); ?>
+            </button>
+        </div>
+    </div>
+</dialog>
 
 <?php
 // Load the Disciple.Tools footer
