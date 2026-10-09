@@ -164,7 +164,7 @@ class Dt_Journeys {
         add_action( 'template_include', [ $this, 'load_journeys_template' ] );
         add_filter( 'dt_nav', function ( $nav ){
             $can_manage_journeys = current_user_can( 'manage_journeys' ) || current_user_can( 'manage_dt' );
-            
+
             $nav['admin']['settings']['submenu']['journeys'] = [
                 'label'  => __( 'Journeys', 'disciple_tools' ),
                 'link'   => site_url( '/admin/journeys/' ),
