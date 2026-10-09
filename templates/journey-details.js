@@ -370,81 +370,91 @@ function close_edit(isUpdating = false) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function delete_stage(stage_id) {
-    hideError();
-    if (currentStageId === stage_id) {
-        close_edit();
-    }
+function delete_stage(stage_id) {
+    confirmDeleteModal({
+        title: 'Delete Stage?',
+        message: 'Are you sure you want to delete this stage? This action cannot be undone.',
+        onConfirm: async () => {
+            hideError();
 
-    const stageRow = document.getElementById(`stage-${stage_id}`);
+            if (currentStageId === stage_id) {
+                close_edit();
+            }
 
-    if (journeyId === 0) {
-        const index = stages.findIndex(stage => stage.ID === stage_id || stage.temp_id === stage_id);
+            const stageRow = document.getElementById(`stage-${stage_id}`);
 
-        if (index !== -1) {
-            stages.splice(index, 1);
-        }
+            if (journeyId === 0) {
+                const index = stages.findIndex(stage => stage.ID === stage_id || stage.temp_id === stage_id);
 
-        if (stageRow) {
-            stageRow.remove();
-        }
-
-    } else {
-        try {
-            let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/stage/${stage_id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': window.wpApiShare.nonce,
-                },
-            });
-
-            if (response.ok) {
-                let result = await response.json();
+                if (index !== -1) {
+                    stages.splice(index, 1);
+                }
 
                 if (stageRow) {
                     stageRow.remove();
                 }
-
-                const index = stages.findIndex(stage => stage.ID == stage_id);
-                if (index !== -1) {
-                    stages.splice(index, 1);
-                }
             } else {
-                let result = await response.json();
+                try {
+                    let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/stage/${stage_id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-WP-Nonce': window.wpApiShare.nonce,
+                        },
+                    });
 
-                showError(result.message || 'Failed to delete stage', 'stage-list-error');
+                    if (response.ok) {
+                        let result = await response.json();
+
+                        if (stageRow) {
+                            stageRow.remove();
+                        }
+
+                        const index = stages.findIndex(stage => stage.ID == stage_id);
+                        if (index !== -1) {
+                            stages.splice(index, 1);
+                        }
+                    } else {
+                        let result = await response.json();
+                        showError(result.message || 'Failed to delete stage', 'stage-list-error');
+                    }
+                } catch (error) {
+                    console.error("Delete Stage Error:", error);
+                    showError('An error occurred while deleting the stage. Please try again.', 'stage-list-error');
+                }
             }
-        } catch (error) {
-            console.error("Delete Stage Error:", error);
-            showError('An error occurred while deleting the stage. Please try again.', 'stage-list-error');
-        }
-    }
 
-    toggleEmptyStageText();
+            toggleEmptyStageText();
+        }
+    });
 }
 
-async function delete_journey(journey_id) {
+function delete_journey(journey_id) {
+    confirmDeleteModal({
+        title: 'Delete Journey?',
+        message: 'Are you sure you want to delete this journey? All of its stages will also be deleted.',
+        onConfirm: async () => {
+            try {
+                let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/${journey_id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': window.wpApiShare.nonce,
+                    },
+                });
 
-    try {
-        let response = await fetch(window.journey_details_js.rest_endpoint + `journeys/${journey_id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': window.wpApiShare.nonce,
-            },
-        });
-
-        if (response.ok) {
-            window.location.href = journeysBaseUrl;
-        } else {
-            let result = await response.json();
-            showError(result.message || 'Failed to delete journey', 'journey-detail-error');
+                if (response.ok) {
+                    window.location.href = journeysBaseUrl;
+                } else {
+                    let result = await response.json();
+                    showError(result.message || 'Failed to delete journey', 'journey-detail-error');
+                }
+            } catch (error) {
+                console.error("Delete Journey Error:", error);
+                showError('An error occurred while deleting the journey. Please try again.', 'journey-detail-error');
+            }
         }
-    } catch (error) {
-        console.error("Delete Journey Error:", error);
-        showError('An error occurred while deleting the journey. Please try again.', 'journey-detail-error');
-    }
+    });
 }
 
 async function save_journey(event) {
@@ -609,4 +619,48 @@ function hideError() {
     if (listError) listError.style.display = 'none';
     const stageDetailError = document.getElementById('stage-detail-error');
     if (stageDetailError) stageDetailError.style.display = 'none';
+}
+
+function confirmDeleteModal({ title, message, onConfirm }) {
+    const dialog = document.getElementById('dt-confirm-dialog');
+    const titleEl = document.getElementById('dialog-title');
+    const msgEl = document.getElementById('dialog-message');
+    const confirmBtn = document.getElementById('dialog-confirm-btn');
+    const cancelBtn = document.getElementById('dialog-cancel-btn');
+
+    if (!dialog) return;
+
+    titleEl.textContent = title || 'Delete Item?';
+    msgEl.textContent = message || 'Are you sure? This cannot be undone.';
+
+    const cleanup = () => {
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+        dialog.removeEventListener('click', handleBackdropClick);
+        dialog.removeEventListener('close', handleCancel);
+    };
+
+    const handleConfirm = async () => {
+        cleanup();
+        dialog.close();
+        await onConfirm();
+    };
+
+    const handleCancel = () => {
+        cleanup();
+        dialog.close();
+    };
+
+    const handleBackdropClick = (e) => {
+        if (e.target === dialog) {
+            e.stopPropagation();
+            handleCancel();
+        }
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
+    dialog.addEventListener('click', handleBackdropClick);
+
+    dialog.showModal();
 }
