@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journeys Mockups</title>
+<!--
+  Static mockups for the Journeys mobile/tablet UI review.
+  Pick a screen with ?s=<name>, e.g. mockups.html?s=phone-list
+  Screens: phone-list, phone-list-actions, phone-filters, phone-stages, phone-details-menu,
+           phone-stage-menu, phone-stage-edit, phone-new, phone-discard,
+           tablet-list, tablet-details, landscape-list, landscape-detail, landscape-stage-edit
+-->
+<style>
+  :root {
+    --primary: #3f729b;
+    --primary-dark: #2a4d6b;
+    --primary-tint: #e8f0f6;
+    --bg: #e4e4e4;
+    --card: #ffffff;
+    --text: #1f1f1f;
+    --muted: #666;
+    --border: #d6d6d6;
+    --danger: #c62828;
+    --success: #2e7d32;
+    --green: #4caf50;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.35;
+    min-height: 100vh;
+  }
+  svg.i { width: 22px; height: 22px; fill: currentColor; flex: none; }
+  svg.i.sm { width: 16px; height: 16px; }
+
+  /* DT top bar */
+  .topbar { background: var(--primary); color: #fff; height: 52px; display: flex; align-items: center; padding: 0 12px; gap: 14px; }
+  .topbar .logo { font-weight: 700; letter-spacing: .5px; font-size: 13px; line-height: 1; display: flex; align-items: center; gap: 6px; }
+  .topbar .logo b { color: #8bc34a; font-size: 22px; }
+  .topbar .logo small { display: block; font-weight: 300; font-size: 11px; letter-spacing: 2px; }
+  .topbar .spacer { flex: 1; }
+  .topbar .plus { width: 28px; height: 28px; border-radius: 50%; background: var(--green); display: grid; place-items: center; }
+  .topbar nav { display: flex; gap: 28px; font-weight: 700; margin-left: 12px; }
+
+  /* Page scaffolding */
+  .page { padding: 12px 12px 96px; }
+  .tablet .page { padding: 16px 16px 40px; }
+  .box { background: var(--card); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+  .pad { padding: 16px; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid transparent; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .btn.primary { background: var(--primary); color: #fff; }
+  .btn.outline { background: #fff; color: var(--primary); border-color: var(--border); }
+  .btn.ghost { background: transparent; color: var(--primary); }
+  .btn.danger { background: #fff; color: var(--danger); border-color: var(--border); }
+  .btn.block { width: 100%; }
+  .iconbtn { width: 44px; height: 44px; display: inline-grid; place-items: center; border-radius: 50%; border: 0; background: transparent; color: #555; flex: none; }
+  .iconbtn.on { background: #eef2f5; }
+
+  .titlebar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .titlebar h1 { font-size: 24px; margin: 0; }
+  .titlebar h1 .count { font-size: 14px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+
+  .searchrow { display: flex; gap: 8px; margin-bottom: 8px; }
+  .search { flex: 1; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; background: #fff; border: 1px solid var(--border); border-radius: 8px; color: #888; }
+  .select { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 12px; background: #fff; border: 1px solid var(--border); border-radius: 8px; color: #888; min-width: 170px; }
+  .badge { background: var(--primary); color: #fff; border-radius: 10px; font-size: 12px; padding: 1px 7px; font-weight: 700; }
+  .metaline { font-size: 13px; color: var(--muted); margin: 4px 2px 10px; display: flex; justify-content: space-between; align-items: center; }
+  .metaline .sort { color: var(--primary); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 14px; background: #eef2f5; color: #333; font-size: 13px; }
+  .chip.removable { background: var(--primary-tint); color: var(--primary-dark); font-weight: 600; height: 32px; padding: 0 6px 0 12px; }
+  .chip.removable svg { width: 18px; height: 18px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+
+  /* Journey cards (phone list) */
+  .jlist { display: flex; flex-direction: column; gap: 8px; }
+  .jcard { display: flex; align-items: flex-start; gap: 4px; padding: 14px 4px 14px 16px; min-height: 76px; }
+  .jcard .jmain { flex: 1; min-width: 0; }
+  .jtitle { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+  .jmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .jmeta .dot::before { content: "·"; margin-right: 6px; }
+  .jsub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .jcard.pressed { outline: 2px solid var(--primary); }
+
+  /* Overlays */
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.42); z-index: 10; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 16px 16px 0 0; z-index: 11; padding: 8px 0 24px; box-shadow: 0 -4px 20px rgba(0,0,0,.2); }
+  .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: #ccc; margin: 4px auto 10px; }
+  .sheet h3 { margin: 0; padding: 6px 20px 12px; font-size: 16px; border-bottom: 1px solid #eee; }
+  .sheet .item { display: flex; align-items: center; gap: 16px; min-height: 56px; padding: 0 20px; font-size: 16px; color: #222; }
+  .sheet .item svg { color: #555; }
+  .sheet .item.danger, .sheet .item.danger svg { color: var(--danger); }
+  .sheet .item.disabled { color: #aaa; }
+  .sheet .item.disabled svg { color: #ccc; }
+  .sheet .sep { height: 1px; background: #eee; margin: 6px 0; }
+  .sheet .section { padding: 14px 20px 4px; }
+  .sheet .section h4 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  .opt { display: flex; align-items: center; justify-content: space-between; min-height: 48px; font-size: 16px; border-bottom: 1px solid #f0f0f0; }
+  .opt .check { color: var(--primary); }
+  .tchip { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 14px; background: #fff; }
+  .tchip.sel { background: var(--primary-tint); border-color: var(--primary); color: var(--primary-dark); font-weight: 600; }
+  .sheet .footer { display: flex; gap: 10px; padding: 16px 20px 0; border-top: 1px solid #eee; margin-top: 14px; }
+  .sheet .footer .btn { flex: 1; }
+
+  .menu { position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.22); min-width: 220px; padding: 6px 0; z-index: 20; }
+  .menu .item { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px; font-size: 15px; }
+  .menu .item.danger { color: var(--danger); }
+  .menu .sep { height: 1px; background: #eee; margin: 4px 0; }
+
+  .dialog { position: fixed; left: 20px; right: 20px; top: 34%; background: #fff; border-radius: 14px; z-index: 11; padding: 22px 20px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+  .dialog h3 { margin: 0 0 8px; font-size: 18px; }
+  .dialog p { margin: 0 0 18px; color: #444; }
+  .dialog .actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 24px; background: #2b2b2b; color: #fff; border-radius: 10px; padding: 0 8px 0 18px; min-height: 52px; display: flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.3); z-index: 30; white-space: nowrap; }
+  .toast .btn { color: #9cc7ea; min-height: 44px; padding: 0 12px; }
+
+  /* Detail page */
+  .subbar { display: flex; align-items: center; justify-content: space-between; margin: -4px -4px 2px; }
+  .back, .subbar .back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 8px 0 0; color: var(--primary); font-weight: 600; background: none; border: 0; font: inherit; font-weight: 600; }
+  .ptitle { font-size: 20px; margin: 2px 0 12px; line-height: 1.25; }
+  .ptitle small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 4px; }
+
+  .tabs { display: flex; background: #d5d9dd; border-radius: 10px; padding: 3px; margin-bottom: 12px; }
+  .tabs a { flex: 1; text-align: center; min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; font-weight: 600; color: #444; }
+  .tabs a.active { background: #fff; color: var(--primary-dark); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .tabs .pill { font-size: 12px; background: #bfc7ce; color: #333; border-radius: 9px; padding: 0 7px; }
+  .tabs a.active .pill { background: var(--primary); color: #fff; }
+
+  .hint { font-size: 13px; color: var(--muted); margin: 0 2px 10px; display: flex; align-items: center; gap: 6px; }
+
+  .slist { display: flex; flex-direction: column; gap: 8px; }
+  .scard { display: flex; align-items: center; gap: 2px; padding: 6px 0; min-height: 72px; }
+  .scard .handle { width: 40px; height: 56px; display: grid; place-items: center; color: #a5a5a5; flex: none; }
+  .scard .num { width: 28px; height: 28px; border-radius: 50%; background: var(--primary-tint); color: var(--primary-dark); font-weight: 700; font-size: 14px; display: grid; place-items: center; flex: none; margin-right: 10px; }
+  .scard .sbody { flex: 1; min-width: 0; }
+  .sname { font-weight: 700; }
+  .sdesc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .sbadges { display: flex; gap: 12px; margin-top: 6px; font-size: 13px; color: #555; }
+  .sbadges span { display: inline-flex; align-items: center; gap: 3px; }
+  .scard.selected { outline: 2px solid var(--primary); background: #f7fbfe; }
+  .addstage { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; border: 2px dashed #b9c7d3; border-radius: 10px; color: var(--primary); font-weight: 600; background: rgba(255,255,255,.6); }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  .field label .req { color: var(--danger); }
+  .input { min-height: 44px; border: 1px solid var(--border); border-radius: 8px; padding: 11px 12px; background: #fff; color: #222; }
+  .input.placeholder { color: #999; }
+  .input.area { min-height: 96px; }
+  .input.tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 7px 8px; align-items: center; }
+  .input.tags .chip { height: 30px; }
+  .toggle { width: 52px; height: 32px; border-radius: 16px; background: var(--primary); position: relative; }
+  .toggle::after { content: ""; position: absolute; top: 3px; right: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+  .dropzone { border: 2px dashed #c9c9c9; border-radius: 10px; min-height: 64px; display: flex; align-items: center; gap: 10px; padding: 8px 12px; color: #777; font-size: 14px; }
+  .file { display: flex; align-items: center; gap: 10px; min-height: 48px; border: 1px solid var(--border); border-radius: 8px; padding: 0 4px 0 12px; margin-bottom: 8px; }
+  .file .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 20px; }
+  .grid .full { grid-column: 1 / -1; }
+
+  .editorbar { position: sticky; top: 0; background: #fff; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 8px 4px 4px; border-bottom: 1px solid #e6e6e6; z-index: 2; }
+  .editorbar .mid { flex: 1; text-align: center; font-size: 13px; color: var(--muted); }
+  .saved { display: inline-flex; align-items: center; gap: 4px; color: var(--success); font-size: 13px; font-weight: 600; }
+
+  .bottombar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid #ddd; padding: 10px 12px 14px; display: flex; gap: 10px; z-index: 5; box-shadow: 0 -2px 8px rgba(0,0,0,.06); }
+  .bottombar .btn { flex: 1; }
+
+  /* Tables (tablet) */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 13px; color: #444; font-weight: 700; padding: 0 10px; height: 44px; border-bottom: 2px solid #ddd; white-space: nowrap; }
+  th .sorti { color: var(--primary); vertical-align: middle; }
+  td { padding: 8px 10px; height: 60px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  td.name { font-weight: 700; }
+  td.muted { color: var(--muted); font-size: 14px; }
+  td.act { width: 52px; padding: 0 4px; text-align: right; }
+  tr.hl td { background: #f6f9fc; }
+  .more { color: var(--primary); font-weight: 600; font-size: 13px; }
+
+  .split { display: grid; gap: 16px; align-items: start; }
+  .panel-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .panel-title h2 { font-size: 17px; margin: 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const P = {
+  menu: 'M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z',
+  dots: 'M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z',
+  search: 'M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z',
+  filter: 'M6,13H18V11H6M3,6V8H21V6M10,18H14V16H10V18Z',
+  left: 'M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z',
+  right: 'M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z',
+  down: 'M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z',
+  drag: 'M9,3H11V5H9V3M13,3H15V5H13V3M9,7H11V9H9V7M13,7H15V9H13V7M9,11H11V13H9V11M13,11H15V13H13V11M9,15H11V17H9V15M13,15H15V17H13V15M9,19H11V21H9V19M13,19H15V21H13V19Z',
+  link: 'M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z',
+  clip: 'M16.5,6V17.5A4,4 0 0,1 12.5,21.5A4,4 0 0,1 8.5,17.5V5A2.5,2.5 0 0,1 11,2.5A2.5,2.5 0 0,1 13.5,5V15.5A1,1 0 0,1 12.5,16.5A1,1 0 0,1 11.5,15.5V6H10V15.5A2.5,2.5 0 0,0 12.5,18A2.5,2.5 0 0,0 15,15.5V5A4,4 0 0,0 11,1A4,4 0 0,0 7,5V17.5A5.5,5.5 0 0,0 12.5,23A5.5,5.5 0 0,0 18,17.5V6H16.5Z',
+  fields: 'M7,5H21V7H7V5M7,13V11H21V13H7M4,4.5A1.5,1.5 0 0,1 5.5,6A1.5,1.5 0 0,1 4,7.5A1.5,1.5 0 0,1 2.5,6A1.5,1.5 0 0,1 4,4.5M4,10.5A1.5,1.5 0 0,1 5.5,12A1.5,1.5 0 0,1 4,13.5A1.5,1.5 0 0,1 2.5,12A1.5,1.5 0 0,1 4,10.5M7,19V17H21V19H7M4,16.5A1.5,1.5 0 0,1 5.5,18A1.5,1.5 0 0,1 4,19.5A1.5,1.5 0 0,1 2.5,18A1.5,1.5 0 0,1 4,16.5Z',
+  plus: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z',
+  check: 'M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z',
+  close: 'M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z',
+  dup: 'M11,17H4A2,2 0 0,1 2,15V3A2,2 0 0,1 4,1H16V3H4V15H11V13L15,16L11,19V17M19,21V7H8V13H6V7A2,2 0 0,1 8,5H19A2,2 0 0,1 21,7V21A2,2 0 0,1 19,23H8A2,2 0 0,1 6,21V19H8V21H19Z',
+  del: 'M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z',
+  edit: 'M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z',
+  up: 'M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z',
+  dn: 'M11,4H13V16L18.5,10.5L19.92,11.92L12,19.84L4.08,11.92L5.5,10.5L11,16V4Z',
+  sort: 'M9,3L5,7H8V14H10V7H13M16,17V10H14V17H11L15,21L19,17H16Z',
+  open: 'M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z',
+  upload: 'M14,13V17H10V13H7L12,8L17,13M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z',
+  pdf: 'M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z',
+  bell: 'M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21',
+  gear: 'M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z',
+};
+const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${P[n]}"/></svg>`;
+
+/* Data pulled from dtplayground */
+const JOURNEYS = [
+  { name: 'new b', cats: [], roles: [], stages: 1, updated: 'Today' },
+  { name: 'Test Journey (Copy) (Copy) (Copy)', cats: ['Test'], roles: ['Registered', 'Multiplier', 'Strategist', 'Partner', 'Dispatcher', 'User Manager'], stages: 2, updated: '1 week ago' },
+  { name: 'Foundations 1: From Creation to the Birth of Jesus!', cats: ['Waha', 'Foundations'], roles: ['Multiplier'], stages: 4, updated: '1 month ago' },
+  { name: 'New Journey', cats: ['Test'], roles: [], stages: 1, updated: '1 month ago' },
+  { name: 'Test Journey', cats: ['Test'], roles: [], stages: 1, updated: '1 month ago' },
+  { name: 'Foundations 2: The Life and Message of Jesus', cats: ['Waha', 'Foundations'], roles: [], stages: 2, updated: '2 months ago' },
+];
+const STAGES = [
+  { name: 'Creation', desc: 'Genesis 1:1-25', l: 1, a: 1, r: 1 },
+  { name: 'Creation of Humans', desc: 'Genesis 1:26-31, 2:4-9, 15-25', l: 0, a: 0, r: 2 },
+  { name: 'Humans Disobey God', desc: 'Genesis 3', l: 0, a: 0, r: 0 },
+  { name: 'God Destroys an Evil Humanity', desc: 'Genesis 6-9', l: 0, a: 0, r: 0 },
+];
+const ROLES = ['Registered', 'Multiplier', 'Strategist', 'User Manager', 'Partner', 'Dispatcher', 'Digital Responder'];
+
+const phoneTop = () => `<div class="topbar">${ic('menu')}<div class="logo"><b>⋀</b><div>DISCIPLE<small>TOOLS</small></div></div><div class="spacer"></div>${ic('search')}<div class="plus">${ic('plus', 'sm')}</div></div>`;
+const tabletTop = () => `<div class="topbar"><div class="logo"><b>⋀</b><div>DISCIPLE<small>TOOLS</small></div></div><nav><span>Dashboard</span><span>Disciples</span><span>Groups</span><span>More ▾</span></nav><div class="spacer"></div>${ic('search')}<div class="plus">${ic('plus', 'sm')}</div>${ic('bell')}${ic('gear')}</div>`;
+
+const roleSummary = (roles) => roles.length ? (roles.length > 2 ? `${roles.slice(0, 2).join(', ')} <span class="more">+${roles.length - 2}</span>` : roles.join(', ')) : '<span style="color:#aaa">All roles</span>';
+
+const jcard = (j, extra = '') => `
+  <div class="box jcard ${extra}">
+    <div class="jmain">
+      <div class="jtitle">${j.name}</div>
+      <div class="jmeta">${j.cats.map(c => `<span class="chip">${c}</span>`).join('')}<span ${j.cats.length ? 'class="dot"' : ''}>${j.stages} stage${j.stages === 1 ? '' : 's'}</span></div>
+      <div class="jsub">${j.roles.length ? j.roles.slice(0, 2).join(', ') + (j.roles.length > 2 ? ` +${j.roles.length - 2}` : '') + ' · ' : ''}Updated ${j.updated.toLowerCase()}</div>
+    </div>
+    <button class="iconbtn" aria-label="More actions">${ic('dots')}</button>
+  </div>`;
+
+const phoneListBody = (opts = {}) => `
+  ${phoneTop()}
+  <main class="page">
+    <div class="titlebar"><h1>Journeys<span class="count">${opts.count || 6}</span></h1><button class="btn primary">${ic('plus', 'sm')} New</button></div>
+    <div class="searchrow"><div class="search">${ic('search', 'sm')} Search journeys</div><button class="btn outline">${ic('filter', 'sm')} Filters${opts.filtered ? ' <span class="badge">1</span>' : ''}</button></div>
+    ${opts.filtered ? `<div class="chips"><span class="chip removable">Foundations ${ic('close')}</span></div>` : ''}
+    <div class="metaline"><span>${opts.count || 6} journeys</span><span class="sort">${ic('sort', 'sm')} Last modified</span></div>
+    <div class="jlist">${(opts.list || JOURNEYS).map((j, i) => jcard(j, opts.pressed === i ? 'pressed' : '')).join('')}</div>
+  </main>`;
+
+const stageCard = (s, i, sel) => `
+  <div class="box scard ${sel ? 'selected' : ''}">
+    <div class="handle" title="Drag to reorder">${ic('drag')}</div>
+    <div class="num">${i + 1}</div>
+    <div class="sbody">
+      <div class="sname">${s.name}</div>
+      ${s.desc ? `<div class="sdesc">${s.desc}</div>` : ''}
+      ${(s.l || s.a || s.r) ? `<div class="sbadges">${s.l ? `<span>${ic('link', 'sm')}${s.l}</span>` : ''}${s.a ? `<span>${ic('clip', 'sm')}${s.a}</span>` : ''}${s.r ? `<span>${ic('fields', 'sm')}${s.r}</span>` : ''}</div>` : ''}
+    </div>
+    <button class="iconbtn" aria-label="Stage actions">${ic('dots')}</button>
+  </div>`;
+
+const detailHeader = (title, opts = {}) => `
+  <div class="subbar"><button class="back">${ic('left')} Journeys</button><button class="iconbtn ${opts.menuOn ? 'on' : ''}">${ic('dots')}</button></div>
+  <h1 class="ptitle">${title}${opts.sub ? `<small>${opts.sub}</small>` : ''}</h1>`;
+
+const tabs = (active, n) => `<div class="tabs"><a class="${active === 'details' ? 'active' : ''}">Details</a><a class="${active === 'stages' ? 'active' : ''}">Stages <span class="pill">${n}</span></a></div>`;
+
+const stagesPanel = (sel) => `
+  <div class="hint">${ic('drag', 'sm')} Drag to reorder, or use ${ic('dots', 'sm')} › Move up / down</div>
+  <div class="slist">${STAGES.map((s, i) => stageCard(s, i, sel === i)).join('')}
+    <div class="addstage">${ic('plus', 'sm')} Add stage</div>
+  </div>`;
+
+const field = (label, value, opts = {}) => `
+  <div class="field ${opts.full ? 'full' : ''}"><label>${label}${opts.req ? ' <span class="req">*</span>' : ''}</label>
+  ${opts.raw || `<div class="input ${opts.area ? 'area' : ''} ${value ? '' : 'placeholder'}">${value || opts.ph || ''}</div>`}</div>`;
+
+const detailsFields = (empty) => `
+  ${field('Name', empty ? '' : 'Foundations 1: From Creation to the Birth of Jesus!', { req: true, ph: 'e.g. Discovery Bible Study' })}
+  ${field('Subtitle', empty ? '' : 'Waha story set', { ph: 'Optional' })}
+  ${field('Description', empty ? '' : 'Ten Bible stories from Creation to the birth of Jesus, used with new discovery groups.', { area: true, full: true, ph: 'What is this journey for?' })}
+  ${field('Category', '', { raw: `<div class="input tags">${empty ? '<span style="color:#999;padding-left:4px">Add a category</span>' : '<span class="chip">Waha</span><span class="chip">Foundations</span>'}</div>` })}
+  ${field('Display type', empty ? '' : 'Timeline', { ph: 'Choose…' })}
+  <div class="field"><div class="toggle-row"><label style="margin:0">Sequential stages</label><div class="toggle"></div></div><div class="sdesc">Stages must be completed in order.</div></div>
+  ${field('Applies to roles', '', { full: true, raw: `<div class="input tags">${empty ? '<span style="color:#999;padding-left:4px">All roles</span>' : '<span class="chip">Multiplier</span>'}<span class="more" style="margin-left:auto;padding-right:6px">${ic('plus', 'sm')}</span></div>` })}
+  ${field('Next journey', empty ? '' : 'Foundations 2: The Life and Message of Jesus', { ph: 'Search journeys' })}
+  ${field('Previous journeys', '', { ph: 'Search journeys' })}`;
+
+const stageEditorFields = () => `
+  ${field('Name', 'Creation of Humans', { req: true })}
+  ${field('Description', 'Genesis 1:26-31, 2:4-9, 15-25')}
+  ${field('Instructions', 'Read the passage together twice. Ask: What does this teach us about God? About people? How will you obey?', { area: true, full: true })}
+  <div class="field full"><label>Attachments</label>
+    <div class="file">${ic('pdf', 'sm')}<span class="grow">Creation-of-Humans-guide.pdf</span><button class="iconbtn">${ic('close')}</button></div>
+    <div class="dropzone">${ic('upload')} Tap to add a file</div></div>
+  <div class="field full"><label>Links</label>
+    <div class="file">${ic('link', 'sm')}<span class="grow">Waha app — Story 2</span><button class="iconbtn">${ic('close')}</button></div>
+    <button class="btn outline block">${ic('plus', 'sm')} Add link</button></div>
+  ${field('Related fields', '', { full: true, raw: '<div class="input tags"><span class="chip">Faith milestones</span><span class="chip">Baptism date</span></div>' })}
+  ${field('Success action label', 'Story shared')}`;
+
+const SCREENS = {
+  'phone-list': () => phoneListBody(),
+
+  'phone-list-actions': () => phoneListBody({ pressed: 2 }) + `
+    <div class="scrim"></div>
+    <div class="sheet"><div class="grab"></div>
+      <h3>Foundations 1: From Creation to the Birth of Jesus!</h3>
+      <div class="item">${ic('open')} Open</div>
+      <div class="item">${ic('dup')} Duplicate</div>
+      <div class="sep"></div>
+      <div class="item danger">${ic('del')} Delete journey…</div>
+    </div>`,
+
+  'phone-filters': () => phoneListBody({ filtered: true, count: 2, list: JOURNEYS.filter(j => j.cats.includes('Foundations')) }) + `
+    <div class="scrim"></div>
+    <div class="sheet"><div class="grab"></div>
+      <h3>Filter &amp; sort</h3>
+      <div class="section"><h4>Sort by</h4>
+        <div class="opt">Last modified <span class="check">${ic('check')}</span></div>
+        <div class="opt">Name (A–Z)</div>
+        <div class="opt" style="border:0">Number of stages</div></div>
+      <div class="section"><h4>Category</h4><div class="chips"><span class="tchip sel">${ic('check', 'sm')} Foundations</span><span class="tchip">Waha</span><span class="tchip">Test</span></div></div>
+      <div class="section"><h4>Applies to roles</h4><div class="chips">${ROLES.slice(0, 5).map(r => `<span class="tchip">${r}</span>`).join('')}</div></div>
+      <div class="footer"><button class="btn outline">Clear all</button><button class="btn primary">Show 2 journeys</button></div>
+    </div>`,
+
+  'phone-stages': () => `${phoneTop()}<main class="page">
+    ${detailHeader('Foundations 1: From Creation to the Birth of Jesus!', { sub: 'Waha · Foundations · Sequential' })}
+    ${tabs('stages', 4)}
+    ${stagesPanel()}
+  </main>`,
+
+  'phone-details-menu': () => `${phoneTop()}<main class="page" style="position:relative">
+    ${detailHeader('Foundations 1: From Creation to the Birth of Jesus!', { sub: 'Waha · Foundations · Sequential', menuOn: true })}
+    <div class="menu" style="right:8px;top:44px">
+      <div class="item">${ic('dup', 'sm')} Duplicate journey</div>
+      <div class="sep"></div>
+      <div class="item danger">${ic('del', 'sm')} Delete journey…</div>
+    </div>
+    ${tabs('details', 4)}
+    <div class="box pad">${detailsFields()}</div>
+  </main>`,
+
+  'phone-stage-menu': () => `${phoneTop()}<main class="page">
+    ${detailHeader('Foundations 1: From Creation to the Birth of Jesus!', { sub: 'Waha · Foundations · Sequential' })}
+    ${tabs('stages', 4)}
+    ${stagesPanel(1)}
+  </main>
+  <div class="scrim"></div>
+  <div class="sheet"><div class="grab"></div>
+    <h3>2. Creation of Humans</h3>
+    <div class="item">${ic('edit')} Edit stage</div>
+    <div class="item">${ic('up')} Move up</div>
+    <div class="item">${ic('dn')} Move down</div>
+    <div class="sep"></div>
+    <div class="item danger">${ic('del')} Delete stage…</div>
+  </div>`,
+
+  'phone-stage-edit': () => `${phoneTop()}
+    <div class="editorbar"><button class="back">${ic('left')} Stages</button><span class="mid">Stage 2 of 4</span><button class="btn primary" style="min-height:40px">Done</button></div>
+    <main class="page" style="padding-top:10px">
+      <div class="hint" style="justify-content:space-between"><span class="saved">${ic('check', 'sm')} All changes saved</span><span>Editing <b style="color:#333">Foundations 1</b></span></div>
+      <div class="box pad">${stageEditorFields()}</div>
+    </main>
+    <div class="bottombar"><button class="btn outline">${ic('left', 'sm')} 1. Creation</button><button class="btn outline">3. Humans Disobey ${ic('right', 'sm')}</button></div>`,
+
+  'phone-new': () => `${phoneTop()}<main class="page">
+    <div class="subbar"><button class="back">${ic('left')} Journeys</button></div>
+    <h1 class="ptitle">New journey</h1>
+    ${tabs('details', 2)}
+    <div class="box pad">${detailsFields(true)}</div>
+  </main>
+  <div class="bottombar"><button class="btn outline" style="flex:0 0 auto">Cancel</button><button class="btn primary">Save journey</button></div>`,
+
+  'phone-discard': () => SCREENS['phone-new']() + `
+    <div class="scrim"></div>
+    <div class="dialog">
+      <h3>Discard this journey?</h3>
+      <p>You've filled in details and added 2 stages that haven't been saved yet.</p>
+      <div class="actions"><button class="btn ghost" style="color:var(--danger)">Discard</button><button class="btn primary">Keep editing</button></div>
+    </div>`,
+
+  'tablet-list': () => `<div class="tablet">${tabletTop()}<main class="page">
+    <div class="box pad">
+      <div class="titlebar"><h1>Journeys<span class="count">6</span></h1><button class="btn primary">${ic('plus', 'sm')} New journey</button></div>
+      <div class="searchrow" style="margin-bottom:14px"><div class="search">${ic('search', 'sm')} Search journeys</div><div class="select">Category ${ic('down', 'sm')}</div><div class="select">Roles ${ic('down', 'sm')}</div></div>
+      <table>
+        <tr><th>Name</th><th>Category</th><th>Roles</th><th>Stages</th><th>Updated <span class="sorti">▼</span></th><th></th></tr>
+        ${JOURNEYS.map((j, i) => `<tr class="${i === 2 ? 'hl' : ''}"><td class="name">${j.name}</td><td class="muted">${j.cats.join(', ') || '—'}</td><td class="muted">${roleSummary(j.roles)}</td><td class="muted" style="text-align:center">${j.stages}</td><td class="muted" style="white-space:nowrap">${j.updated}</td><td class="act"><button class="iconbtn">${ic('dots')}</button></td></tr>`).join('')}
+      </table>
+    </div>
+  </main></div>`,
+
+  'tablet-details': () => `<div class="tablet">${tabletTop()}<main class="page">
+    ${detailHeader('Foundations 1: From Creation to the Birth of Jesus!', { sub: 'Waha · Foundations · Sequential' })}
+    <div style="max-width:420px">${tabs('details', 4)}</div>
+    <div class="box pad"><div class="grid">${detailsFields()}</div></div>
+  </main></div>`,
+
+  'landscape-list': () => SCREENS['tablet-list']().replace('<tr class="">', '<tr class="">') + `
+    <div class="toast">Copy of “Test Journey” created <button class="btn ghost">Open</button><button class="btn ghost">Undo</button></div>`,
+
+  'landscape-detail': () => `<div class="tablet">${tabletTop()}<main class="page">
+    ${detailHeader('Foundations 1: From Creation to the Birth of Jesus!', { sub: 'Waha · Foundations · Sequential' })}
+    <div class="split" style="grid-template-columns: 1.35fr 1fr">
+      <div class="box pad"><div class="panel-title"><h2>Details</h2></div><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${detailsFields()}</div></div>
+      <div><div class="panel-title" style="padding:0 2px"><h2>Stages <span class="count" style="font-weight:400;color:#666;font-size:14px">4</span></h2><button class="btn primary">${ic('plus', 'sm')} Add stage</button></div>${stagesPanel()}</div>
+    </div>
+  </main></div>`,
+
+  'landscape-stage-edit': () => `<div class="tablet">${tabletTop()}<main class="page">
+    ${detailHeader('Foundations 1: From Creation to the Birth of Jesus!', { sub: 'Waha · Foundations · Sequential' })}
+    <div class="split" style="grid-template-columns: 0.85fr 1.35fr">
+      <div><div class="panel-title" style="padding:0 2px"><h2>Stages <span class="count" style="font-weight:400;color:#666;font-size:14px">4</span></h2><button class="btn outline">${ic('plus', 'sm')} Add stage</button></div>${stagesPanel(1)}</div>
+      <div class="box" style="overflow:hidden">
+        <div class="editorbar" style="padding:8px 8px 8px 16px"><b style="font-size:17px">2. Creation of Humans</b><span class="mid" style="text-align:right;padding-right:6px"><span class="saved">${ic('check', 'sm')} Saved</span></span><button class="btn primary" style="min-height:40px">Done</button></div>
+        <div class="pad"><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">${stageEditorFields()}</div></div>
+      </div>
+    </div>
+  </main></div>`,
+};
+
+const s = new URLSearchParams(location.search).get('s') || 'phone-list';
+document.getElementById('app').innerHTML = (SCREENS[s] || (() => `<p style="padding:20px">Unknown screen: ${s}</p>`))();
+document.title = 'Journeys Mockups — ' + s;
+</script>
+</body>
+</html>
