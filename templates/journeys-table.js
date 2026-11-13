@@ -14,6 +14,9 @@ export class JourneysTable extends LitElement {
     search_filter: { type: Object, state: true },
     expanded_list: { type: Object, state: true },
     deleting_id: { type: Number, state: true },
+    import_data: { type: Object, state: true },
+    error_message: { type: String, state: true },
+    importing: { type: Boolean, state: true },
   };
 
   constructor() {
@@ -26,6 +29,10 @@ export class JourneysTable extends LitElement {
     this.expanded_list = {};
     this.searchTimeout = null;
     this.deleting_id = null;
+    this.has_file = false;
+    this.file_error = false;
+    this.error_message = '';
+    this.importing = false;
 
     // Grabs the translations we localized in the PHP file
     this.translations = window.SHAREDFUNCTIONS.escapeObject(
@@ -146,8 +153,101 @@ export class JourneysTable extends LitElement {
     window.location.href = window.journeys_table.base_url + 'new/';
   }
 
-  run_import() {
-    console.log("Importing Journey");
+  run_import(e) {
+    e.stopPropagation();
+    const dialog = this.shadowRoot.querySelector('#import-dialog');
+    if (dialog) {
+      dialog.dispatchEvent(new Event('open'));
+    }
+
+  }
+
+  cancelImport(e) {
+    if (e) e.stopPropagation();
+
+    const dialog = this.shadowRoot.querySelector('#import-dialog');
+    if (dialog) {
+      dialog.dispatchEvent(new Event('close'));
+    }
+    this.import_data = null;
+    this.error_message = '';
+
+    const uploader = this.shadowRoot.querySelector('#json-upload');
+    uploader.value = null;
+  }
+
+  async confirmImport(e) {
+    e.stopPropagation();
+    this.error_message = '';
+
+    if (!this.import_data) {
+        this.error_message = this.translations.upload_message;
+      return;
+    }
+
+    this.importing = true;
+
+    try {
+      const response = await this.save_journey(this.import_data);
+      if (response && response.ok) {
+        window.location.reload();
+      } else {
+        this.error_message = this.translations.import_failed;
+        this.importing = false;
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      this.error_message = this.translations.import_failed;
+      this.importing = false;
+    }
+  }
+
+  async save_journey(journeyData) {
+
+    const payload = journeyData;
+
+    try {
+        let response = await fetch(window.journeys_table.rest_endpoint + `journeys`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': window.wpApiShare.nonce,
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          let result = await response.json();
+
+          console.error(result.message || 'Failed to save journey', 'journey-detail-error');
+        }
+
+        return response;
+    } catch (error) {
+        console.error("Create Journey Error:", error);
+        return null;
+    }
+  }
+
+  async handleFileChange() {
+    this.error_message = '';
+    const uploader = this.shadowRoot.querySelector('#json-upload');
+    const files = uploader?.getPendingFilesForUpload() || [];
+    const file = files[0];
+
+    if (!file) {
+      this.import_data = null;
+      return;
+    }
+
+    try {
+      const textContent = await file.text();
+      this.import_data = JSON.parse(textContent);
+    } catch (error) {
+      console.error('Failed to parse JSON', error);
+      this.error_message = this.translations.invalid_json;
+      console.log(this.error_message);
+    }
   }
 
   run_edit(e, journey_id) {
@@ -213,6 +313,7 @@ export class JourneysTable extends LitElement {
     if (e.target.nodeName === 'DIALOG') {
       e.stopPropagation();
       this.cancelDelete();
+      this.cancelImport();
     }
   }
 
@@ -246,19 +347,24 @@ export class JourneysTable extends LitElement {
       }
     }
 
+    let noJourneys = !this.loading && !this.search && !hasFilters && this.journeys.length === 0;
+
     return html`
         <div id="title-row">
             <h2 class="journey-header">
               ${this.translations.journeys}
-              ${statusContent}
+              ${noJourneys ? '' : statusContent}
             </h2>
+            ${noJourneys
+              ? ''
+              : html`
             <div id="create-button">
-              <button class="button" @click="${this.run_create}">
-                  ${this.translations.create_journey}
-              </button>
+            <button class="button button-import" @click="${this.run_import}">${this.translations.import_journey}</button>
+              <button class="button" @click="${this.run_create}">${this.translations.create_journey}</button>
             </div>
+            ` }
         </div>
-        ${!this.loading && !this.search && !hasFilters && this.journeys.length === 0
+        ${noJourneys
           ? html`
               <div id="no-journeys-text" class="no-journeys-text">
                 <span>${this.translations.no_journeys}</span>
@@ -402,6 +508,7 @@ export class JourneysTable extends LitElement {
           @click="${this.handleBackdropClick}"
           closebutton
           submitbutton
+          hideHeader
         >
           <div slot="content" class="dialog-content">
             ${this.translations.delete_confirmation}
@@ -410,6 +517,52 @@ export class JourneysTable extends LitElement {
             ${this.translations.delete}
           </button>
         </dt-modal>
+        <dt-modal 
+              id="import-dialog" 
+              class="import-dialog"
+              hideButton="true"
+              @click="${this.handleBackdropClick}"
+              hideHeader
+            >
+              <form slot="content" id="json-form">
+                <div class="dialog-content">
+                  <h3 class="dialog-title">${this.translations.import_journeys}</h3>
+                  <dt-file-upload 
+                    id="json-upload"
+                    label="Test"
+                    auto-upload="false"
+                    accepted-file-types='[".json", "application/json"]'
+                    max-files="1"
+                    @change="${this.handleFileChange}">
+                  </dt-file-upload>
+                  ${this.error_message ? html`
+                    <div class="error-container">
+                      <dt-icon icon="mdi:alert-circle" class="alert" size="1.4rem"></dt-icon>
+                      <span class="error-text">${this.error_message}</span>
+                    </div>
+                  ` : ''}
+                  ${this.import_data ? html`
+                    <div id="file-content">
+                      <ul>
+                        ${Object.entries(this.import_data).map(([key, value]) => {
+                          if (key === 'source') return '';
+                          const previewValue = key === 'stages' && Array.isArray(value) ? value.length : value;
+                          return html`<li><strong>${key}:</strong> ${previewValue}</li>`;
+                        })}
+                      </ul>
+                    </div>
+                  ` : ''}
+                  <div class="dialog-actions">
+                    <button type="button" class="button button-cancel" @click="${this.cancelImport}">
+                      ${this.translations.cancel}
+                    </button>
+                    <button id="submit-button" class="button" type="button" @click="${this.confirmImport}" ?disabled="${Boolean(this.error_message) || this.importing}">
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </dt-modal>
         `
       }
     `;
@@ -510,8 +663,8 @@ export class JourneysTable extends LitElement {
 
         .dialog-actions {
           display: flex;
-          justify-content: flex-end;
           gap: 0.5rem;
+          padding-block-start: 1rem;
         }
 
         .button-delete {
@@ -543,6 +696,25 @@ export class JourneysTable extends LitElement {
             background-color: #3f729b;
             color: white;
           }
+        }
+
+        .error-container {
+          margin-top: 1rem;
+          max-width: 100%;
+          overflow: hidden;
+        }
+
+        .error-container {
+          align-items: center;
+          font-family: var(--font-family);
+          font-size: 0.875rem;
+          font-weight: 300;
+          padding: 3px 0.5rem;
+          gap: 0.5rem;
+
+          border: solid 1px var(--color-alert);
+          background-color: var(--color-alert-container);
+          color: var(--color-on-alert-container);
         }
       `,
     ];
